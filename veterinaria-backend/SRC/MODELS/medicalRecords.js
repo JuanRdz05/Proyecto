@@ -57,7 +57,6 @@ const medicalRecordSchema = new mongoose.Schema(
 		nextVisitDate: {
 			type: Date,
 		},
-		attachments: [String], // URLs de radiografías, análisis, etc.
 	},
 	{
 		timestamps: true,
