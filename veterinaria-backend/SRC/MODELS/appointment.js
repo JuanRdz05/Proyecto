@@ -1,12 +1,7 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const appointmentSchema = new mongoose.Schema(
 	{
-		_id: {
-			type: Number,
-			required: true,
-			unique: true,
-		},
 		date: {
 			type: Date,
 			required: true,
@@ -80,4 +75,4 @@ appointmentSchema.index(
 	},
 );
 
-export default mongoose.model("appointments", appointmentSchema);
+module.exports = mongoose.model("Appointments", appointmentSchema);
