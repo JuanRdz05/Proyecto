@@ -15,6 +15,8 @@ async function startServer() {
 		await connectDB();
 		console.log("Base de datos conectada exitosamente");
 		//Conexion con el servidor
+		console.log("===================================================");
+		console.log("Iniciando servidor...");
 		await app.listen(config.app.port, () => {
 			console.log(
 				`Servidor corriendo en http://${config.app.host}:${config.app.port}`,
