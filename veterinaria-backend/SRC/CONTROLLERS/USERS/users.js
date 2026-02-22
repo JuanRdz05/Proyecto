@@ -1,6 +1,7 @@
 const Users = require("../../MODELS/users.js");
 const { hashPassword } = require("../../MIDDLEWARES/passwords.js");
 const { validateEmail } = require("../../MIDDLEWARES/emailFormatter.js");
+const bcrypt = require("bcrypt");
 
 const getAllUsers = async (req, res) => {
 	try {
@@ -40,7 +41,7 @@ const registerUser = async (req, res) => {
 			paternalLastName,
 			maternalLastName,
 			email,
-			passwordHash,
+			password: passwordHash,
 			role: "client",
 		});
 		//Guardamos el usuario en la base de datos
@@ -54,7 +55,31 @@ const registerUser = async (req, res) => {
 	}
 };
 
+//Función para obtener el usuerio por email
+const getUser = async (req, res) => {
+	try {
+		const { email } = req.params;
+		console.log("===================================================");
+		console.log("Buscando usuario...");
+		const user = await Users.findOne({ email }).select(
+			"-_id name paternalLastName maternalLastName email role isActive",
+		);
+		if (!user) {
+			console.log("===================================================");
+			console.log("No hay usuario con ese email");
+			return res.status(404).json({ message: "No hay usuario con ese email" });
+		}
+		console.log("===================================================");
+		console.log("Usuario encontrado: ", user);
+		res.status(200).json({ message: "Usuario encontrado: ", user });
+	} catch (error) {
+		console.error("Error al obtener el usuario: ", error);
+		res.status(500).json({ message: "Error al obtener el usuario", error });
+	}
+};
+
 module.exports = {
 	getAllUsers,
 	registerUser,
+	getUser,
 };
