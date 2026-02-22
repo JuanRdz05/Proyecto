@@ -1,11 +1,7 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const logsSchema = new mongoose.Schema(
 	{
-		_id: {
-			type: Number,
-			required: true,
-		},
 		action: {
 			type: String,
 			required: true,
@@ -25,4 +21,4 @@ const logsSchema = new mongoose.Schema(
 	},
 );
 
-export default mongoose.model("logs", logsSchema);
+module.exports = mongoose.model("Logs", logsSchema);

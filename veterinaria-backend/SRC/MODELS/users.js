@@ -1,13 +1,7 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
 	{
-		_id: {
-			type: Number,
-			required: true,
-			unique: true,
-			autoIncrement: true,
-		},
 		name: {
 			type: String,
 			required: true,
@@ -58,4 +52,4 @@ userSchema.virtual("pets", {
 	foreignField: "owner",
 });
 
-export default mongoose.model("users", userSchema);
+module.exports = mongoose.model("Users", userSchema);

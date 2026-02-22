@@ -1,11 +1,7 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const servicesSchema = new mongoose.Schema(
 	{
-		_id: {
-			type: Number,
-			required: true,
-		},
 		name: {
 			type: String,
 			required: true,
@@ -29,4 +25,4 @@ const servicesSchema = new mongoose.Schema(
 	},
 );
 
-export default mongoose.model("services", servicesSchema);
+module.exports = mongoose.model("Services", servicesSchema);

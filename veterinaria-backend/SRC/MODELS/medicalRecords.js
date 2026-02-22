@@ -1,12 +1,7 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const medicalRecordSchema = new mongoose.Schema(
 	{
-		_id: {
-			type: Number,
-			required: true,
-			unique: true,
-		},
 		pet: {
 			type: Number,
 			ref: "pets",
@@ -67,4 +62,4 @@ const medicalRecordSchema = new mongoose.Schema(
 medicalRecordSchema.index({ pet: 1, createdAt: -1 });
 medicalRecordSchema.index({ vet: 1 });
 
-export default mongoose.model("medicalRecords", medicalRecordSchema);
+module.exports = mongoose.model("MedicalRecords", medicalRecordSchema);
