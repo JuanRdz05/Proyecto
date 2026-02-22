@@ -1,7 +1,6 @@
 const Users = require("../../MODELS/users.js");
 const { hashPassword } = require("../../MIDDLEWARES/passwords.js");
 const { validateEmail } = require("../../MIDDLEWARES/emailFormatter.js");
-const bcrypt = require("bcrypt");
 
 const getAllUsers = async (req, res) => {
 	try {
@@ -78,8 +77,15 @@ const getUser = async (req, res) => {
 	}
 };
 
+//Funcion para obtener el perfil del usuario
+const getProfile = async (req, res) => {
+	const userId = req.user.id; // viene del token
+	const user = await Users.findById(userId);
+	res.json(user);
+};
 module.exports = {
 	getAllUsers,
 	registerUser,
 	getUser,
+	getProfile,
 };

@@ -2,9 +2,11 @@ const {
 	getAllUsers,
 	registerUser,
 	getUser,
+	getProfile,
 } = require("../../CONTROLLERS/USERS/users.js");
 const { loginUser } = require("../../CONTROLLERS/USERS/authUsers.js");
 const { noNumbers } = require("../../MIDDLEWARES/noNumbers.js");
+const { verificarToken } = require("../../MIDDLEWARES/authToken.js");
 
 const usersRouter = require("express").Router();
 
@@ -18,5 +20,7 @@ usersRouter.post(
 );
 //Ruta para hacer login
 usersRouter.post("/login", loginUser);
+//Ruta para obtener el perfil del usuario
+usersRouter.get("/profile", verificarToken, getProfile);
 
 module.exports = usersRouter;
