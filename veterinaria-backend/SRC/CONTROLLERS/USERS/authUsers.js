@@ -28,9 +28,13 @@ const loginUser = async (req, res) => {
 			});
 		}
 		//Si todo sale bien, generamos el token jwt
-		const token = jwt.sign({ id: user._id }, process.env.JWT_KEY, {
-			expiresIn: "1h",
-		});
+		const token = jwt.sign(
+			{ id: user._id, role: user.role },
+			process.env.JWT_KEY,
+			{
+				expiresIn: "1h",
+			},
+		);
 		//Enviamos el token
 		console.log("===================================================");
 		console.log("Iniciando sesión...");
