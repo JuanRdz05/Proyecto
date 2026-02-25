@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { InputField } from "../components/inputfield.jsx";
-import { loginUser } from "../services/auth.js";
+import { InputField } from "../../components/Inputfield/inputfield.jsx";
+import { loginUser } from "../../services/auth.js";
+import "./login.css";
 
 export function Login() {
 	//Estados de la pagina

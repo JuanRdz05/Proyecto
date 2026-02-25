@@ -1,3 +1,5 @@
+import "./inputfield.css";
+
 // src/components/InputField.jsx
 export function InputField({ label, type, value, onChange }) {
 	return (
