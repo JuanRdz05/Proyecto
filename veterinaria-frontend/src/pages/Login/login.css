@@ -1,6 +1,5 @@
-h1 {
-	font-family: "outfit";
-	font-weight: 500;
+body {
+	font-family: "outfit", sans-serif;
 }
 
 .login-container {

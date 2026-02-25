@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { InputField } from "../../components/Inputfield/inputfield.jsx";
 import { loginUser } from "../../services/auth.js";
+import { Link } from "react-router-dom";
+
 import "./login.css";
 
 export function Login() {
@@ -25,26 +27,28 @@ export function Login() {
 	};
 
 	return (
-		<div className="login-container">
-			<h1>Login</h1>
-			<form onSubmit={handleSubmit}>
-				<InputField
-					label="Correo Electrónico"
-					type="email"
-					value={email}
-					onChange={(e) => setEmail(e.target.value)}
-				/>
-				<InputField
-					label="Contraseña"
-					type="password"
-					value={password}
-					onChange={(e) => setPassword(e.target.value)}
-				/>
-				<button type="submit">Iniciar sesión</button>
-				<p>
-					¿No tienes cuenta? <a href="/register">Registrate</a>
-				</p>
-			</form>
-		</div>
+		<>
+			<div className="login-container">
+				<h1>Iniciar sesión</h1>
+				<form onSubmit={handleSubmit}>
+					<InputField
+						label="Correo Electrónico"
+						type="email"
+						value={email}
+						onChange={(e) => setEmail(e.target.value)}
+					/>
+					<InputField
+						label="Contraseña"
+						type="password"
+						value={password}
+						onChange={(e) => setPassword(e.target.value)}
+					/>
+					<button type="submit">Iniciar sesión</button>
+					<p>
+						¿No tienes cuenta? <Link to="/register">Registrate</Link>
+					</p>
+				</form>
+			</div>
+		</>
 	);
 }
