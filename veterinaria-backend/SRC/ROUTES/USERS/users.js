@@ -4,7 +4,7 @@ const {
 	getUser,
 	getProfile,
 } = require("../../CONTROLLERS/USERS/users.js");
-const { loginUser, authRole } = require("../../CONTROLLERS/USERS/authUsers.js");
+const { loginUser } = require("../../CONTROLLERS/USERS/authUsers.js");
 const { noNumbers } = require("../../MIDDLEWARES/noNumbers.js");
 const { verificarToken, authRole } = require("../../MIDDLEWARES/authToken.js");
 

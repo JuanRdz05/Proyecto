@@ -1,0 +1,54 @@
+import { useState } from "react";
+import { InputField } from "../../components/Inputfield/inputfield.jsx";
+import { loginUser } from "../../services/auth.js";
+import { Link } from "react-router-dom";
+
+import "./login.css";
+
+export function Login() {
+	//Estados de la pagina
+	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
+
+	const handleSubmit = async (e) => {
+		e.preventDefault();
+		console.log("Email: " + email);
+		console.log("Constraseña: " + password);
+
+		//Enviar los datos al servidor
+		try {
+			console.log("Enviando datos...");
+			const data = await loginUser(email, password);
+			console.log("Login exitoso: ", data);
+		} catch (error) {
+			console.error("Error al iniciar sesión: ", error);
+			alert("Usuario o contraseña incorrectos");
+		}
+	};
+
+	return (
+		<>
+			<div className="login-container">
+				<h1>Iniciar sesión</h1>
+				<form onSubmit={handleSubmit}>
+					<InputField
+						label="Correo Electrónico"
+						type="email"
+						value={email}
+						onChange={(e) => setEmail(e.target.value)}
+					/>
+					<InputField
+						label="Contraseña"
+						type="password"
+						value={password}
+						onChange={(e) => setPassword(e.target.value)}
+					/>
+					<button type="submit">Iniciar sesión</button>
+					<p>
+						¿No tienes cuenta? <Link to="/register">Registrate</Link>
+					</p>
+				</form>
+			</div>
+		</>
+	);
+}
