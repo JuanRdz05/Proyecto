@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 const usersRouter = require("./ROUTES/USERS/users.js");
+const mascotasRouter = require("./ROUTES/PETS/pets.js");
 
 //Middlewares
 app.use(express.json());
@@ -10,7 +11,8 @@ app.use(express.urlencoded({ extended: true }));
 
 //Rutas para los usuarios
 app.use("/users", usersRouter);
-
+//Rutas para los animales
+app.use("/pets", mascotasRouter);
 app.get("/", (req, res) => {
 	res.status(200).json({ message: "Hello World" });
 });

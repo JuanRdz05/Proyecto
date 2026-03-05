@@ -3,6 +3,7 @@ const {
 	registerUser,
 	getUser,
 	getProfile,
+	updateProfile,
 } = require("../../CONTROLLERS/USERS/users.js");
 const { loginUser } = require("../../CONTROLLERS/USERS/authUsers.js");
 const { noNumbers } = require("../../MIDDLEWARES/noNumbers.js");
@@ -22,6 +23,13 @@ usersRouter.post(
 usersRouter.post("/login", loginUser);
 //Ruta para obtener el perfil del usuario
 usersRouter.get("/profile", verificarToken, getProfile);
+//Ruta para actualizar el perfil del usuario
+usersRouter.patch(
+	"/profile",
+	verificarToken,
+	noNumbers(["name", "paternalLastName", "maternalLastName"]),
+	updateProfile,
+);
 //Rutas para los administradores
 usersRouter.get("/admin/home", authRole("admin"), loginUser);
 

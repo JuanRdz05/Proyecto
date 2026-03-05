@@ -83,9 +83,66 @@ const getProfile = async (req, res) => {
 	const user = await Users.findById(userId);
 	res.json(user);
 };
+
+//Funcion par actualizar el perfil del usuario
+const updateProfile = async (req, res) => {
+	try {
+		//Campos permitidos para actualizar el perfil
+		const camposPermitidos = [
+			"name",
+			"paternalLastName",
+			"maternalLastName",
+			"email",
+		];
+		const cambios = {};
+		//Obtenemos los campos que se han enviado
+		camposPermitidos.forEach((campo) => {
+			if (req.body[campo]) {
+				cambios[campo] = req.body[campo];
+			}
+		});
+
+		if (cambios.email && !validateEmail(cambios.email)) {
+			consol.log("===================================================");
+			console.log("El email no es valido");
+			return res.status(400).json({ message: "El email no es valido" });
+		}
+		//Verificar que el email sea único
+		if (cambios.email) {
+			const existe = await Users.findOne({ email: cambios.email });
+			if (existe) {
+				console.log("===================================================");
+				console.log("El email ya existe");
+				return res.status(400).json({ message: "El email ya existe" });
+			}
+		}
+		//Guardamos los cambios a la base de datos
+		const user = await Users.findByIdAndUpdate(req.user.id, cambios, {
+			new: true,
+			runValidators: true,
+		});
+		if (!user) {
+			console.log("===================================================");
+			console.log("No se pudo actualizar el perfil del usuario");
+			return res
+				.status(404)
+				.json({ message: "No se pudo actualizar el perfil del usuario" });
+		}
+		console.log("===================================================");
+		console.log("Perfil actualizado exitosamente");
+		res.status(200).json({ message: "Perfil actualizado exitosamente", user });
+	} catch (error) {
+		console.error("Error al actualizar el perfil del usuario: ", error);
+		res
+			.status(500)
+			.json({ message: "Error al actualizar el perfil del usuario", error });
+	}
+};
+
 module.exports = {
 	getAllUsers,
 	registerUser,
 	getUser,
 	getProfile,
+	updateProfile,
 };
