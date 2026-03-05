@@ -83,6 +83,7 @@ const getProfile = async (req, res) => {
 	const user = await Users.findById(userId);
 	res.json(user);
 };
+
 module.exports = {
 	getAllUsers,
 	registerUser,
