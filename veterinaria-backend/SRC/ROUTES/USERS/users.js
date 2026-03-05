@@ -3,11 +3,15 @@ const {
 	registerUser,
 	getUser,
 	getProfile,
-	updateProfile,
 } = require("../../CONTROLLERS/USERS/users.js");
+const {
+	updateProfile,
+	updatePassword,
+} = require("../../CONTROLLERS/USERS/updateUsers.js");
 const { loginUser } = require("../../CONTROLLERS/USERS/authUsers.js");
 const { noNumbers } = require("../../MIDDLEWARES/noNumbers.js");
 const { verificarToken, authRole } = require("../../MIDDLEWARES/authToken.js");
+const { body, validationResult } = require("express-validator");
 
 const usersRouter = require("express").Router();
 
@@ -29,6 +33,19 @@ usersRouter.patch(
 	verificarToken,
 	noNumbers(["name", "paternalLastName", "maternalLastName"]),
 	updateProfile,
+);
+
+//Ruta par actualizar la contraseña del usuario
+usersRouter.patch(
+	"/change-password",
+	verificarToken,
+	body("currentPassword")
+		.notEmpty()
+		.withMessage("La constraseña actual es requerida"),
+	body("newPassword")
+		.notEmpty()
+		.withMessage("La nueva contraseña es requerida"),
+	updatePassword,
 );
 //Rutas para los administradores
 usersRouter.get("/admin/home", authRole("admin"), loginUser);
