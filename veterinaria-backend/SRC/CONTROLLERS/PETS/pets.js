@@ -156,10 +156,31 @@ const modifyPet = async (req, res) => {
 	}
 };
 
+const getPetById = async (req, res) => {
+	try {
+		const petId = req.params.id;
+		console.log("===================================================");
+		console.log("Buscando mascota...");
+		const pet = await Pets.findById(petId);
+		if (!pet) {
+			console.log("===================================================");
+			console.log("Mascota no encontrada");
+			return res.status(404).json({ message: "Mascota no encontrada" });
+		}
+		console.log("===================================================");
+		console.log("Mascota encontrada exitosamente");
+		res.status(200).json({ message: "Mascota encontrada", pet });
+	} catch (error) {
+		console.error("Error al obtener la mascota: ", error);
+		res.status(500).json({ message: "Error al obtener la mascota", error });
+	}
+};
+
 module.exports = {
 	getAllPets,
 	addPet,
 	getPetsByUser,
 	changeStatus,
 	modifyPet,
+	getPetById,
 };

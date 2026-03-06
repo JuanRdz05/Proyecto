@@ -6,6 +6,7 @@ const {
 	getPetsByUser,
 	changeStatus,
 	modifyPet,
+	getPetById,
 } = require("../../CONTROLLERS/PETS/pets.js");
 const { verificarToken } = require("../../MIDDLEWARES/authToken.js");
 
@@ -20,6 +21,8 @@ mascotasRouter.post(
 );
 //Ruta para mostrar las mascotas por usuario
 mascotasRouter.get("/user/:id", verificarToken, getPetsByUser);
+//Ruta para mostrar una mascota por id
+mascotasRouter.get("/:id", verificarToken, getPetById);
 //Rutas para activar o desactivar una mascota
 mascotasRouter.patch("/:id/toggleActive", verificarToken, changeStatus);
 //Ruta para modificar una mascota
