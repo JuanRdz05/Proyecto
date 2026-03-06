@@ -23,7 +23,9 @@ async function addPet(req, res) {
 	try {
 		console.log("===================================================");
 		console.log("Agregando mascota...");
-		const pet = new Pets(req.body);
+		const userId = req.user.id;
+		const petData = { ...req.body, owner: userId };
+		const pet = new Pets(petData);
 		await pet.save();
 		console.log("===================================================");
 		console.log("Mascota agregada exitosamente");
