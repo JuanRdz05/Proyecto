@@ -50,6 +50,8 @@ const getPetsByUser = async (req, res) => {
 			return res.status(404).json({ message: "No hay mascotas de usuario" });
 		}
 		res.status(200).json({ message: "Mascotas de usuario encontradas", pets });
+		console.log("===================================================");
+		console.log("Mascotas de usuario encontradas exitosamente");
 	} catch (error) {
 		console.error("Error al obtener las mascotas de usuario: ", error);
 		res
@@ -58,8 +60,66 @@ const getPetsByUser = async (req, res) => {
 	}
 };
 
+const changeStatus = async (req, res, next) => {
+	try {
+		const petId = req.params.id;
+		const userId = req.user.id;
+
+		// Buscar mascota
+		console.log("===================================================");
+		console.log("Buscando mascota...");
+		const pet = await Pets.findById(petId);
+
+		//Validar que existe
+		console.log("===================================================");
+		console.log("Validando que la mascota existe...");
+		if (!pet) {
+			console.log("===================================================");
+			console.log("Mascota no encontrada");
+			return res.status(404).json({ message: "Mascota no encontrada" });
+		}
+
+		//Validar que tiene owner
+		console.log("===================================================");
+		console.log("Validando que la mascota tiene dueño...");
+		if (!pet.owner) {
+			console.log("===================================================");
+			console.log("Esta mascota no tiene dueño asignado");
+			return res.status(400).json({
+				message: "Error: Esta mascota no tiene dueño asignado",
+			});
+		}
+		//Verificando que sea el dueño de la mascota
+		console.log("===================================================");
+		console.log("Verificando que el dueño de la mascota es el usuario...");
+		if (pet.owner.toString() !== userId.toString()) {
+			console.log("===================================================");
+			console.log("No puedes modificar mascotas ajenas");
+			return res.status(403).json({
+				message: "No puedes modificar mascotas ajenas",
+			});
+		}
+
+		// Actualizar
+		const updatedPet = await Pets.findByIdAndUpdate(
+			petId,
+			{ isActive: !pet.isActive },
+			{ new: true },
+		);
+
+		res.status(200).json({
+			message: "Estado de la mascota cambiado",
+			pet: updatedPet,
+		});
+	} catch (error) {
+		console.error("Error:", error);
+		res.status(500).json({ message: "Error", error: error.message });
+	}
+};
+
 module.exports = {
 	getAllPets,
 	addPet,
 	getPetsByUser,
+	changeStatus,
 };
