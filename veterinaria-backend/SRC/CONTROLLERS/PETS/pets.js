@@ -36,7 +36,30 @@ async function addPet(req, res) {
 	}
 }
 
+const getPetsByUser = async (req, res) => {
+	try {
+		console.log("===================================================");
+		console.log("Obteniendo mascotas de usuario...");
+		const userId = req.user.id;
+		const pets = await Pets.find({ owner: userId }).select("-_id");
+		console.log("===================================================");
+		console.log("Mascotas de usuario encontradas");
+		if (pets.length === 0) {
+			console.log("===================================================");
+			console.log("No hay mascotas de usuario");
+			return res.status(404).json({ message: "No hay mascotas de usuario" });
+		}
+		res.status(200).json({ message: "Mascotas de usuario encontradas", pets });
+	} catch (error) {
+		console.error("Error al obtener las mascotas de usuario: ", error);
+		res
+			.status(500)
+			.json({ message: "Error al obtener las mascotas de usuario", error });
+	}
+};
+
 module.exports = {
 	getAllPets,
 	addPet,
+	getPetsByUser,
 };
