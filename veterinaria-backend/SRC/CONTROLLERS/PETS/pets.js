@@ -106,11 +106,50 @@ const changeStatus = async (req, res, next) => {
 			{ isActive: !pet.isActive },
 			{ new: true },
 		);
-
+		console.log("===================================================");
+		console.log("Mascota actualizada exitosamente");
 		res.status(200).json({
 			message: "Estado de la mascota cambiado",
 			pet: updatedPet,
 		});
+	} catch (error) {
+		console.error("Error:", error);
+		res.status(500).json({ message: "Error", error: error.message });
+	}
+};
+
+const modifyPet = async (req, res) => {
+	try {
+		const petId = req.params.id;
+		const userId = req.user.id;
+		//Comenzamos a buscar la mascota
+		console.log("===================================================");
+		console.log("Buscando mascota...");
+		const pet = await Pets.findByIdAndUpdate(petId, req.body, {
+			new: true,
+			runValidators: true,
+		});
+		//Validamos que la mascota exista
+		console.log("===================================================");
+		console.log("Validando que la mascota existe...");
+		if (!pet) {
+			console.log("===================================================");
+			console.log("Mascota no encontrada");
+			return res.status(404).json({ message: "Mascota no encontrada" });
+		}
+		//Validamos que el dueño sea el usuario
+		console.log("===================================================");
+		console.log("Validando que el dueño de la mascota es el usuario...");
+		if (pet.owner.toString() !== userId.toString()) {
+			console.log("===================================================");
+			console.log("No puedes modificar mascotas ajenas");
+			return res.status(403).json({
+				message: "No puedes modificar mascotas ajenas",
+			});
+		}
+		console.log("===================================================");
+		console.log("Mascota actualizada exitosamente");
+		res.status(200).json({ message: "Mascota modificada", pet });
 	} catch (error) {
 		console.error("Error:", error);
 		res.status(500).json({ message: "Error", error: error.message });
@@ -122,4 +161,5 @@ module.exports = {
 	addPet,
 	getPetsByUser,
 	changeStatus,
+	modifyPet,
 };
