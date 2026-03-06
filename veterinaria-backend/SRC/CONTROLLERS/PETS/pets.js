@@ -125,10 +125,7 @@ const modifyPet = async (req, res) => {
 		//Comenzamos a buscar la mascota
 		console.log("===================================================");
 		console.log("Buscando mascota...");
-		const pet = await Pets.findByIdAndUpdate(petId, req.body, {
-			new: true,
-			runValidators: true,
-		});
+		const pet = await Pets.findById(petId);
 		//Validamos que la mascota exista
 		console.log("===================================================");
 		console.log("Validando que la mascota existe...");
@@ -147,9 +144,13 @@ const modifyPet = async (req, res) => {
 				message: "No puedes modificar mascotas ajenas",
 			});
 		}
+		const updatePet = await Pets.findByIdAndUpdate(petId, req.body, {
+			new: true,
+			runValidators: true,
+		});
 		console.log("===================================================");
 		console.log("Mascota actualizada exitosamente");
-		res.status(200).json({ message: "Mascota modificada", pet });
+		res.status(200).json({ message: "Mascota modificada", updatePet });
 	} catch (error) {
 		console.error("Error:", error);
 		res.status(500).json({ message: "Error", error: error.message });
@@ -159,6 +160,7 @@ const modifyPet = async (req, res) => {
 const getPetById = async (req, res) => {
 	try {
 		const petId = req.params.id;
+		const userId = req.user.id;
 		console.log("===================================================");
 		console.log("Buscando mascota...");
 		const pet = await Pets.findById(petId);
@@ -166,6 +168,16 @@ const getPetById = async (req, res) => {
 			console.log("===================================================");
 			console.log("Mascota no encontrada");
 			return res.status(404).json({ message: "Mascota no encontrada" });
+		}
+		//Validamos que el dueño sea el usuario
+		console.log("===================================================");
+		console.log("Validando que el dueño de la mascota es el usuario...");
+		if (pet.owner.toString() !== userId.toString()) {
+			console.log("===================================================");
+			console.log("Acceso denegado");
+			return res.status(403).json({
+				message: "Acceso denegado",
+			});
 		}
 		console.log("===================================================");
 		console.log("Mascota encontrada exitosamente");
