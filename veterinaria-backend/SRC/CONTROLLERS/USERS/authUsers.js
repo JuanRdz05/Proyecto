@@ -2,6 +2,7 @@ const Users = require("../../MODELS/users.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
+const { createLog } = require("../../MIDDLEWARES/logs.js");
 dotenv.config();
 
 const loginUser = async (req, res) => {
@@ -35,7 +36,22 @@ const loginUser = async (req, res) => {
 				expiresIn: "1h",
 			},
 		);
-		//Enviamos el token
+		//Guardamos el log
+		if (user.role === "vet" || user.role === "admin") {
+			await createLog(
+				"LOGIN",
+				"USER",
+				`El usuario ${user.name} ha iniciado sesión`,
+				{
+					email: user.email,
+					role: user.role,
+					apellidoPaterno: user.paternalLastName,
+					apellidoMaterno: user.maternalLastName,
+					nombre: user.name,
+				},
+				user._id,
+			);
+		}
 		console.log("===================================================");
 		console.log("Iniciando sesión...");
 		res.status(200).json({ message: "Inicio de sesión exitoso", token });

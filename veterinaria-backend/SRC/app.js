@@ -3,6 +3,7 @@ const cors = require("cors");
 const app = express();
 const usersRouter = require("./ROUTES/USERS/users.js");
 const mascotasRouter = require("./ROUTES/PETS/pets.js");
+const logsRouter = require("./ROUTES/LOGS/logs.js");
 
 //Middlewares
 app.use(express.json());
@@ -10,9 +11,12 @@ app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 
 //Rutas para los usuarios
-app.use("/users", usersRouter);
-//Rutas para los animales
-app.use("/pets", mascotasRouter);
+app.use("/users/v1", usersRouter);
+//Rutas para las mascotas
+app.use("/pets/v1", mascotasRouter);
+//Ruta para los logs
+app.use("/logs/v1", logsRouter);
+
 app.get("/", (req, res) => {
 	res.status(200).json({ message: "Hello World" });
 });
