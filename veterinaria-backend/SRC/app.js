@@ -4,6 +4,7 @@ const app = express();
 const usersRouter = require("./ROUTES/USERS/users.js");
 const mascotasRouter = require("./ROUTES/PETS/pets.js");
 const logsRouter = require("./ROUTES/LOGS/logs.js");
+const servicesRouter = require("./ROUTES/SERVICES/services.js");
 
 //Middlewares
 app.use(express.json());
@@ -14,6 +15,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/users/v1", usersRouter);
 //Rutas para las mascotas
 app.use("/pets/v1", mascotasRouter);
+//Rutas para los servicios
+app.use("/services/v1", servicesRouter);
 //Ruta para los logs
 app.use("/logs/v1", logsRouter);
 

@@ -25,8 +25,14 @@ const getAllUsers = async (req, res) => {
 //Registar un nuevo usuario
 const registerUser = async (req, res) => {
 	try {
-		const { name, paternalLastName, maternalLastName, email, password } =
-			req.body;
+		const {
+			name,
+			paternalLastName,
+			maternalLastName,
+			email,
+			password,
+			username,
+		} = req.body;
 		//Hasheo de la contraseña
 		const passwordHash = hashPassword(password);
 		//Validar el formato del email
@@ -41,6 +47,7 @@ const registerUser = async (req, res) => {
 			maternalLastName,
 			email,
 			password: passwordHash,
+			username,
 			role: "client",
 		});
 		//Guardamos el usuario en la base de datos
