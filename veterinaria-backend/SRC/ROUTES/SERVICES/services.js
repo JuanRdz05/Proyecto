@@ -1,5 +1,8 @@
 const servicesRouter = require("express").Router();
-const { createService } = require("../../CONTROLLERS/SERVICES/services.js");
+const {
+	createService,
+	getAllServices,
+} = require("../../CONTROLLERS/SERVICES/services.js");
 const { noNumbers } = require("../../MIDDLEWARES/noNumbers.js");
 const { verificarToken } = require("../../MIDDLEWARES/authToken.js");
 
@@ -10,4 +13,6 @@ servicesRouter.post(
 	noNumbers(["name"]),
 	createService,
 );
+//Ruta para obtener todos los servicios
+servicesRouter.get("/all", verificarToken, getAllServices);
 module.exports = servicesRouter;

@@ -4,7 +4,7 @@ const { validateEmail } = require("../../MIDDLEWARES/emailFormatter.js");
 
 const getAllUsers = async (req, res) => {
 	try {
-		const users = await Users.find({});
+		const users = await Users.find({}).select("-_id");
 		console.log("===================================================");
 		console.log("Mostrando los usuarios registrados...");
 		if (users.length === 0) {

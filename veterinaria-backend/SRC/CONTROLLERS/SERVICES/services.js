@@ -1,4 +1,4 @@
-const Services = require("../../MODELOS/SERVICES/services.js");
+const Services = require("../../MODELS/services.js");
 const { createLog } = require("../../MIDDLEWARES/logs.js");
 const { formatoDinero } = require("../../MIDDLEWARES/formateoDinero.js");
 //Ruta para crear un servicio
@@ -54,6 +54,29 @@ const createService = async (req, res) => {
 	}
 };
 
+//Función para obtener todos los servicios
+const getAllServices = async (req, res) => {
+	try {
+		console.log("===================================================");
+		console.log("Comenzando el proceso para obtener todos los servicios...");
+		const services = await Services.find({}).select("-_id");
+		if (services.length === 0) {
+			console.log("===================================================");
+			console.log("No hay servicios para mostrar");
+			return res.status(404).json({ message: "No hay servicios para mostrar" });
+		}
+		console.log("===================================================");
+		console.log("Servicios obtenidos exitosamente");
+		res
+			.status(200)
+			.json({ message: "Servicios obtenidos exitosamente", services });
+	} catch (error) {
+		console.error("Hubo un error al obtener los servicios: " + error);
+		res.status(500).json({ message: "Hubo un error al obtener los servicios" });
+	}
+};
+
 module.exports = {
 	createService,
+	getAllServices,
 };

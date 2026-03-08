@@ -40,7 +40,7 @@ const userSchema = new mongoose.Schema(
 			default: true,
 		},
 		username: {
-			type: string,
+			type: String,
 			required: true,
 		},
 	},
