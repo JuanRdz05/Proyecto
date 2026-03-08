@@ -76,7 +76,54 @@ const getAllServices = async (req, res) => {
 	}
 };
 
+//Función para cambiar el estado de un servicio
+const changeStatus = async (req, res) => {
+	try {
+		console.log("===================================================");
+		console.log(
+			"Comenzando el proceso para cambiar el estado de un servicio...",
+		);
+		const serviceId = req.params.id;
+		const user = req.user;
+		//Buscamos el servicio
+		console.log("===================================================");
+		console.log("Buscando servicio...");
+		const service = await Services.findById(serviceId);
+		//Validamos que existe
+		console.log("===================================================");
+		console.log("Validando que el servicio existe...");
+		if (!service) {
+			console.log("===================================================");
+			console.log("Servicio no encontrado");
+			return res.status(404).json({ message: "Servicio no encontrado" });
+		}
+		//Validamos que sea un administrador quien intenta cambiar el estado
+		console.log("===================================================");
+		console.log("Validando el rol del usuario...");
+		if (user.role !== "admin") {
+			console.log("===================================================");
+			console.log("Acceso denegado");
+			return res.status(403).json({ message: "Acceso denegado" });
+		}
+		//Actualizamos el estado
+		const updatedService = await Services.findByIdAndUpdate(
+			serviceId,
+			{ isActive: !service.isActive },
+			{ new: true },
+		);
+		console.log("===================================================");
+		console.log("Servicio actualizado exitosamente");
+		res
+			.status(200)
+			.json({ message: "Estado del servicio cambiado", updatedService });
+	} catch (error) {
+		console.error("Error:", error);
+		res.status(500).json({ message: "Error", error: error.message });
+	}
+};
+
 module.exports = {
 	createService,
 	getAllServices,
+	changeStatus,
 };
