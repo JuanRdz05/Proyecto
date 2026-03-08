@@ -13,9 +13,9 @@ const petSchema = new mongoose.Schema(
 			enum: ["perro", "gato", "conejo", "ave", "reptil", "otro"],
 		},
 		owner: {
-			type: Number,
+			type: mongoose.Schema.Types.ObjectId,
 			required: true,
-			ref: "users",
+			ref: "Users",
 		},
 		isActive: {
 			type: Boolean,
