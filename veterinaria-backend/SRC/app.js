@@ -5,6 +5,7 @@ const usersRouter = require("./ROUTES/USERS/users.js");
 const mascotasRouter = require("./ROUTES/PETS/pets.js");
 const logsRouter = require("./ROUTES/LOGS/logs.js");
 const servicesRouter = require("./ROUTES/SERVICES/services.js");
+const citasRouter = require("./ROUTES/CITAS/citas.js");
 
 //Middlewares
 app.use(express.json());
@@ -19,6 +20,8 @@ app.use("/pets/v1", mascotasRouter);
 app.use("/services/v1", servicesRouter);
 //Ruta para los logs
 app.use("/logs/v1", logsRouter);
+//Ruta para las citas
+app.use("/appointments/v1", citasRouter);
 
 app.get("/", (req, res) => {
 	res.status(200).json({ message: "Hello World" });
