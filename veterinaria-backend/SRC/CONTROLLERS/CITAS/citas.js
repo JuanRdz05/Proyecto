@@ -60,7 +60,33 @@ const createAppointments = async (req, res) => {
 			.json({ message: "Error al crear la cita", error: error.message });
 	}
 };
+//Función para obtener todas las citas
+const getAllAppointments = async (req, res) => {
+	try {
+		console.log("===================================================");
+		console.log("Comenzando el proceso para obtener todas las citas...");
+		//Verificar que el usuario tenga permisos para ver todas las citas
+		const user = req.user;
+		if (user.role !== "admin") {
+			console.log("Acceso denegado");
+			return res.status(403).json({ message: "Acceso denegado" });
+		}
+		const appointments = await Appointments.find({}).select("-_id");
+		if (appointments.length === 0) {
+			console.log("===================================================");
+			console.log("No hay citas para mostrar");
+			return res
+				.status(404)
+				.json({ message: "No hay citas en la base de datos" });
+		}
+		res.status(200).json({ message: "Citas obtenidas", appointments });
+	} catch (error) {
+		console.error("Error al obtener las citas: ", error);
+		res.status(500).json({ message: "Error al obtener las citas", error });
+	}
+};
 
 module.exports = {
 	createAppointments,
+	getAllAppointments,
 };
