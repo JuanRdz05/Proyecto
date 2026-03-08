@@ -122,8 +122,31 @@ const changeStatus = async (req, res) => {
 	}
 };
 
+//Ruta para obtener un servicio por id
+const getServiceById = async (req, res) => {
+	try {
+		console.log("===================================================");
+		console.log("Buscando el servicio seleccionado...");
+		const serviceId = req.params.id;
+		//Verificamos que el servicio exista
+		const service = await Services.findById(serviceId);
+		if (!service) {
+			console.log("===================================================");
+			console.log("Servicio no encontrado");
+			return res.status(404).json({ message: "Servicio no encontrado" });
+		}
+		console.log("===================================================");
+		console.log("Servicio encontrado exitosamente");
+		res.status(200).json({ message: "Servicio encontrado", service });
+	} catch (error) {
+		console.error("Error al obtener el servicio: ", error);
+		res.status(500).json({ message: "Error al obtener el servicio", error });
+	}
+};
+
 module.exports = {
 	createService,
 	getAllServices,
 	changeStatus,
+	getServiceById,
 };
