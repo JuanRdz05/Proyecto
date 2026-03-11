@@ -14,6 +14,6 @@ citasRouter.get("/all", verificarToken, getAllAppointments);
 //Rutas para obtener las citas por usuario
 citasRouter.get("/user/:id", verificarToken, getAppointmentsByUser);
 //Ruta para cancelar una cita
-citasRouter.patch("/:id", verificarToken, cancelAppointment);
+citasRouter.patch("/cancel/:id", verificarToken, cancelAppointment);
 
 module.exports = citasRouter;
