@@ -20,7 +20,7 @@ const appointmentSchema = new mongoose.Schema(
 		pet: {
 			type: mongoose.Schema.Types.ObjectId,
 			required: true,
-			ref: "pets",
+			ref: "Pets",
 		},
 		owner: {
 			type: mongoose.Schema.Types.ObjectId,
@@ -30,12 +30,19 @@ const appointmentSchema = new mongoose.Schema(
 		service: {
 			type: mongoose.Schema.Types.ObjectId,
 			required: true,
-			ref: "services",
+			ref: "Services",
 		},
 		status: {
 			type: String,
-			enum: ["Pendiente", "Aceptada", "Rechazada", "En progreso"],
-			default: "pending",
+			enum: [
+				"Pendiente",
+				"Aceptada",
+				"Rechazada",
+				"En progreso",
+				"Cancelada",
+				"Terminada",
+			],
+			default: "Pendiente",
 			required: true,
 		},
 		notes: {

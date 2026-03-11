@@ -31,7 +31,7 @@ const createAppointments = async (req, res) => {
 			service: serviceId, //Id del servicio
 			precioAlRegistrar: servicioDB.price, //Precio del servicio al momento de registrar la cita
 			owner: user.id, //Id del dueño de la mascota
-			status: "Pending",
+			status: "Pendiente",
 			notes,
 		});
 
@@ -94,7 +94,7 @@ const getAppointmentsByUser = async (req, res) => {
 		const userId = req.user.id;
 		const userRole = req.user.role;
 		//Verificar que el usuario sea un cliente
-		if (userRole !== "client") {
+		if (userRole !== "client" && userRole !== "admin") {
 			console.log("Acceso denegado");
 			return res
 				.status(403)
