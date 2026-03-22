@@ -1,4 +1,4 @@
-import { Navbarguest } from "../../components/Navbar/navbarGuest.jsx";
+import { Navbarguest } from "../../../components/Navbar/navbarGuest.jsx";
 
 export function Guest() {
 	return (

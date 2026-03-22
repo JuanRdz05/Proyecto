@@ -2,7 +2,7 @@ const BASE_ULR = "http://localhost:3050";
 
 export const loginUser = async (email, password) => {
 	try {
-		const response = await fetch(`${BASE_ULR}/users/login`, {
+		const response = await fetch(`${BASE_ULR}/users/v1/login`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",

@@ -13,6 +13,8 @@ const { noNumbers } = require("../../MIDDLEWARES/noNumbers.js");
 const { verificarToken, authRole } = require("../../MIDDLEWARES/authToken.js");
 const { body, validationResult } = require("express-validator");
 
+const upload = require("../../MIDDLEWARES/uploadImage.js");
+
 const usersRouter = require("express").Router();
 
 //Ruta para mostrar todos los usuarios
@@ -20,6 +22,7 @@ usersRouter.get("/all", getAllUsers);
 //Ruta para registrar un nuevo usuarios
 usersRouter.post(
 	"/register",
+	upload.single("profilePic"),
 	noNumbers(["name", "paternalLastName", "maternalLastName"]),
 	registerUser,
 );
