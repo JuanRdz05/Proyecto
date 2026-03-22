@@ -11,7 +11,7 @@ const servicesSchema = new mongoose.Schema(
 			required: true,
 		},
 		price: {
-			type: Number, //Precio en pesos MX
+			type: Number,
 			required: true,
 			min: 0,
 		},

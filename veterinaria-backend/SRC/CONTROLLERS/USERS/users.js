@@ -4,7 +4,7 @@ const { validateEmail } = require("../../MIDDLEWARES/emailFormatter.js");
 
 const getAllUsers = async (req, res) => {
 	try {
-		const users = await Users.find({});
+		const users = await Users.find({}).select("-_id");
 		console.log("===================================================");
 		console.log("Mostrando los usuarios registrados...");
 		if (users.length === 0) {
@@ -25,8 +25,14 @@ const getAllUsers = async (req, res) => {
 //Registar un nuevo usuario
 const registerUser = async (req, res) => {
 	try {
-		const { name, paternalLastName, maternalLastName, email, password } =
-			req.body;
+		const {
+			name,
+			paternalLastName,
+			maternalLastName,
+			email,
+			password,
+			username,
+		} = req.body;
 		//Hasheo de la contraseña
 		const passwordHash = hashPassword(password);
 		//Validar el formato del email
@@ -41,6 +47,7 @@ const registerUser = async (req, res) => {
 			maternalLastName,
 			email,
 			password: passwordHash,
+			username,
 			role: "client",
 		});
 		//Guardamos el usuario en la base de datos
@@ -83,6 +90,7 @@ const getProfile = async (req, res) => {
 	const user = await Users.findById(userId);
 	res.json(user);
 };
+
 module.exports = {
 	getAllUsers,
 	registerUser,
