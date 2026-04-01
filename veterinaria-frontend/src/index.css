@@ -9,3 +9,9 @@ body {
 	margin: 0;
 	padding: 0;
 }
+
+:root {
+  --primary-blue: #007bff; /* Tu azul exacto del login */
+  --text-white: #ffffff;
+  --bg-gray: #f8f9fa; /* Un gris muy claro para secciones */
+}
