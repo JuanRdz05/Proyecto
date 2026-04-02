@@ -23,8 +23,20 @@ export function Login() {
 
 	return (
 		<div className="login-container">
-			<h1>Iniciar sesión</h1>
-			<form onSubmit={handleSubmit}>
+			<form onSubmit={handleSubmit} className="login-card">
+				{/* Botón X para regresar */}
+				<button 
+					type="button" 
+					className="btn-close-card" 
+					onClick={() => navigate(-1)}
+					title="Regresar"
+				>
+					&times;
+				</button>
+
+				{/* Título ahora dentro de la tarjeta */}
+				<h1>Iniciar sesión</h1>
+
 				<InputField
 					label="Correo Electrónico"
 					type="email"
@@ -37,8 +49,9 @@ export function Login() {
 					value={password}
 					onChange={(e) => setPassword(e.target.value)}
 				/>
-                {/* Agregamos la clase btn-login aquí */}
+				
 				<button type="submit" className="btn-login">Iniciar sesión</button>
+				
 				<p>
 					¿No tienes cuenta? <Link to="/register">Regístrate</Link>
 				</p>

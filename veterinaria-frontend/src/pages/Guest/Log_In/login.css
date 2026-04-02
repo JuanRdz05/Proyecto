@@ -14,32 +14,55 @@ body {
 	box-sizing: border-box;
 }
 
-.login-container h1 {
-	font-size: 3rem;
-	margin-bottom: 2rem;
-	text-align: center;
-}
-
-.login-container form {
+/* --- TARJETA ACTUALIZADA --- */
+.login-card {
+	position: relative; /* Necesario para posicionar la X */
 	width: 100%; 
 	max-width: 350px; 
-	padding: 2rem;
+	padding: 3rem 2rem 2rem 2rem; /* Más espacio arriba para que el título no choque */
 	border-radius: 10px;
 	background-color: #fff;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 	box-sizing: border-box;
 }
 
-.login-container form input {
+/* Botón de cerrar (X) */
+.btn-close-card {
+	position: absolute;
+	top: 15px;
+	left: 15px;
+	background: none;
+	border: none;
+	font-size: 1.8rem;
+	color: #999;
+	cursor: pointer;
+	line-height: 1;
+	padding: 0;
+	transition: color 0.2s;
+}
+
+.btn-close-card:hover {
+	color: #333;
+}
+
+/* Título ajustado para estar dentro de la tarjeta */
+.login-card h1 {
+	font-size: 2rem; /* Reducido un poco para que quepa mejor */
+	margin-bottom: 2rem;
+	text-align: center;
+	margin-top: 0;
+	color: #111;
+}
+
+.login-card input {
 	margin-bottom: 1rem;
 	width: 100%;
 	box-sizing: border-box;
 }
 
-/* --- CAMBIO AQUÍ: Usamos la clase específica --- */
 .btn-login {
 	width: 100%;
-	padding: 0.8rem; /* Lo hice un poquitito más alto para que coincida con el registro */
+	padding: 0.8rem;
 	background-color: #007bff;
 	color: #fff;
 	border: none;
@@ -54,15 +77,14 @@ body {
 .btn-login:hover {
 	background-color: #0069d9;
 }
-/* ---------------------------------------------- */
 
-.login-container form p {
+.login-card p {
 	text-align: center;
 	margin-top: 1.5rem;
 	font-size: 0.9rem;
 }
 
-.login-container form a {
+.login-card a {
 	color: #007bff;
 	text-decoration: none;
 	font-weight: bold;

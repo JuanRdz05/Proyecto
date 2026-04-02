@@ -1,14 +1,13 @@
-import { useState, useRef } from 'react'; // Importamos useRef para la foto
+// src/pages/Register/Register.jsx
+import { useState, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { InputField } from "../../../components/Inputfield/inputfield.jsx"; // Reutilizamos tu componente
-// Asumimos que la función de registro ahora acepta FormData
-import { registerClient } from '../../../services/Guest/register.js'; // Ruta correcta
+import { InputField } from "../../../components/Inputfield/inputfield.jsx";
+import { registerClient } from '../../../services/Guest/register.js';
 import './register.css';
 
 export function Register() {
-    const navigate = useNavigate();
+    const navigate = useNavigate(); // Ya lo tienes importado y definido
     
-    // Estados para los campos de texto
     const [username, setUsername] = useState('');
     const [name, setName] = useState('');
     const [paternalLastName, setPaternalLastName] = useState('');
@@ -16,38 +15,28 @@ export function Register() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    // --- LÓGICA DE LA FOTO DE PERFIL ---
-    const fileInputRef = useRef(null); // Referencia oculta al selector de archivos
-    const [selectedFile, setSelectedFile] = useState(null); // Archivo real para enviar
-    const [previewUrl, setPreviewUrl] = useState(null); // URL para mostrar en el navegador
+    const fileInputRef = useRef(null);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
 
-    // Función que se ejecuta al hacer clic en el círculo de "FOTO"
     const handleFileClick = () => {
-        fileInputRef.current.click(); // Dispara el clic del input oculto
+        fileInputRef.current.click();
     };
 
-    // Función que se ejecuta cuando el usuario selecciona un archivo
     const handleFileChange = (e) => {
         const file = e.target.files[0];
-        
-        // Validación básica: que sea una imagen
         if (file && file.type.startsWith('image/')) {
             setSelectedFile(file);
-            // Creamos una URL temporal para previsualizar la imagen en el círculo
             setPreviewUrl(URL.createObjectURL(file));
         } else if (file) {
             alert("Por favor selecciona un archivo multimedia válido (imagen estática).");
-            e.target.value = null; // Limpiar el input
+            e.target.value = null;
         }
     };
-    // -----------------------------------
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
         try {
-            // Cuando hay una imagen, no podemos enviar JSON simple. 
-            // Debemos usar FormData para empaquetar los datos y el archivo.
             const formDataToSend = new FormData();
             formDataToSend.append('username', username);
             formDataToSend.append('name', name);
@@ -56,17 +45,13 @@ export function Register() {
             formDataToSend.append('email', email);
             formDataToSend.append('password', password);
             
-            // Si el usuario seleccionó una foto, la adjuntamos
             if (selectedFile) {
-                // El nombre 'profilePic' debe coincidir con el que espera tu Backend
                 formDataToSend.append('profilePic', selectedFile); 
             }
 
-            // Llamamos al servicio pasando el FormData
             await registerClient(formDataToSend);
-            
             alert("Cliente registrado exitosamente.");
-            navigate('/login'); // Regresa específicamente al login al terminar
+            navigate('/login'); 
         } catch (error) {
             alert(error.message || "Error al registrar la cuenta");
         }
@@ -75,20 +60,26 @@ export function Register() {
     return (
         <div className="register-container">
             <form onSubmit={handleSubmit} className="register-form">
+                {/* --- NUEVO: Botón X para regresar --- */}
+                <button 
+                    type="button" 
+                    className="btn-close-card" 
+                    onClick={() => navigate(-1)}
+                    title="Regresar"
+                >
+                    &times;
+                </button>
+
                 <h2>Crear cuenta</h2>
                 
-                {/* --- SECCIÓN DE FOTO DE PERFIL ACTIVA CON PLACEHOLDER --- */}
                 <div 
                     className="profile-pic-placeholder clickable" 
                     onClick={handleFileClick} 
                     title="Haz clic para seleccionar una foto"
                 >
                     {previewUrl ? (
-                        // 1. Mostramos la vista previa si el usuario ya seleccionó una foto
                         <img src={previewUrl} alt="Vista previa de perfil" className="profile-pic-preview" />
                     ) : (
-                        // 2. NUEVO: Mostramos el ícono de placeholder si no hay foto seleccionada
-                        // Usamos un SVG integrado directamente para no depender de archivos externos
                         <svg 
                             className="profile-pic-icon-placeholder" 
                             viewBox="0 0 24 24" 
@@ -104,17 +95,14 @@ export function Register() {
                     )}
                 </div>
                 
-                {/* Input de tipo archivo oculto, activado por el div de arriba */}
                 <input 
                     type="file" 
                     ref={fileInputRef} 
                     onChange={handleFileChange} 
-                    accept="image/*" // Solo acepta imágenes
-                    style={{ display: 'none' }} // Oculto visualmente
+                    accept="image/*"
+                    style={{ display: 'none' }}
                 />
-                {/* ------------------------------------------ */}
 
-                {/* Labels corregidos a Mayúsculas Iniciales */}
                 <InputField
                     label="Nombre de Usuario"
                     type="text"
@@ -160,7 +148,6 @@ export function Register() {
                 <button type="submit" className="btn-register">Crear cuenta</button>
                 
                 <p className="login-link">
-                    {/* Enlace corregido para ir específicamente a /login */}
                     ¿Ya tienes cuenta? <Link to="/login">Inicia sesión</Link>
                 </p>
             </form>
