@@ -14,7 +14,14 @@ export function Login() {
 		try {
 			const data = await loginUser(email, password);
 			console.log("Login exitoso: ", data);
-			// navigate('/dashboard'); 
+			localStorage.setItem("userName", data.name);
+
+            // Redirección por rol
+            if (data.role === 'client') {
+                navigate('/client-home'); 
+            } else if (data.role === 'vet' || data.role === 'admin') {
+                navigate('/admin/home');
+            }
 		} catch (error) {
 			console.error("Error al iniciar sesión: ", error);
 			alert("Usuario o contraseña incorrectos");

@@ -8,6 +8,8 @@ export const loginUser = async (email, password) => {
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify({ email, password }),
+            //Permite que el navegador reciba y envíe la cookie
+            credentials: "include" 
 		});
 		if (!response.ok) {
 			throw new Error("Error al iniciar sesión");
