@@ -82,6 +82,7 @@
     border-radius: 5px;
     cursor: pointer;
     flex-shrink: 0;
+    font-weight: bold;
 }
 
 .btn-edit:hover {

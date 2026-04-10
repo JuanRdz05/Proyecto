@@ -51,7 +51,7 @@ export function Register() {
 
             await registerClient(formDataToSend);
             alert("Cliente registrado exitosamente.");
-            navigate('/login'); 
+            navigate('/inicio-sesion'); 
         } catch (error) {
             alert(error.message || "Error al registrar la cuenta");
         }
@@ -148,7 +148,7 @@ export function Register() {
                 <button type="submit" className="btn-register">Crear cuenta</button>
                 
                 <p className="login-link">
-                    ¿Ya tienes cuenta? <Link to="/login">Inicia sesión</Link>
+                    ¿Ya tienes cuenta? <Link to="/inicio-sesion">Inicia sesión</Link>
                 </p>
             </form>
         </div>

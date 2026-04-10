@@ -1,8 +1,10 @@
+import { useNavigate } from "react-router-dom";
 import { NavbarClient } from "../../../components/NavbarClient/navbarClient.jsx";
-import { FooterGuest } from "../../../components/Footer/footer.jsx"; // Reusamos el footer
+import { FooterGuest } from "../../../components/Footer/footer.jsx";
 import "./client.css";
 
 export function ClientHome() {
+    const navigate = useNavigate();
     const userName = localStorage.getItem("userName") || "User";
 
     return (
@@ -17,7 +19,12 @@ export function ClientHome() {
                     <section className="dashboard-section">
                         <div className="section-header">
                             <h2>Proximas citas</h2>
-                            <button className="btn-view-all">Ver todas</button>
+                            <button
+                                className="btn-view-all"
+                                onClick={() => navigate('/historial')}
+                            >
+                                Ver todas
+                            </button>
                         </div>
                         
                         <div className="list-container">
@@ -36,17 +43,31 @@ export function ClientHome() {
                     <section className="dashboard-section">
                         <div className="section-header">
                             <h2>Mis Mascotas</h2>
-                            <button className="btn-add">+ Agregar nueva mascota</button>
+                            <button
+                                className="btn-add"
+                                onClick={() => navigate('/nueva-mascota')}
+                            >
+                                + Agregar nueva mascota
+                            </button>
                         </div>
                         
                         <div className="list-container">
-                            {["Max", "Bella", "Charlie"].map(name => (
-                                <div key={name} className="item-card">
+                            {[
+                                { name: "Max",     id: 1 },
+                                { name: "Bella",   id: 2 },
+                                { name: "Charlie", id: 3 },
+                            ].map(pet => (
+                                <div key={pet.name} className="item-card">
                                     <div className="pet-icon">🐾</div>
                                     <div className="item-info">
-                                        <p className="pet-name">{name}</p>
+                                        <p className="pet-name">{pet.name}</p>
                                     </div>
-                                    <button className="btn-edit">Editar</button>
+                                    <button
+                                        className="btn-edit"
+                                        onClick={() => navigate(`/detalles-mascota/${pet.id}`)}
+                                    >
+                                        Detalles
+                                    </button>
                                 </div>
                             ))}
                         </div>

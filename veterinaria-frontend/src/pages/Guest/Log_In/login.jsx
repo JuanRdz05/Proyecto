@@ -18,8 +18,10 @@ export function Login() {
 
             // Redirección por rol
             if (data.role === 'client') {
-                navigate('/client-home'); 
-            } else if (data.role === 'vet' || data.role === 'admin') {
+                navigate('/cliente'); 
+            } else if (data.role === 'vet') {
+                navigate('/veterinario');
+            } else if (data.role === 'admin') {
                 navigate('/admin/home');
             }
 		} catch (error) {
@@ -60,7 +62,7 @@ export function Login() {
 				<button type="submit" className="btn-login">Iniciar sesión</button>
 				
 				<p>
-					¿No tienes cuenta? <Link to="/register">Regístrate</Link>
+					¿No tienes cuenta? <Link to="/registro">Regístrate</Link>
 				</p>
 			</form>
 		</div>
