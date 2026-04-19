@@ -22,7 +22,7 @@ export function Login() {
             } else if (data.role === 'vet') {
                 navigate('/veterinario');
             } else if (data.role === 'admin') {
-                navigate('/admin/home');
+                navigate('/admin/citas');
             }
 		} catch (error) {
 			console.error("Error al iniciar sesión: ", error);

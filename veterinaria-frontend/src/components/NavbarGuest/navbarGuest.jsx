@@ -24,7 +24,7 @@ export function NavbarGuest() {
 					{/* Botón azul con borde y texto blanco que redirige al login */}
 					<button 
 						className="btn-navbar-login" 
-						onClick={() => navigate("/login")} // Asumiendo que / es tu ruta de login
+						onClick={() => navigate("/inicio-sesion")} // Asumiendo que / es tu ruta de login
 					>
 						Iniciar sesión
 					</button>

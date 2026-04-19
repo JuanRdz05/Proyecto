@@ -33,7 +33,7 @@ export function GuestRoute({ children }) {
     if (status === "loading") return null;
     if (status === "client") return <Navigate to="/cliente" replace />;
     if (status === "vet") return <Navigate to="/veterinario" replace />;
-    if (status === "admin") return <Navigate to="/admin/home" replace />;
+    if (status === "admin") return <Navigate to="/admin/citas" replace />;
 
     return children;
 }
