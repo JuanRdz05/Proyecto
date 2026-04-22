@@ -1,0 +1,120 @@
+/* pets.css */
+
+.pets-page-container {
+    background-color: #f0f2f5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.pets-main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 100px 20px 60px;
+}
+
+/* Tarjeta principal */
+.pets-card {
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    padding: 2rem 2.5rem;
+    width: 100%;
+    max-width: 580px;
+}
+
+/* Encabezado: título + botón agregar */
+.pets-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.2rem;
+}
+
+.pets-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 0;
+}
+
+/* Botón "Agregar mascota" — igual al btn-add de /client */
+.btn-add-pet {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background-color 0.2s;
+}
+
+.btn-add-pet:hover {
+    background-color: #0069d9;
+}
+
+/* Lista de mascotas */
+.pets-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.pets-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 0;
+}
+
+.pets-list-item.with-divider {
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.pet-label {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #1a1a2e;
+}
+
+/* Botón editar — igual al btn-edit de /client */
+.btn-edit-pet {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 15px;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    color: #fff;
+    flex-shrink: 0;
+    font-size: 0.85rem;
+    font-weight: bold;
+    font-family: inherit;
+    transition: background-color 0.2s;
+    gap: 0.3rem;
+}
+
+.btn-edit-pet:hover {
+    background-color: #0069d9;
+}
+
+.btn-edit-pet svg {
+    width: 13px;
+    height: 13px;
+    stroke: currentColor;
+    flex-shrink: 0;
+}
+
+/* Responsive */
+@media (max-width: 560px) {
+    .pets-card {
+        padding: 1.5rem 1.2rem;
+    }
+}

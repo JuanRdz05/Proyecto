@@ -8,10 +8,12 @@ const {
 	updateProfile,
 	updatePassword,
 } = require("../../CONTROLLERS/USERS/updateUsers.js");
-const { loginUser } = require("../../CONTROLLERS/USERS/authUsers.js");
+const { loginUser, logoutUser } = require("../../CONTROLLERS/USERS/authUsers.js");
 const { noNumbers } = require("../../MIDDLEWARES/noNumbers.js");
 const { verificarToken, authRole } = require("../../MIDDLEWARES/authToken.js");
 const { body, validationResult } = require("express-validator");
+
+const upload = require("../../MIDDLEWARES/uploadImage.js");
 
 const usersRouter = require("express").Router();
 
@@ -20,11 +22,14 @@ usersRouter.get("/all", getAllUsers);
 //Ruta para registrar un nuevo usuarios
 usersRouter.post(
 	"/register",
+	upload.single("profilePic"),
 	noNumbers(["name", "paternalLastName", "maternalLastName"]),
 	registerUser,
 );
 //Ruta para hacer login
 usersRouter.post("/login", loginUser);
+//Ruta para cerrar sesión
+usersRouter.post("/logout", logoutUser);
 //Ruta para obtener el perfil del usuario
 usersRouter.get("/profile", verificarToken, getProfile);
 //Ruta para actualizar el perfil del usuario

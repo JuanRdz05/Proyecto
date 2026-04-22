@@ -32,10 +32,9 @@ const loginUser = async (req, res) => {
 		const token = jwt.sign(
 			{ id: user._id, role: user.role },
 			process.env.JWT_KEY,
-			{
-				expiresIn: "1h",
-			},
+			{ expiresIn: "1h" }
 		);
+		
 		//Guardamos el log
 		if (user.role === "vet" || user.role === "admin") {
 			await createLog(
@@ -52,15 +51,37 @@ const loginUser = async (req, res) => {
 		}
 		console.log("===================================================");
 		console.log("Iniciando sesión...");
-		res.status(200).json({ message: "Inicio de sesión exitoso", token });
+		// cookie
+        res.cookie("token", token, {
+            httpOnly: true, 
+            secure: process.env.NODE_ENV === "production", 
+            sameSite: "strict", 
+            maxAge: 3600000 
+        });
+
+		res.status(200).json({ 
+            message: "Inicio de sesión exitoso",
+            role: user.role,
+            name: user.name
+        });
 		console.log("===================================================");
-		console.log("¡Bienvenido " + user.name + "!");
+		
 	} catch (error) {
 		console.error("Error al registrar el usuario: ", error);
 		res.status(500).json({ message: "Error al registrar el usuario", error });
 	}
 };
 
+const logoutUser = (req, res) => {
+	res.clearCookie("token", {
+		httpOnly: true,
+		sameSite: "strict",
+		secure: process.env.NODE_ENV === "production",
+	});
+	res.status(200).json({ message: "Sesión cerrada exitosamente" });
+};
+
 module.exports = {
 	loginUser,
+	logoutUser,
 };

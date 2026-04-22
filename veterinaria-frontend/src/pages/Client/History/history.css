@@ -1,0 +1,76 @@
+/* history.css */
+
+.history-page-container {
+    background-color: #f0f2f5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.history-main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 100px 20px 60px;
+}
+
+/* Tarjeta principal */
+.history-card {
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    padding: 2rem 2.5rem;
+    width: 100%;
+    max-width: 600px;
+}
+
+.history-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 0 0 1.2rem 0;
+}
+
+/* Lista de historial */
+.history-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.history-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 0;
+}
+
+.history-item.with-divider {
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.history-pet-label {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #1a1a2e;
+}
+
+/* Fecha y hora alineadas a la derecha */
+.history-datetime {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.1rem;
+    font-size: 0.9rem;
+    color: #6b7280;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+/* Responsive */
+@media (max-width: 560px) {
+    .history-card {
+        padding: 1.5rem 1.2rem;
+    }
+}
