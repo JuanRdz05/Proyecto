@@ -1,0 +1,87 @@
+/* src/components/FooterGuest/footerGuest.css */
+
+.footer-guest-container {
+	/* Usamos tu azul exacto de fondo */
+	background-color: var(--primary-blue, #007bff);
+	color: var(--text-white, #ffffff);
+	width: 100%;
+	padding: 3rem 2rem 1rem 2rem;
+	font-family: "Outfit", sans-serif;
+	box-sizing: border-box;
+    margin-top: auto; /* Empuja el footer al fondo si hay poco contenido */
+}
+
+.footer-content-wrapper {
+	width: 100%;
+	max-width: 1200px;
+	margin: 0 auto;
+	display: flex;
+	justify-content: space-between;
+	align-items: center; /* Alineación central según instrucción */
+    padding-bottom: 2rem;
+}
+
+/* --- SECCIÓN IZQUIERDA --- */
+.footer-left-section {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.footer-logo-placeholder {
+	width: 50px; /* Reducido un poco para que no se vea tan apretado */
+	height: 50px; 
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+}
+
+.footer-logo-placeholder img {
+	width: 100%;       /* Ocupa todo el ancho del círculo */
+	height: 100%;      /* Ocupa todo el alto del círculo */
+	object-fit: contain; /* Ajusta la imagen sin recortar el logo (o usa 'cover' si quieres que llene todo) */
+	display: block;
+}
+
+.footer-trust-text {
+	font-size: 1.1rem;
+	margin: 0;
+	font-style: italic;
+}
+
+/* --- SECCIÓN DERECHA --- */
+.footer-right-section {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start; /* Alineación del título y lista */
+    gap: 0.8rem;
+}
+
+.footer-right-section h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.footer-contact-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.footer-contact-list p {
+	margin: 0;
+	font-size: 1rem;
+}
+
+/* Barra inferior de Copyright */
+.footer-bottom-bar {
+	width: 100%;
+	max-width: 1200px;
+	margin: 0 auto;
+	border-top: 1px solid rgba(255, 255, 255, 0.2);
+	padding-top: 1rem;
+	text-align: center;
+	font-size: 0.8rem;
+    opacity: 0.8;
+}

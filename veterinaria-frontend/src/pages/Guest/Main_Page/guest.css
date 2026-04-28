@@ -1,0 +1,184 @@
+/* src/pages/GuestHome/guest.css */
+
+.guest-home-page {
+	font-family: "Outfit", sans-serif;
+	background-color: var(--bg-gray, #f8f9fa); /* Fondo claro para la página */
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+
+.guest-main-content {
+	flex: 1;
+	/* IMPORTANTE: Compensar la altura del Nav fijo arriba */
+	padding-top: 80px; 
+}
+
+/* =========================================
+   ESTILOS DEL CARRUSEL BÁSICO
+   ========================================= */
+.carousel-section {
+    width: 100%;
+    height: 400px; /* Bajamos a 300px para que la imagen se vea menos "estirada" */
+    background-color: #333;
+    overflow: hidden;
+    position: relative;
+}
+
+.carousel-wrapper {
+	width: 100%;
+	height: 100%;
+}
+
+.carousel-slide {
+	width: 100%;
+	height: 100%;
+	position: relative;
+    display: none; /* Ocultar todos por defecto */
+}
+
+/* Solo mostramos el slide activo (para controlarlo con JS después) */
+.carousel-slide.active {
+    display: block;
+}
+
+/* Placeholder para las imágenes veterinarias */
+.carousel-image-placeholder {
+	width: 100%;
+	height: 100%;
+	background-color: #555; /* Gris para la imagen */
+	color: #999;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.5rem;
+}
+
+/* Puedes asignar fondos específicos si quieres previsualizar */
+.vet-image-1 { background-color: #444; } /* Ejemplo */
+
+.carousel-caption {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	background: linear-gradient(transparent, rgba(0, 0, 0, 0.7)); /* Gradiente oscuro */
+	color: var(--text-white, #ffffff);
+	padding: 3rem 2rem 2rem 2rem;
+	text-align: center;
+	box-sizing: border-box;
+}
+
+.carousel-caption h3 {
+	margin: 0;
+	font-size: 2.2rem;
+	text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.carousel-slide img {
+    /* --- ESTO ES LO QUE SOLUCIONA TU PROBLEMA --- */
+    width: 100%;       /* Fuerza a la imagen a ocupar todo el ancho del contenedor */
+    height: 100%;      /* Fuerza a la imagen a ocupar todo el alto del contenedor */
+    object-fit: cover; /* Recorta y estira inteligentemente para llenar el espacio sin deformar */
+    object-position: center;
+}
+
+/* =========================================
+   ESTILOS DE BIENVENIDO Y TARJETAS
+   ========================================= */
+.welcome-cards-section {
+	width: 100%;
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 3rem 2rem;
+	box-sizing: border-box;
+    text-align: center;
+}
+
+.welcome-title {
+	font-size: 2.5rem;
+	color: var(--primary-blue, #007bff); /* Usamos tu azul */
+	margin-top: 0;
+	margin-bottom: 2rem;
+}
+
+.cards-horizontal-container {
+	display: flex;
+	gap: 2rem;
+	justify-content: center;
+    flex-wrap: wrap; /* Para que se adapten en móviles */
+}
+
+/* Estilo unificado de la tarjeta horizontal */
+.card-horizontal-item {
+	background-color: #ffffff;
+	border-radius: 10px;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+	display: flex; /* Flexbox para imagen izq / texto der */
+	align-items: center;
+	width: 100%;
+	max-width: 350px; /* Tamaño máximo para que quepan 3 */
+	height: 120px; /* Altura fija según mockup */
+	overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card-horizontal-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
+}
+
+/* Imagen del lado izquierdo */
+.card-image-left {
+    width: 120px;       /* Reducido a 60px para que sea un espacio pequeño */
+    flex-shrink: 0;    /* ¡IMPORTANTE! Esto evita que la imagen empuje al texto */
+    height: 100%;
+    background-color: #d3d3d3;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-image-left img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Fondos de tarjeta (ejemplo) */
+.vet-card-1 { background-color: #cce5ff; }
+
+/* Texto del lado derecho */
+.card-text-right {
+	flex: 1; /* Ocupa el resto del espacio */
+	padding: 1rem;
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+    text-align: left;
+}
+
+.card-text-right p {
+	margin: 0;
+	font-size: 1rem;
+	color: #333;
+	line-height: 1.4;
+}
+
+/* =========================================
+   REGLAS ADAPTATIVAS (RESPONSIVE)
+   ========================================= */
+@media (max-width: 768px) {
+    .navbar-left-section { gap: 1rem; }
+    .navbar-links { display: none; } /* Ocultar enlaces en mobile */
+    .btn-navbar-login { padding: 8px 15px; font-size: 0.9rem; }
+    
+    .carousel-section { height: 350px; }
+    .carousel-caption h3 { font-size: 1.8rem; }
+    
+    .cards-horizontal-container { flex-direction: column; align-items: center; }
+    .card-horizontal-item { max-width: 100%; width: 100%; }
+    
+    .footer-content-wrapper { flex-direction: column; gap: 2rem; align-items: flex-start; }
+}

@@ -1,0 +1,180 @@
+/* petAdd.css */
+
+.petadd-page-container {
+    background-color: #f0f2f5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.petadd-main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 100px 20px 60px;
+}
+
+/* Tarjeta central */
+.petadd-card {
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    padding: 2.5rem 3rem;
+    width: 100%;
+    max-width: 480px;
+}
+
+.petadd-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 0 0 1.8rem 0;
+}
+
+/* Formulario */
+.petadd-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.3rem;
+}
+
+.petadd-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.petadd-field label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+/* Inputs */
+.petadd-field input[type="text"],
+.petadd-field input[type="date"] {
+    width: 100%;
+    padding: 0.65rem 0.9rem;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    font-size: 0.95rem;
+    color: #111;
+    background: #fff;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s;
+    font-family: inherit;
+}
+
+.petadd-field input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+/* Select con flecha custom */
+.select-wrapper-pa {
+    position: relative;
+}
+
+.select-wrapper-pa select {
+    width: 100%;
+    padding: 0.65rem 2.2rem 0.65rem 0.9rem;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    font-size: 0.95rem;
+    color: #111;
+    background: #fff;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.select-wrapper-pa select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.select-arrow-pa {
+    position: absolute;
+    right: 0.8rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.1rem;
+    color: #6b7280;
+    pointer-events: none;
+}
+
+/* Campo extra "Otro" — aparece con animación suave */
+.petadd-field-extra {
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Botones de acción */
+.petadd-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.btn-cancel-petadd {
+    padding: 0.7rem 1.8rem;
+    background: transparent;
+    color: #374151;
+    border: 1.5px solid #d1d5db;
+    border-radius: 7px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.btn-cancel-petadd:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+}
+
+.btn-submit-petadd {
+    padding: 0.7rem 1.8rem;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-family: inherit;
+}
+
+.btn-submit-petadd:hover {
+    background-color: #0069d9;
+}
+
+/* Responsive */
+@media (max-width: 520px) {
+    .petadd-card {
+        padding: 2rem 1.5rem;
+    }
+
+    .petadd-actions {
+        flex-direction: column-reverse;
+    }
+
+    .btn-cancel-petadd,
+    .btn-submit-petadd {
+        width: 100%;
+        text-align: center;
+    }
+}

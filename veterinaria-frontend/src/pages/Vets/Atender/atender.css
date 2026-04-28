@@ -1,0 +1,305 @@
+/* atender.css */
+
+.atender-page-container {
+    background-color: #f0f2f5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.atender-main {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    padding: 100px 20px 60px;
+}
+
+/* Tarjeta principal */
+.atender-card {
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 860px;
+    height: fit-content;
+}
+
+.atender-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 0 0 1.8rem 0;
+}
+
+/* Grid de dos columnas */
+.atender-top-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+/* ---- COLUMNA IZQUIERDA ---- */
+.atender-col-left {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+}
+
+/* Caja de info de la cita */
+.cita-info-box {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 0.9rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.cita-info-row {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.88rem;
+    color: #374151;
+}
+
+.cita-info-row span {
+    color: #6b7280;
+    min-width: 85px;
+}
+
+/* Fila de dos inputs: Peso + Temperatura */
+.atender-row-two {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+}
+
+/* Campo genérico */
+.atender-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.atender-field label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #374151;
+    letter-spacing: 0.04em;
+}
+
+.atender-field input[type="text"],
+.atender-field input[type="number"],
+.atender-field textarea {
+    padding: 0.6rem 0.8rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: #111;
+    background: #fff;
+    outline: none;
+    transition: border-color 0.2s;
+    font-family: inherit;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.atender-field input:focus,
+.atender-field textarea:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.atender-field textarea {
+    resize: vertical;
+}
+
+/* Input con unidad (kg / °C / /día) */
+.input-unit-wrapper,
+.input-freq-wrapper {
+    display: flex;
+    align-items: center;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+}
+
+.input-unit-wrapper:focus-within,
+.input-freq-wrapper:focus-within {
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.input-unit-wrapper input,
+.input-freq-wrapper input {
+    border: none !important;
+    box-shadow: none !important;
+    flex: 1;
+    border-radius: 0;
+}
+
+.unit-badge {
+    padding: 0 0.6rem;
+    font-size: 0.82rem;
+    color: #6b7280;
+    background: #f3f4f6;
+    border-left: 1px solid #d1d5db;
+    white-space: nowrap;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+/* ---- COLUMNA DERECHA: PRESCRIPCIÓN ---- */
+.atender-col-right {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.prescripcion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.prescripcion-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 0;
+}
+
+.btn-add-med {
+    background: none;
+    border: none;
+    color: #007bff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    font-family: inherit;
+    transition: color 0.2s;
+}
+
+.btn-add-med:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+/* Lista de bloques de medicamentos */
+.medicamentos-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+/* Bloque individual de un medicamento */
+.medicamento-block {
+    background: #f8f9fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    animation: slidein 0.2s ease-out;
+}
+
+@keyframes slidein {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Encabezado del bloque (número + X) */
+.med-block-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.med-block-num {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #007bff;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.btn-remove-med {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.btn-remove-med:hover {
+    color: #ef4444;
+}
+
+/* ---- BOTONES DE ACCIÓN ---- */
+.atender-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 1.5rem;
+}
+
+.btn-cancelar-cita {
+    padding: 0.7rem 1.8rem;
+    background: transparent;
+    color: #374151;
+    border: 1.5px solid #d1d5db;
+    border-radius: 7px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+
+.btn-cancelar-cita:hover {
+    background: #f3f4f6;
+}
+
+.btn-terminar-cita {
+    padding: 0.7rem 1.8rem;
+    background-color: #1a1a2e;
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background-color 0.2s;
+}
+
+.btn-terminar-cita:hover {
+    background-color: #007bff;
+}
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 680px) {
+    .atender-top-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .atender-actions {
+        flex-direction: column-reverse;
+    }
+
+    .btn-cancelar-cita,
+    .btn-terminar-cita {
+        width: 100%;
+        text-align: center;
+    }
+}

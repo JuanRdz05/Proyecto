@@ -1,0 +1,129 @@
+/* src/components/NavbarClient/navbarClient.css */
+
+.navbar-client {
+    /* Usamos tu azul típico de toda la página */
+    background-color: var(--primary-blue, #007bff); 
+    color: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2rem;
+    height: 70px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    box-sizing: border-box;
+    z-index: 1000;
+    font-family: "Outfit", sans-serif;
+}
+
+/* --- LADO IZQUIERDO: LOGO --- */
+.nav-left {
+    display: flex;
+    align-items: center;
+}
+
+.nav-logo {
+    height: 40px; 
+    object-fit: contain;
+}
+
+/* --- CENTRO: ENLACES --- */
+.nav-center {
+    display: flex;
+    list-style: none;
+    gap: 2.5rem;
+    margin: 0;
+    padding: 0;
+    height: 100%; 
+}
+
+.nav-center li {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.nav-center a {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    border-bottom: 4px solid transparent; 
+    transition: color 0.2s;
+    box-sizing: border-box;
+    padding-top: 4px; 
+}
+
+.nav-center a:hover {
+    color: #d1d5db; 
+}
+
+/* La pestaña activa con la línea debajo */
+.nav-center a.active {
+    border-bottom: 4px solid #ffffff; 
+    font-weight: bold;
+}
+
+/* --- LADO DERECHO: PERFIL --- */
+.nav-right {
+    display: flex;
+    align-items: center;
+}
+
+.user-profile-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.user-profile-nav:hover {
+    opacity: 0.8;
+}
+
+/* El círculo para la foto de perfil */
+.nav-profile-pic {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background-color: #e2e8f0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-profile-pic img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.nav-profile-pic svg {
+    width: 60%;
+    height: 60%;
+    color: #888;
+    stroke: #888;
+}
+
+.user-profile-nav span {
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+/* --- RESPONSIVE BÁSICO --- */
+@media (max-width: 768px) {
+    .nav-center {
+        display: none; 
+    }
+    
+    .navbar-client {
+        padding: 0 1rem;
+    }
+}

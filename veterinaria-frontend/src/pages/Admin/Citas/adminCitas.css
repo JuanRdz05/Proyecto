@@ -1,0 +1,232 @@
+/* adminCitas.css */
+
+.admin-citas-container {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-citas-main {
+    flex: 1;
+    max-width: 1100px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 100px 20px 60px;
+}
+
+/* ---- ENCABEZADO ---- */
+.admin-citas-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #1a1a2e;
+    margin: 0 0 1.5rem 0;
+}
+
+.admin-citas-subheader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.admin-citas-subtitle {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #374151;
+    margin: 0;
+}
+
+/* ---- FILTROS ---- */
+.filter-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-filter {
+    padding: 0.45rem 1.1rem;
+    border-radius: 8px;
+    border: 1.5px solid #d1d5db;
+    background: #ffffff;
+    color: #374151;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.18s;
+}
+
+.btn-filter:hover {
+    border-color: #007bff;
+    color: #007bff;
+}
+
+.btn-filter.active {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: #ffffff;
+}
+
+.filter-dot {
+    font-size: 0.55rem;
+    line-height: 1;
+}
+
+/* ---- TABLA ---- */
+.admin-citas-table-wrapper {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    overflow-x: auto;
+}
+
+.admin-citas-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: "Outfit", sans-serif;
+}
+
+.admin-citas-table thead tr {
+    border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+}
+
+.admin-citas-table th {
+    text-align: left;
+    padding: 0.85rem 1.1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #6b7280;
+    white-space: nowrap;
+}
+
+.admin-citas-table tbody tr {
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.15s;
+}
+
+.admin-citas-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.admin-citas-table tbody tr:hover {
+    background-color: #f8f9ff;
+}
+
+.admin-citas-table td {
+    padding: 1rem 1.1rem;
+    font-size: 0.92rem;
+    color: #374151;
+    white-space: nowrap;
+}
+
+.col-pet strong {
+    color: #1a1a2e;
+    font-weight: 700;
+}
+
+.col-datetime {
+    color: #6b7280;
+    font-size: 0.88rem;
+}
+
+.empty-row {
+    text-align: center;
+    color: #9ca3af;
+    padding: 2.5rem !important;
+    font-size: 0.95rem;
+}
+
+/* ---- BADGES DE ESTADO ---- */
+.cita-status-badge {
+    display: inline-block;
+    padding: 0.28rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.status-pendiente {
+    background-color: #007bff;
+    color: #ffffff;
+    border: none;
+}
+
+.status-aceptada {
+    background-color: #ffffff;
+    color: #111111;
+    border: 1.5px solid #111111;
+}
+
+.status-cancelada {
+    background-color: #111111;
+    color: #ffffff;
+    border: none;
+}
+
+.status-rechazada {
+    background-color: #f3f4f6;
+    color: #374151;
+}
+
+/* ---- BOTONES DE ACCIÓN ---- */
+.col-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.btn-action {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: none;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.18s;
+}
+
+.btn-aceptar {
+    background-color: #007bff;
+    color: #ffffff;
+}
+
+.btn-aceptar:hover {
+    background-color: #0056b3;
+}
+
+.btn-rechazar {
+    background-color: #f3f4f6;
+    color: #374151;
+    border: 1.5px solid #d1d5db;
+}
+
+.btn-rechazar:hover {
+    background-color: #fee2e2;
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 768px) {
+    .admin-citas-subheader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .admin-citas-table th,
+    .admin-citas-table td {
+        padding: 0.7rem 0.8rem;
+        font-size: 0.82rem;
+    }
+}

@@ -4,7 +4,7 @@ const { validateEmail } = require("../../MIDDLEWARES/emailFormatter.js");
 
 const getAllUsers = async (req, res) => {
 	try {
-		const users = await Users.find({});
+		const users = await Users.find({}).select("-_id");
 		console.log("===================================================");
 		console.log("Mostrando los usuarios registrados...");
 		if (users.length === 0) {
@@ -25,28 +25,44 @@ const getAllUsers = async (req, res) => {
 //Registar un nuevo usuario
 const registerUser = async (req, res) => {
 	try {
-		const { name, paternalLastName, maternalLastName, email, password } =
-			req.body;
-		//Hasheo de la contraseña
-		const passwordHash = hashPassword(password);
-		//Validar el formato del email
-		if (!validateEmail(email)) {
-			console.log("===================================================");
-			console.log("El email no es valido");
-			return res.status(400).json({ message: "El email no es valido" });
-		}
-		const user = new Users({
+		const {
 			name,
 			paternalLastName,
 			maternalLastName,
 			email,
+			password,
+			username,
+		} = req.body;
+        
+		const passwordHash = hashPassword(password);
+        
+		if (!validateEmail(email)) {
+			return res.status(400).json({ message: "El email no es valido" });
+		}
+
+        // --- NUEVO: Convertir la imagen a Base64 ---
+        let profilePictureBase64 = null;
+        
+        // Si el usuario subió un archivo (req.file existe gracias a multer)
+        if (req.file) {
+            // Convertimos el archivo binario a texto base64
+            const b64 = Buffer.from(req.file.buffer).toString('base64');
+            // Le agregamos el prefijo para que el navegador sepa qué tipo de imagen es
+            profilePictureBase64 = `data:${req.file.mimetype};base64,${b64}`;
+        }
+
+		const user = new Users({
+			name,
+			paternalLastName: paternalLastName || "", // Opcional
+			maternalLastName,
+			email,
 			password: passwordHash,
+			username,
 			role: "client",
+            profilePicture: profilePictureBase64 // <-- Guardamos la imagen como texto literal
 		});
-		//Guardamos el usuario en la base de datos
+
 		await user.save();
-		console.log("===================================================");
-		console.log("Usuario registrado exitosamente");
 		res.status(201).json({ message: "Usuario registrado exitosamente" });
 	} catch (error) {
 		console.error("Error al registrar el usuario: ", error);
@@ -83,6 +99,7 @@ const getProfile = async (req, res) => {
 	const user = await Users.findById(userId);
 	res.json(user);
 };
+
 module.exports = {
 	getAllUsers,
 	registerUser,

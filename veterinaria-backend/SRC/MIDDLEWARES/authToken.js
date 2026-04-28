@@ -1,15 +1,16 @@
 const jwt = require("jsonwebtoken");
+const dotenv = require("dotenv");
+dotenv.config();
 
 const verificarToken = async (req, res, next) => {
-	const authHeader = req.headers["authorization"];
-	const token = authHeader && authHeader.split(" ")[1];
+	const token = req.cookies.token; 
+
 	if (!token) {
 		return res.status(401).json({ message: "Acceso no autorizado" });
 	}
 	try {
 		//Verificar el token
 		const tokenDecoded = jwt.verify(token, process.env.JWT_KEY);
-		//Le pasamos el token al usuario que hizo la pateición
 		req.user = tokenDecoded;
 		next();
 	} catch (error) {
@@ -17,6 +18,28 @@ const verificarToken = async (req, res, next) => {
 	}
 };
 
-module.exports = {
-	verificarToken,
+const authRole = (adminRol) => {
+	return async (req, res, next) => {
+		try {
+			const token = req.cookies.token;
+
+			if (!token) {
+				return res.status(401).json({ message: "No tiene permiso de acceso a esta area" });
+			}
+            
+			const decoded = jwt.verify(token, process.env.JWT_KEY);
+			req.user = decoded;
+            
+			// ... (la lógica de verificación de rol se queda exactamente igual)
+			if (decoded.role !== adminRol) {
+				return res.status(401).json({ message: "No tiene permiso de acceso a esta area" });
+			}
+			next();
+		} catch (error) {
+			console.error("Error al autenticar al usuario: ", error);
+			res.status(500).json({ message: "Error al autenticar al usuario", error });
+		}
+	};
 };
+
+module.exports = { verificarToken, authRole };

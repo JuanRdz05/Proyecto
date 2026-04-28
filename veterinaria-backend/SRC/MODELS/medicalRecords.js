@@ -3,22 +3,22 @@ const mongoose = require("mongoose");
 const medicalRecordSchema = new mongoose.Schema(
 	{
 		pet: {
-			type: Number,
+			type: mongoose.Schema.Types.ObjectId,
 			ref: "pets",
 			required: true,
 		},
 		appointment: {
-			type: Number,
+			type: mongoose.Schema.Types.ObjectId,
 			ref: "appointments",
 			required: false, // Puede haber registros sin cita (emergencias)
 		},
 		vet: {
-			type: Number,
+			type: mongoose.Schema.Types.ObjectId,
 			ref: "users",
 			required: true,
 		},
 		service: {
-			type: Number,
+			type: mongoose.Schema.Types.ObjectId,
 			ref: "services",
 			required: false,
 		},

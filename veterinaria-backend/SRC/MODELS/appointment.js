@@ -18,43 +18,42 @@ const appointmentSchema = new mongoose.Schema(
 			},
 		},
 		pet: {
-			type: Number,
+			type: mongoose.Schema.Types.ObjectId,
 			required: true,
-			ref: "pets",
+			ref: "Pets",
 		},
 		owner: {
-			type: Number,
+			type: mongoose.Schema.Types.ObjectId,
 			required: true,
 			ref: "users",
 		},
 		service: {
-			// ← AGREGADO
-			type: Number,
+			type: mongoose.Schema.Types.ObjectId,
 			required: true,
-			ref: "services",
+			ref: "Services",
 		},
 		status: {
 			type: String,
-			enum: ["pending", "accepted", "rejected", "completed", "cancelled"],
-			default: "pending",
+			enum: [
+				"Pendiente",
+				"Aceptada",
+				"Rechazada",
+				"En progreso",
+				"Cancelada",
+				"Terminada",
+			],
+			default: "Pendiente",
 			required: true,
 		},
 		notes: {
 			type: String,
 		},
 		vet: {
-			type: Number,
-			required: false, // ← Ahora es opcional (se asigna al aceptar)
+			type: mongoose.Schema.Types.ObjectId,
+			required: false,
 			ref: "users",
 		},
-		medicalRecord: {
-			// ← AGREGADO
-			type: Number,
-			ref: "medicalRecords",
-			required: false,
-		},
 		rejectionReason: {
-			// ← AGREGADO (opcional)
 			type: String,
 		},
 	},
@@ -69,7 +68,7 @@ appointmentSchema.index(
 	{
 		unique: true,
 		partialFilterExpression: {
-			status: { $in: ["accepted", "in_progress"] },
+			status: { $in: ["Aceptada", "En proceso"] },
 			vet: { $exists: true },
 		},
 	},

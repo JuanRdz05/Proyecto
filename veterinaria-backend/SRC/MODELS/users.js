@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema(
 		},
 		maternalLastName: {
 			type: String,
-			required: true,
+			required: false,
 		},
 		email: {
 			type: String,
@@ -38,6 +38,10 @@ const userSchema = new mongoose.Schema(
 		isActive: {
 			type: Boolean,
 			default: true,
+		},
+		username: {
+			type: String,
+			required: true,
 		},
 	},
 	{
