@@ -24,7 +24,7 @@ import { AdminManager } from "./pages/Admin/AdminManager/adminManager.jsx";
 import { RegisterAdmin } from "./pages/Admin/AddAdmin/registerAdmin.jsx";
 import { AdminServices } from "./pages/Admin/Services/adminServices.jsx";
 import { AddService } from "./pages/Admin/AddService/addService.jsx";
-import { AdminLogs } from "./pages/Admin/Logs/adminLogs.jsx";
+import { AdminLogs } from "./pages/Admin/Logs_Admin/adminLogs.jsx";
 import { AdminClients } from "./pages/Admin/Clients/adminClients.jsx";
 import { AdminPets } from "./pages/Admin/Pets/adminPets.jsx";
 
@@ -32,36 +32,197 @@ export function App() {
 	return (
 		<Routes>
 			{/* Rutas de invitado: solo accesibles sin sesión activa */}
-			<Route path="/" element={<GuestRoute><Guest /></GuestRoute>} />
-			<Route path="/inicio-sesion" element={<GuestRoute><Login /></GuestRoute>} />
-			<Route path="/registro" element={<GuestRoute><Register /></GuestRoute>} />
+			<Route
+				path="/"
+				element={
+					<GuestRoute>
+						<Guest />
+					</GuestRoute>
+				}
+			/>
+			<Route
+				path="/inicio-sesion"
+				element={
+					<GuestRoute>
+						<Login />
+					</GuestRoute>
+				}
+			/>
+			<Route
+				path="/registro"
+				element={
+					<GuestRoute>
+						<Register />
+					</GuestRoute>
+				}
+			/>
 
 			{/* Rutas exclusivas de cliente */}
-			<Route path="/cliente" element={<ClientRoute><ClientHome /></ClientRoute>} />
-			<Route path="/agendar-cita" element={<ClientRoute><Appointment /></ClientRoute>} />
-			<Route path="/mascotas" element={<ClientRoute><Pets /></ClientRoute>} />
-			<Route path="/nueva-mascota" element={<ClientRoute><PetAdd /></ClientRoute>} />
-			<Route path="/detalles-mascota/:id" element={<ClientRoute><PetDetails /></ClientRoute>} />
-			<Route path="/historial" element={<ClientRoute><History /></ClientRoute>} />
+			<Route
+				path="/cliente"
+				element={
+					<ClientRoute>
+						<ClientHome />
+					</ClientRoute>
+				}
+			/>
+			<Route
+				path="/agendar-cita"
+				element={
+					<ClientRoute>
+						<Appointment />
+					</ClientRoute>
+				}
+			/>
+			<Route
+				path="/mascotas"
+				element={
+					<ClientRoute>
+						<Pets />
+					</ClientRoute>
+				}
+			/>
+			<Route
+				path="/nueva-mascota"
+				element={
+					<ClientRoute>
+						<PetAdd />
+					</ClientRoute>
+				}
+			/>
+			<Route
+				path="/detalles-mascota/:id"
+				element={
+					<ClientRoute>
+						<PetDetails />
+					</ClientRoute>
+				}
+			/>
+			<Route
+				path="/historial"
+				element={
+					<ClientRoute>
+						<History />
+					</ClientRoute>
+				}
+			/>
 
 			{/* Rutas compartidas: cualquier usuario autenticado */}
-			<Route path="/perfil" element={<AuthRoute><Profile /></AuthRoute>} />
+			<Route
+				path="/perfil"
+				element={
+					<AuthRoute>
+						<Profile />
+					</AuthRoute>
+				}
+			/>
 
 			{/* Rutas exclusivas de veterinario */}
-			<Route path="/veterinario" element={<VetRoute><VetHome /></VetRoute>} />
-			<Route path="/atender-cita/:id" element={<VetRoute><AtenderCita /></VetRoute>} />
-			<Route path="/vet-historial" element={<VetRoute><VetHistory /></VetRoute>} />
+			<Route
+				path="/veterinario"
+				element={
+					<VetRoute>
+						<VetHome />
+					</VetRoute>
+				}
+			/>
+			<Route
+				path="/atender-cita/:id"
+				element={
+					<VetRoute>
+						<AtenderCita />
+					</VetRoute>
+				}
+			/>
+			<Route
+				path="/vet-historial"
+				element={
+					<VetRoute>
+						<VetHistory />
+					</VetRoute>
+				}
+			/>
 			{/* Rutas exclusivas de administrador */}
-			<Route path="/admin/citas"               element={<AdminRoute><AdminCitas /></AdminRoute>} />
-			<Route path="/admin/veterinarios"        element={<AdminRoute><AdminVets /></AdminRoute>} />
-			<Route path="/admin/nuevo-veterinario"   element={<AdminRoute><RegisterVet /></AdminRoute>} />
-			<Route path="/admin/administradores"     element={<AdminRoute><AdminManager /></AdminRoute>} />
-			<Route path="/admin/nuevo-administrador" element={<AdminRoute><RegisterAdmin /></AdminRoute>} />
-			<Route path="/admin/servicios"           element={<AdminRoute><AdminServices /></AdminRoute>} />
-			<Route path="/admin/nuevo-servicio"      element={<AdminRoute><AddService /></AdminRoute>} />
-			<Route path="/admin/logs"                element={<AdminRoute><AdminLogs /></AdminRoute>} />
-			<Route path="/admin/clientes"            element={<AdminRoute><AdminClients /></AdminRoute>} />
-			<Route path="/admin/mascotas"            element={<AdminRoute><AdminPets /></AdminRoute>} />
+			<Route
+				path="/admin/citas"
+				element={
+					<AdminRoute>
+						<AdminCitas />
+					</AdminRoute>
+				}
+			/>
+			<Route
+				path="/admin/veterinarios"
+				element={
+					<AdminRoute>
+						<AdminVets />
+					</AdminRoute>
+				}
+			/>
+			<Route
+				path="/admin/nuevo-veterinario"
+				element={
+					<AdminRoute>
+						<RegisterVet />
+					</AdminRoute>
+				}
+			/>
+			<Route
+				path="/admin/administradores"
+				element={
+					<AdminRoute>
+						<AdminManager />
+					</AdminRoute>
+				}
+			/>
+			<Route
+				path="/admin/nuevo-administrador"
+				element={
+					<AdminRoute>
+						<RegisterAdmin />
+					</AdminRoute>
+				}
+			/>
+			<Route
+				path="/admin/servicios"
+				element={
+					<AdminRoute>
+						<AdminServices />
+					</AdminRoute>
+				}
+			/>
+			<Route
+				path="/admin/nuevo-servicio"
+				element={
+					<AdminRoute>
+						<AddService />
+					</AdminRoute>
+				}
+			/>
+			<Route
+				path="/admin/logs"
+				element={
+					<AdminRoute>
+						<AdminLogs />
+					</AdminRoute>
+				}
+			/>
+			<Route
+				path="/admin/clientes"
+				element={
+					<AdminRoute>
+						<AdminClients />
+					</AdminRoute>
+				}
+			/>
+			<Route
+				path="/admin/mascotas"
+				element={
+					<AdminRoute>
+						<AdminPets />
+					</AdminRoute>
+				}
+			/>
 		</Routes>
 	);
 }
