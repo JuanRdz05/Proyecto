@@ -1,0 +1,208 @@
+/* adminLogs.css */
+
+.logs-container {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.logs-main {
+    flex: 1;
+    max-width: 1100px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 100px 20px 60px;
+}
+
+/* ---- ENCABEZADO ---- **/
+.logs-header {
+    margin-bottom: 1.2rem;
+}
+
+.logs-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #1a1a2e;
+    margin: 0 0 0.2rem 0;
+}
+
+.logs-subtitle {
+    font-size: 0.88rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+/* ---- FILTROS ---- */
+.logs-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.2rem;
+}
+
+.btn-log-filter {
+    padding: 0.38rem 1rem;
+    border-radius: 20px;
+    border: 1.5px solid #d1d5db;
+    background: #ffffff;
+    color: #374151;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.18s;
+}
+
+.btn-log-filter:hover {
+    border-color: #007bff;
+    color: #007bff;
+}
+
+.btn-log-filter.active {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: #ffffff;
+}
+
+/* ---- TABLA ---- */
+.logs-table-wrapper {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    overflow-x: auto;
+}
+
+.logs-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: "Outfit", sans-serif;
+}
+
+.logs-table thead tr {
+    border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+}
+
+.logs-table th {
+    text-align: left;
+    padding: 0.85rem 1.1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #6b7280;
+    white-space: nowrap;
+}
+
+.logs-table tbody tr {
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.15s;
+}
+
+.logs-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.logs-table tbody tr:hover {
+    background-color: #f8f9ff;
+}
+
+.logs-table td {
+    padding: 0.9rem 1.1rem;
+    font-size: 0.92rem;
+    color: #374151;
+    vertical-align: middle;
+}
+
+.col-date {
+    white-space: nowrap;
+    color: #6b7280 !important;
+    font-size: 0.87rem !important;
+    min-width: 130px;
+}
+
+.col-desc {
+    color: #374151;
+}
+
+.logs-empty {
+    text-align: center;
+    color: #9ca3af;
+    padding: 2.5rem !important;
+    font-size: 0.95rem;
+}
+
+/* ---- BADGES DE ACCIÓN (solo azul, negro, blanco) ---- */
+.action-badge {
+    display: inline-block;
+    padding: 0.28rem 0.85rem;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* CREATE — azul #007bff, letras blancas */
+.action-create {
+    background-color: #007bff;
+    color: #ffffff;
+}
+
+/* UPDATE — blanco, borde negro, letras negras */
+.action-update {
+    background-color: #ffffff;
+    color: #111111;
+    border: 1.5px solid #111111;
+}
+
+/* DELETE — negro #1a1a2e, letras blancas */
+.action-delete {
+    background-color: #1a1a2e;
+    color: #ffffff;
+}
+
+/* LOGIN — azul claro (variante más suave del azul) */
+.action-login {
+    background-color: #e0ecff;
+    color: #007bff;
+    border: 1.5px solid #007bff;
+}
+
+/* LOGOUT — gris claro, borde gris, letras grises */
+.action-logout {
+    background-color: #f3f4f6;
+    color: #374151;
+    border: 1.5px solid #d1d5db;
+}
+
+/* ---- COLUMNA USUARIO ---- */
+.col-user {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.user-name {
+    font-weight: 600;
+    color: #1a1a2e;
+    font-size: 0.9rem;
+}
+
+.user-role {
+    font-size: 0.75rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 768px) {
+    .logs-table th,
+    .logs-table td {
+        padding: 0.7rem 0.8rem;
+        font-size: 0.82rem;
+    }
+
+    .logs-filters {
+        gap: 0.4rem;
+    }
+}
