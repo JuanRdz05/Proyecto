@@ -92,12 +92,12 @@ export function PetAdd() {
 									<option value="" disabled>
 										Selecciona una opción
 									</option>
-									<option value="perro">Perro</option>
-									<option value="gato">Gato</option>
-									<option value="conejo">Conejo</option>
-									<option value="ave">Ave</option>
-									<option value="reptil">Reptil</option>
-									<option value="otro">Otro</option>
+									<option value="Perro">Perro</option>
+									<option value="Gato">Gato</option>
+									<option value="Conejo">Conejo</option>
+									<option value="Ave">Ave</option>
+									<option value="Reptil">Reptil</option>
+									<option value="Otro">Otro</option>
 								</select>
 								<span className="select-arrow-pa">&#8964;</span>
 							</div>
