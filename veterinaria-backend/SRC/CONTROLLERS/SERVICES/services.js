@@ -1,39 +1,60 @@
 const Services = require("../../MODELS/services.js");
 const { createLog } = require("../../MIDDLEWARES/logs.js");
 const { formatoDinero } = require("../../MIDDLEWARES/formateoDinero.js");
-//Ruta para crear un servicio
+
 const createService = async (req, res) => {
 	try {
 		console.log("===================================================");
 		console.log("Comenzando el proceso para crear un servicio...");
-		//Obtenemos los datos del usuario que esta creando el servicio
+
 		const user = req.user;
+
 		console.log("===================================================");
 		console.log("Intentando crear un servicio...");
 		console.log("===================================================");
-		console.log("Usuario: ", user.username);
-		console.log("Email: ", user.email);
-		console.log("Rol del usuario: ", user.role);
-		//Obtenemos los datos del servicio
-		if (user.role !== "admin") {
+		console.log("Usuario: ", user?.username);
+		console.log("Email: ", user?.email);
+		console.log("Rol del usuario: ", user?.role);
+
+		// Validar que sea admin
+		if (!user || user.role !== "admin") {
 			console.log("===================================================");
 			console.log("Acceso denegado");
 			return res.status(403).json({ message: "Acceso denegado" });
 		}
+
 		const { name, description, price } = req.body;
 		console.log("Datos del servicio: ", { name, description, price });
+
+		// Validar datos requeridos ANTES de guardar
+		if (!name || !description || price === undefined || price === null) {
+			return res.status(400).json({ message: "Faltan datos requeridos" });
+		}
+
+		const priceNumber = parseFloat(price);
+		if (isNaN(priceNumber) || priceNumber < 0) {
+			return res
+				.status(400)
+				.json({ message: "El precio debe ser un número válido" });
+		}
+
+		// Crear el servicio (aún NO guardar)
 		const service = new Services({
 			name,
 			description,
-			price,
+			price: priceNumber,
 		});
-		//Guardamos el servicio en la base de datos
+
+		// Formatear el precio para el log (antes de guardar, si falla no se guarda nada)
+		const precioFormateado = formatoDinero(priceNumber);
+		console.log("Precio formateado: ", precioFormateado);
+
+		// Ahora sí guardar
 		await service.save();
 		console.log("===================================================");
 		console.log("Servicio creado exitosamente");
-		//Formateamos el precio
-		const precioFormateado = formatoDinero(price);
-		//Guardamos el log
+
+		// Guardar el log
 		await createLog(
 			"CREATE",
 			"SERVICE",
@@ -47,24 +68,30 @@ const createService = async (req, res) => {
 			},
 			user._id,
 		);
+
 		res.status(201).json({ message: "Servicio creado exitosamente", service });
 	} catch (error) {
-		console.error("Hubo un error al crear el servicio: " + error);
+		console.error("Hubo un error al crear el servicio: ", error);
 		res.status(500).json({ message: "Hubo un error al crear el servicio" });
 	}
 };
 
-//Función para obtener todos los servicios
+// Función para obtener todos los servicios
 const getAllServices = async (req, res) => {
 	try {
 		console.log("===================================================");
 		console.log("Comenzando el proceso para obtener todos los servicios...");
-		const services = await Services.find({}).select("-_id");
+
+		const services = await Services.find({}); // ✅ Quité .select("-_id")
+
 		if (services.length === 0) {
 			console.log("===================================================");
 			console.log("No hay servicios para mostrar");
-			return res.status(404).json({ message: "No hay servicios para mostrar" });
+			return res
+				.status(200)
+				.json({ message: "No hay servicios para mostrar", services: [] });
 		}
+
 		console.log("===================================================");
 		console.log("Servicios obtenidos exitosamente");
 		res
@@ -144,9 +171,83 @@ const getServiceById = async (req, res) => {
 	}
 };
 
+const updateService = async (req, res) => {
+	try {
+		console.log("===================================================");
+		console.log("Comenzando el proceso para actualizar un servicio...");
+
+		const user = req.user;
+		const serviceId = req.params.id;
+
+		// Validar admin
+		if (!user || user.role !== "admin") {
+			console.log("Acceso denegado");
+			return res.status(403).json({ message: "Acceso denegado" });
+		}
+
+		const { name, description, price } = req.body;
+
+		// Validar que el servicio existe
+		const service = await Services.findById(serviceId);
+		if (!service) {
+			return res.status(404).json({ message: "Servicio no encontrado" });
+		}
+
+		// Validar datos
+		if (!name?.trim() || !description?.trim() || price === undefined) {
+			return res.status(400).json({ message: "Faltan datos requeridos" });
+		}
+
+		const priceNumber = parseFloat(price);
+		if (isNaN(priceNumber) || priceNumber < 0) {
+			return res
+				.status(400)
+				.json({ message: "El precio debe ser un número válido" });
+		}
+
+		// Actualizar
+		const updatedService = await Services.findByIdAndUpdate(
+			serviceId,
+			{
+				name: name.trim(),
+				description: description.trim(),
+				price: priceNumber,
+			},
+			{ new: true },
+		);
+
+		const precioFormateado = formatoDinero(priceNumber);
+
+		// Log
+		await createLog(
+			"UPDATE",
+			"SERVICE",
+			`El servicio ${name} ha sido actualizado`,
+			{
+				user: req.user.username,
+				email: req.user.email,
+				role: req.user.role,
+				precioFinal: precioFormateado,
+				id_service: serviceId,
+			},
+			user._id,
+		);
+
+		console.log("Servicio actualizado exitosamente");
+		res.status(200).json({
+			message: "Servicio actualizado exitosamente",
+			service: updatedService,
+		});
+	} catch (error) {
+		console.error("Error al actualizar el servicio:", error);
+		res.status(500).json({ message: "Error al actualizar el servicio" });
+	}
+};
+
 module.exports = {
 	createService,
 	getAllServices,
 	changeStatus,
 	getServiceById,
+	updateService,
 };

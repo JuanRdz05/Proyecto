@@ -1,61 +1,66 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { NavbarClient } from "../../../components/NavbarClient/navbarClient.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
 import "./pets.css";
-
-// Datos placeholder — se conectará al backend más adelante
-const MOCK_PETS = [
-    { id: 1, name: "Iggy",  species: "Perro" },
-    { id: 2, name: "Luna",  species: "Gato" },
-    { id: 3, name: "Max",   species: "Perro" },
-    { id: 4, name: "Coco",  species: "Perro" },
-    { id: 5, name: "Mia",   species: "Conejo" },
-    { id: 6, name: "Rocky", species: "Perro" },
-];
+import { getPets } from "../../../services/Client/pet.js";
 
 export function Pets() {
-    const navigate = useNavigate();
-    const [pets] = useState(MOCK_PETS);
+	const navigate = useNavigate();
+	const [pets, setPets] = useState([]);
 
-    return (
-        <div className="pets-page-container">
-            <NavbarClient />
+	useEffect(() => {
+		const fetchPets = async () => {
+			try {
+				const data = await getPets();
+				setPets(data);
+			} catch (error) {
+				console.error("Error al obtener las mascotas:", error);
+			}
+		};
+		fetchPets();
+	}, []);
 
-            <main className="pets-main">
-                <div className="pets-card">
-                    {/* Encabezado */}
-                    <div className="pets-header">
-                        <h2 className="pets-title">Mis mascotas</h2>
-                        <button
-                            className="btn-add-pet"
-                            onClick={() => navigate('/nueva-mascota')}
-                        >
-                            + Agregar mascota
-                        </button>
-                    </div>
+	return (
+		<div className="pets-page-container">
+			<NavbarClient />
 
-                    {/* Lista */}
-                    <ul className="pets-list">
-                        {pets.map((pet, index) => (
-                            <li
-                                key={pet.id}
-                                className={`pets-list-item ${index < pets.length - 1 ? "with-divider" : ""}`}
-                            >
-                                <span className="pet-label">{pet.name} - {pet.species}</span>
-                                <button
-                                        className="btn-edit-pet"
-                                        onClick={() => navigate(`/detalles-mascota/${pet.id}`)}
-                                    >
-                                        Detalles
-                                    </button>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            </main>
+			<main className="pets-main">
+				<div className="pets-card">
+					{/* Encabezado */}
+					<div className="pets-header">
+						<h2 className="pets-title">Mis mascotas</h2>
+						<button
+							className="btn-add-pet"
+							onClick={() => navigate("/nueva-mascota")}
+						>
+							+ Agregar mascota
+						</button>
+					</div>
 
-            <FooterGuest />
-        </div>
-    );
+					{/* Lista */}
+					<ul className="pets-list">
+						{pets.map((pet, index) => (
+							<li
+								key={pet.id}
+								className={`pets-list-item ${index < pets.length - 1 ? "with-divider" : ""}`}
+							>
+								<span className="pet-label">
+									{pet.name} - {pet.petType}
+								</span>
+								<button
+									className="btn-edit-pet"
+									onClick={() => navigate(`/detalles-mascota/${pet._id}`)}
+								>
+									Detalles
+								</button>
+							</li>
+						))}
+					</ul>
+				</div>
+			</main>
+
+			<FooterGuest />
+		</div>
+	);
 }

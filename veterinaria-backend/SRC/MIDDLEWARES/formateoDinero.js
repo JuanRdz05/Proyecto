@@ -1,21 +1,13 @@
-const formatoDinero = (req, res, next) => {
-	try {
-		res.dineroFormateado = (numero) => {
-			if (typeof numero !== "number") return numero;
-			return new Intl.NumberFormat("es-MX", {
-				style: "currency",
-				currency: "MXN",
-			}).format(numero);
-		};
-		next();
-	} catch (error) {
-		if (error instanceof TypeError) {
-			console.error("Error al formatear el dinero: ", error);
-			res.status(500).json({ message: "Error al formatear el dinero", error });
-		}
+const formatoDinero = (numero) => {
+	if (typeof numero !== "number" || isNaN(numero)) {
+		return "$0.00";
 	}
+	return new Intl.NumberFormat("es-MX", {
+		style: "currency",
+		currency: "MXN",
+		minimumFractionDigits: 2,
+		maximumFractionDigits: 2,
+	}).format(numero);
 };
 
-module.exports = {
-	formatoDinero,
-};
+module.exports = { formatoDinero };

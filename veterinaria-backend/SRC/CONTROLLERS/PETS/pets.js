@@ -35,28 +35,20 @@ async function addPet(req, res) {
 		res.status(500).json({ message: "Error al agregar la mascota", error });
 	}
 }
-
 const getPetsByUser = async (req, res) => {
 	try {
-		console.log("===================================================");
-		console.log("Obteniendo mascotas de usuario...");
 		const userId = req.user.id;
-		const pets = await Pets.find({ owner: userId }).select("-_id");
-		console.log("===================================================");
-		console.log("Mascotas de usuario encontradas");
+		// QUITAMOS .select("-_id") para que el front reciba los IDs
+		const pets = await Pets.find({ owner: userId });
+
 		if (pets.length === 0) {
-			console.log("===================================================");
-			console.log("No hay mascotas de usuario");
-			return res.status(404).json({ message: "No hay mascotas de usuario" });
+			return res.status(404).json({ message: "No hay mascotas", pets: [] });
 		}
-		res.status(200).json({ message: "Mascotas de usuario encontradas", pets });
-		console.log("===================================================");
-		console.log("Mascotas de usuario encontradas exitosamente");
+
+		res.status(200).json(pets);
 	} catch (error) {
 		console.error("Error al obtener las mascotas de usuario: ", error);
-		res
-			.status(500)
-			.json({ message: "Error al obtener las mascotas de usuario", error });
+		res.status(500).json({ message: "Error al obtener las mascotas", error });
 	}
 };
 
@@ -163,13 +155,16 @@ const getPetById = async (req, res) => {
 		const userId = req.user.id;
 		console.log("===================================================");
 		console.log("Buscando mascota...");
+
 		const pet = await Pets.findById(petId);
+
 		if (!pet) {
 			console.log("===================================================");
 			console.log("Mascota no encontrada");
 			return res.status(404).json({ message: "Mascota no encontrada" });
 		}
-		//Validamos que el dueño sea el usuario
+
+		// Validamos que el dueño sea el usuario
 		console.log("===================================================");
 		console.log("Validando que el dueño de la mascota es el usuario...");
 		if (pet.owner.toString() !== userId.toString()) {
@@ -179,9 +174,11 @@ const getPetById = async (req, res) => {
 				message: "Acceso denegado",
 			});
 		}
+
 		console.log("===================================================");
 		console.log("Mascota encontrada exitosamente");
-		res.status(200).json({ message: "Mascota encontrada", pet });
+
+		res.status(200).json(pet);
 	} catch (error) {
 		console.error("Error al obtener la mascota: ", error);
 		res.status(500).json({ message: "Error al obtener la mascota", error });

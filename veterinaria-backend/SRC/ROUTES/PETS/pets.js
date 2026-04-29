@@ -20,7 +20,7 @@ mascotasRouter.post(
 	addPet,
 );
 //Ruta para mostrar las mascotas por usuario
-mascotasRouter.get("/user/:id", verificarToken, getPetsByUser);
+mascotasRouter.get("/get-user-pets", verificarToken, getPetsByUser);
 //Ruta para mostrar una mascota por id
 mascotasRouter.get("/:id", verificarToken, getPetById);
 //Rutas para activar o desactivar una mascota
