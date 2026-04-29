@@ -1,90 +1,143 @@
 .client-page-container {
-    background-color: #f8f9fa;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+	background-color: #f8f9fa;
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
 }
 
 .client-main {
-    flex: 1;
-    max-width: 1100px;
-    width: 100%;
-    margin: 0 auto;
-    padding: 100px 20px 40px; /* Espacio para el navbar fijo */
+	flex: 1;
+	max-width: 1100px;
+	width: 100%;
+	margin: 0 auto;
+	padding: 100px 20px 40px;
 }
 
 .welcome-text {
-    font-size: 2.5rem;
-    font-weight: 800;
-    margin-bottom: 3rem;
+	font-size: 2.5rem;
+	font-weight: 800;
+	margin-bottom: 3rem;
 }
 
 .dashboard-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* Dos columnas como el mockup */
-    gap: 40px;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 40px;
 }
 
 .section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
 }
 
+/* --- Tarjetas de items --- */
 .item-card {
-    background: white;
-    padding: 15px 20px;
-    border-radius: 12px;
-    margin-bottom: 15px;
-    display: flex;
-    align-items: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+	background: white;
+	padding: 15px 20px;
+	border-radius: 12px;
+	margin-bottom: 15px;
+	display: flex;
+	align-items: center;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+	gap: 15px; /* Espacio entre todos los elementos hijos */
 }
 
+/* Icono de mascota */
+.pet-icon {
+	font-size: 1.5rem;
+	flex-shrink: 0;
+}
+
+/* Info de la mascota */
 .item-info {
-    flex: 1; /* Empuja los botones al lado derecho */
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 4px; /* Espacio entre nombre y tipo */
 }
 
-.btn-add {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
+.pet-name {
+	font-size: 1rem;
+	font-weight: 600;
+	color: #1a1a2e;
+	margin: 0;
 }
 
+.pet-type {
+	font-size: 0.85rem;
+	color: #666;
+	margin: 0;
+}
+
+/* --- Estados vacíos / carga --- */
+.item-card-empty {
+	justify-content: center;
+	color: #888;
+	font-style: italic;
+	gap: 0; /* Sin gap cuando está centrado */
+}
+
+/* --- Botones --- */
+.btn-add,
 .btn-view-all {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
+	background-color: #007bff;
+	color: white;
+	border: none;
+	padding: 8px 15px;
+	border-radius: 8px;
+	font-weight: bold;
+	cursor: pointer;
+	transition: background-color 0.2s ease;
 }
 
+.btn-add:hover,
 .btn-view-all:hover {
-    background-color: #0069d9;
-}
-
-.btn-add:hover {
-    background-color: #0069d9;
+	background-color: #0069d9;
 }
 
 .btn-edit {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 5px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    flex-shrink: 0;
-    font-weight: bold;
+	background-color: #007bff;
+	color: white;
+	border: none;
+	padding: 6px 16px;
+	border-radius: 6px;
+	cursor: pointer;
+	font-weight: 600;
+	font-size: 0.9rem;
+	transition: background-color 0.2s ease;
+	flex-shrink: 0;
 }
 
 .btn-edit:hover {
-    background-color: #0069d9;
+	background-color: #0069d9;
+}
+
+/* --- Ver más --- */
+.view-more-container {
+	margin-top: 1rem;
+	text-align: center;
+}
+
+.view-more-container .btn-view-all {
+	padding: 10px 20px;
+	font-size: 0.95rem;
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+	.dashboard-grid {
+		grid-template-columns: 1fr;
+		gap: 30px;
+	}
+
+	.item-card {
+		padding: 12px 16px;
+		gap: 12px;
+	}
+
+	.welcome-text {
+		font-size: 1.8rem;
+	}
 }
