@@ -76,17 +76,22 @@ const createService = async (req, res) => {
 	}
 };
 
-//Función para obtener todos los servicios
+// Función para obtener todos los servicios
 const getAllServices = async (req, res) => {
 	try {
 		console.log("===================================================");
 		console.log("Comenzando el proceso para obtener todos los servicios...");
-		const services = await Services.find({}).select("-_id");
+
+		const services = await Services.find({}); // ✅ Quité .select("-_id")
+
 		if (services.length === 0) {
 			console.log("===================================================");
 			console.log("No hay servicios para mostrar");
-			return res.status(404).json({ message: "No hay servicios para mostrar" });
+			return res
+				.status(200)
+				.json({ message: "No hay servicios para mostrar", services: [] });
 		}
+
 		console.log("===================================================");
 		console.log("Servicios obtenidos exitosamente");
 		res

@@ -22,3 +22,46 @@ export async function addService(serviceData) {
 
 	return await response.json();
 }
+//Obtener todos los servicios
+export async function getAllServices() {
+	const token = localStorage.getItem("token");
+
+	const response = await fetch(`${BASE_URL}/services/v1/all`, {
+		method: "GET",
+		credentials: "include",
+		headers: {
+			"Content-Type": "application/json",
+			Authorization: token ? `Bearer ${token}` : "",
+		},
+	});
+
+	if (!response.ok) {
+		const errorData = await response
+			.json()
+			.catch(() => ({ message: "Error desconocido" }));
+		throw new Error(errorData.message || "No se pudieron cargar los servicios");
+	}
+	return await response.json();
+}
+
+//Cambiar estado activo/inactivo
+export async function toggleServiceStatus(id) {
+	const token = localStorage.getItem("token");
+
+	const response = await fetch(`${BASE_URL}/services/v1/${id}/toggleActive`, {
+		method: "PATCH",
+		credentials: "include",
+		headers: {
+			"Content-Type": "application/json",
+			Authorization: token ? `Bearer ${token}` : "",
+		},
+	});
+
+	if (!response.ok) {
+		const errorData = await response
+			.json()
+			.catch(() => ({ message: "Error desconocido" }));
+		throw new Error(errorData.message || "No se pudo cambiar el estado");
+	}
+	return await response.json();
+}
