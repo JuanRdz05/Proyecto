@@ -1,39 +1,60 @@
 const Services = require("../../MODELS/services.js");
 const { createLog } = require("../../MIDDLEWARES/logs.js");
 const { formatoDinero } = require("../../MIDDLEWARES/formateoDinero.js");
-//Ruta para crear un servicio
+
 const createService = async (req, res) => {
 	try {
 		console.log("===================================================");
 		console.log("Comenzando el proceso para crear un servicio...");
-		//Obtenemos los datos del usuario que esta creando el servicio
+
 		const user = req.user;
+
 		console.log("===================================================");
 		console.log("Intentando crear un servicio...");
 		console.log("===================================================");
-		console.log("Usuario: ", user.username);
-		console.log("Email: ", user.email);
-		console.log("Rol del usuario: ", user.role);
-		//Obtenemos los datos del servicio
-		if (user.role !== "admin") {
+		console.log("Usuario: ", user?.username);
+		console.log("Email: ", user?.email);
+		console.log("Rol del usuario: ", user?.role);
+
+		// Validar que sea admin
+		if (!user || user.role !== "admin") {
 			console.log("===================================================");
 			console.log("Acceso denegado");
 			return res.status(403).json({ message: "Acceso denegado" });
 		}
+
 		const { name, description, price } = req.body;
 		console.log("Datos del servicio: ", { name, description, price });
+
+		// Validar datos requeridos ANTES de guardar
+		if (!name || !description || price === undefined || price === null) {
+			return res.status(400).json({ message: "Faltan datos requeridos" });
+		}
+
+		const priceNumber = parseFloat(price);
+		if (isNaN(priceNumber) || priceNumber < 0) {
+			return res
+				.status(400)
+				.json({ message: "El precio debe ser un número válido" });
+		}
+
+		// Crear el servicio (aún NO guardar)
 		const service = new Services({
 			name,
 			description,
-			price,
+			price: priceNumber,
 		});
-		//Guardamos el servicio en la base de datos
+
+		// Formatear el precio para el log (antes de guardar, si falla no se guarda nada)
+		const precioFormateado = formatoDinero(priceNumber);
+		console.log("Precio formateado: ", precioFormateado);
+
+		// Ahora sí guardar
 		await service.save();
 		console.log("===================================================");
 		console.log("Servicio creado exitosamente");
-		//Formateamos el precio
-		const precioFormateado = formatoDinero(price);
-		//Guardamos el log
+
+		// Guardar el log
 		await createLog(
 			"CREATE",
 			"SERVICE",
@@ -47,9 +68,10 @@ const createService = async (req, res) => {
 			},
 			user._id,
 		);
+
 		res.status(201).json({ message: "Servicio creado exitosamente", service });
 	} catch (error) {
-		console.error("Hubo un error al crear el servicio: " + error);
+		console.error("Hubo un error al crear el servicio: ", error);
 		res.status(500).json({ message: "Hubo un error al crear el servicio" });
 	}
 };

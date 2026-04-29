@@ -9,7 +9,12 @@ const { noNumbers } = require("../../MIDDLEWARES/noNumbers.js");
 const { verificarToken } = require("../../MIDDLEWARES/authToken.js");
 
 //Ruta para crear un servicio
-servicesRouter.post("/create", noNumbers(["name"]), createService);
+servicesRouter.post(
+	"/create",
+	verificarToken,
+	noNumbers(["name"]),
+	createService,
+);
 //Ruta para desactivar un servicio
 servicesRouter.patch("/:id/toggleActive", verificarToken, changeStatus);
 //Ruta para obtener todos los servicios
