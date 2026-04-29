@@ -2,105 +2,196 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { NavbarClient } from "../../../components/NavbarClient/navbarClient.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
-import { getPetById } from "../../../services/Client/pet.js";
+import {
+	getPetById,
+	updatePet,
+	togglePetStatus,
+} from "../../../services/Client/pet.js";
 import "./petDetails.css";
 
 export function PetDetails() {
-	const { id } = useParams(); // Captura el ID de la URL
+	const { id } = useParams();
 	const navigate = useNavigate();
 
 	const [pet, setPet] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
+	const [isEditing, setIsEditing] = useState(false);
+	const [formData, setFormData] = useState({});
+
+	const fetchPet = async () => {
+		try {
+			setLoading(true);
+			const data = await getPetById(id);
+			setPet(data);
+		} catch (err) {
+			setError("No se pudo cargar la información.");
+		} finally {
+			setLoading(false);
+		}
+	};
 
 	useEffect(() => {
-		const fetchPet = async () => {
-			try {
-				setLoading(true);
-				const data = await getPetById(id);
-				setPet(data);
-			} catch (err) {
-				console.error("Error al cargar la mascota:", err);
-				setError("No se pudo cargar la información de la mascota.");
-			} finally {
-				setLoading(false);
-			}
-		};
 		fetchPet();
 	}, [id]);
 
-	// Función auxiliar para etiquetas
-	const speciesLabel = (type) => {
-		const map = {
-			perro: "Perro",
-			gato: "Gato",
-			conejo: "Conejo",
-			ave: "Ave",
-			reptil: "Reptil",
-			otro: "Otro",
-		};
-		return map[type] || type;
+	const handleEditClick = () => {
+		setFormData({
+			name: pet.name,
+			petType: pet.petType,
+			birthDate: pet.birthDate ? pet.birthDate.split("T")[0] : "",
+		});
+		setIsEditing(true);
 	};
 
-	if (loading) return <div className="loading">Cargando perfil...</div>;
-	if (error) return <div className="error">{error}</div>;
+	const handleChange = (e) => {
+		setFormData({ ...formData, [e.target.name]: e.target.value });
+	};
+
+	const handleSave = async () => {
+		try {
+			await updatePet(id, formData);
+			// Actualizar el estado localmente sin refetch innecesario
+			setPet({
+				...pet,
+				name: formData.name,
+				petType: formData.petType,
+				birthDate: formData.birthDate,
+			});
+			setIsEditing(false);
+		} catch (err) {
+			alert("Error al guardar");
+		}
+	};
+
+	const handleToggleStatus = async () => {
+		try {
+			await togglePetStatus(id);
+			// Actualizar el estatus localmente de forma inmediata
+			setPet({ ...pet, isActive: !pet.isActive });
+		} catch (err) {
+			alert("Error al cambiar el estatus");
+		}
+	};
+
+	if (loading) return <div>Cargando...</div>;
 
 	return (
 		<div className="petdetails-page-container">
 			<NavbarClient />
-
 			<main className="petdetails-main">
 				<div className="petdetails-card">
-					<h2 className="petdetails-title">Perfil de {pet.name}</h2>
+					<div className="petdetails-header">
+						<div className="petdetails-header-left">
+							<h2 className="petdetails-title">Perfil de {pet.name}</h2>
+							<div
+								className={`pet-status-badge ${pet.isActive ? "status-active" : "status-inactive"}`}
+							>
+								<span className="status-dot"></span>
+								<span className="status-text">
+									{pet.isActive ? "Activo" : "Inactivo"}
+								</span>
+							</div>
+						</div>
+						{!isEditing && (
+							<button
+								onClick={handleToggleStatus}
+								className={`btn-status-toggle ${pet.isActive ? "active-btn" : "inactive-btn"}`}
+								title={
+									pet.isActive ? "Desactivar mascota" : "Reactivar mascota"
+								}
+							>
+								{pet.isActive ? "Desactivar" : "Reactivar"}
+							</button>
+						)}
+					</div>
 
-					{/* Campos de solo lectura */}
 					<div className="petdetails-field">
 						<label>Nombre</label>
-						<input type="text" value={pet.name} readOnly />
+						<input
+							type="text"
+							name="name"
+							value={isEditing ? formData.name : pet.name}
+							onChange={handleChange}
+							readOnly={!isEditing}
+							className={isEditing ? "input-editable" : ""}
+						/>
 					</div>
 
 					<div className="petdetails-field">
 						<label>Especie</label>
-						<input type="text" value={speciesLabel(pet.petType)} readOnly />
+						{isEditing ? (
+							<div className="select-wrapper-pa">
+								<select
+									name="petType"
+									value={formData.petType}
+									onChange={handleChange}
+									className="input-editable"
+								>
+									<option value="perro">Perro</option>
+									<option value="gato">Gato</option>
+									<option value="conejo">Conejo</option>
+									<option value="ave">Ave</option>
+									<option value="reptil">Reptil</option>
+									<option value="otro">Otro</option>
+								</select>
+								<span className="select-arrow-pa">&#8964;</span>
+							</div>
+						) : (
+							<input
+								type="text"
+								value={
+									pet.petType.charAt(0).toUpperCase() + pet.petType.slice(1)
+								}
+								readOnly
+							/>
+						)}
 					</div>
 
 					<div className="petdetails-field">
 						<label>Fecha de nacimiento</label>
-						{/* Asegúrate de que el formato de fecha sea legible */}
-						<input
-							type="text"
-							value={
-								pet.birthDate
-									? new Date(pet.birthDate).toLocaleDateString()
-									: "No registrada"
-							}
-							readOnly
-						/>
+						{isEditing ? (
+							<input
+								type="date"
+								name="birthDate"
+								value={formData.birthDate}
+								onChange={handleChange}
+								className="input-editable"
+							/>
+						) : (
+							<input
+								type="text"
+								value={
+									pet.birthDate
+										? new Date(pet.birthDate).toLocaleDateString()
+										: "No registrada"
+								}
+								readOnly
+							/>
+						)}
 					</div>
 
-					<div className="petdetails-field">
-						<label>Estado</label>
-						<input
-							type="text"
-							value={pet.isActive ? "Activo" : "Inactivo"}
-							readOnly
-							className={pet.isActive ? "status-active" : "status-inactive"}
-						/>
-					</div>
-
-					{/* Botón editar */}
 					<div className="petdetails-actions">
-						<button
-							type="button"
-							className="btn-edit-petdetails"
-							onClick={() => navigate(`/editar-mascota/${id}`)}
-						>
-							✏️ Editar mascota
-						</button>
+						{isEditing ? (
+							<>
+								<button
+									className="btn-cancel"
+									onClick={() => setIsEditing(false)}
+								>
+									❌ Cancelar
+								</button>
+								<button className="btn-save" onClick={handleSave}>
+									💾 Guardar
+								</button>
+							</>
+						) : (
+							<button className="btn-edit-petdetails" onClick={handleEditClick}>
+								✏️ Editar información
+							</button>
+						)}
 					</div>
 				</div>
 			</main>
-
 			<FooterGuest />
 		</div>
 	);
