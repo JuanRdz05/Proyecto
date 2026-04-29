@@ -89,7 +89,7 @@ export function AddService() {
 			setLoading(true);
 			await addService(serviceData);
 
-			toast.success("✅ Servicio creado exitosamente", {
+			toast.success("Servicio creado", {
 				position: "top-right",
 				autoClose: 2000,
 				onClose: () => navigate("/admin/servicios"),
@@ -213,10 +213,10 @@ export function AddService() {
 								onClick={handleCancel}
 								disabled={loading}
 							>
-								❌ Cancelar
+								Cancelar
 							</button>
 							<button type="submit" className="btn-save-svc" disabled={loading}>
-								{loading ? "⏳ Guardando..." : "✅ Guardar"}
+								{loading ? "⏳ Guardando..." : "Guardar"}
 							</button>
 						</div>
 					</form>

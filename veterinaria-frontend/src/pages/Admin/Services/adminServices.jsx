@@ -6,10 +6,10 @@ import { FooterGuest } from "../../../components/Footer/footer.jsx";
 import {
 	getAllServices,
 	toggleServiceStatus,
+	updateService,
 } from "../../../services/Admin/services.js";
 import "./adminServices.css";
 
-// Ícono de lápiz SVG
 function PencilIcon() {
 	return (
 		<svg
@@ -33,16 +33,15 @@ export function AdminServices() {
 	const [loading, setLoading] = useState(true);
 	const [editingId, setEditingId] = useState(null);
 	const [editDraft, setEditDraft] = useState({});
+	const [savingId, setSavingId] = useState(null);
 
-	// Cargar servicios desde el backend
+	// Cargar servicios
 	useEffect(() => {
 		const fetchServices = async () => {
 			try {
 				setLoading(true);
 				const data = await getAllServices();
-				// El backend devuelve { message, services }
-				const servicesList = data.services || [];
-				setServices(servicesList);
+				setServices(data.services || []);
 			} catch (error) {
 				console.error("Error al cargar servicios:", error);
 				toast.error(
@@ -68,7 +67,6 @@ export function AdminServices() {
 	const handleToggleActive = async (id) => {
 		try {
 			await toggleServiceStatus(id);
-			// Actualizar estado localmente
 			setServices((prev) =>
 				prev.map((s) => (s._id === id ? { ...s, isActive: !s.isActive } : s)),
 			);
@@ -99,25 +97,67 @@ export function AdminServices() {
 		setEditDraft({});
 	};
 
-	const saveEdit = (id) => {
-		// TODO: conectar con backend cuando tengas updateService
-		setServices((prev) =>
-			prev.map((s) =>
-				s._id === id
-					? {
-							...s,
-							name: editDraft.name,
-							description: editDraft.description,
-							price: parseFloat(editDraft.price),
-						}
-					: s,
-			),
-		);
-		cancelEdit();
-		toast.success("✅ Cambios guardados (localmente)", {
-			position: "top-right",
-			autoClose: 2000,
-		});
+	const saveEdit = async (id) => {
+		// Validaciones locales
+		if (!editDraft.name.trim()) {
+			toast.warning("El nombre no puede estar vacío");
+			return;
+		}
+		if (!editDraft.description.trim()) {
+			toast.warning("La descripción no puede estar vacía");
+			return;
+		}
+		const priceNum = parseFloat(editDraft.price);
+		if (isNaN(priceNum) || priceNum < 0) {
+			toast.warning("El precio debe ser un número válido");
+			return;
+		}
+
+		try {
+			setSavingId(id);
+			const updateData = {
+				name: editDraft.name.trim(),
+				description: editDraft.description.trim(),
+				price: priceNum,
+			};
+
+			await updateService(id, updateData);
+
+			// Actualizar estado local
+			setServices((prev) =>
+				prev.map((s) =>
+					s._id === id
+						? {
+								...s,
+								name: updateData.name,
+								description: updateData.description,
+								price: updateData.price,
+							}
+						: s,
+				),
+			);
+
+			cancelEdit();
+			toast.success("Servicio actualizado", {
+				position: "top-right",
+				autoClose: 2000,
+			});
+		} catch (error) {
+			console.error("Error al actualizar:", error);
+			toast.error(
+				`❌ ${error.message || "No se pudo actualizar el servicio"}`,
+				{
+					position: "top-right",
+					autoClose: 4000,
+				},
+			);
+		} finally {
+			setSavingId(null);
+		}
+	};
+
+	const handleEditChange = (field, value) => {
+		setEditDraft((prev) => ({ ...prev, [field]: value }));
 	};
 
 	if (loading) {
@@ -202,8 +242,9 @@ export function AdminServices() {
 													className="edit-input"
 													value={editDraft.name}
 													onChange={(e) =>
-														setEditDraft({ ...editDraft, name: e.target.value })
+														handleEditChange("name", e.target.value)
 													}
+													disabled={savingId === svc._id}
 												/>
 											) : (
 												<strong>{svc.name}</strong>
@@ -217,11 +258,9 @@ export function AdminServices() {
 													className="edit-input edit-input-wide"
 													value={editDraft.description}
 													onChange={(e) =>
-														setEditDraft({
-															...editDraft,
-															description: e.target.value,
-														})
+														handleEditChange("description", e.target.value)
 													}
+													disabled={savingId === svc._id}
 												/>
 											) : (
 												svc.description
@@ -238,11 +277,9 @@ export function AdminServices() {
 													min="0"
 													value={editDraft.price}
 													onChange={(e) =>
-														setEditDraft({
-															...editDraft,
-															price: e.target.value,
-														})
+														handleEditChange("price", e.target.value)
 													}
+													disabled={savingId === svc._id}
 												/>
 											) : (
 												`$${svc.price.toFixed(2)}`
@@ -264,24 +301,27 @@ export function AdminServices() {
 												className={`toggle-switch ${svc.isActive ? "on" : "off"}`}
 												onClick={() => handleToggleActive(svc._id)}
 												title={svc.isActive ? "Desactivar" : "Activar"}
+												disabled={editingId === svc._id}
 											>
 												<span className="toggle-knob" />
 											</button>
 										</td>
 
-										{/* Botón Editar / Guardar + Cancelar */}
+										{/* Editar / Guardar + Cancelar */}
 										<td className="col-svc-edit">
 											{editingId === svc._id ? (
 												<div className="edit-actions">
 													<button
 														className="btn-save-edit"
 														onClick={() => saveEdit(svc._id)}
+														disabled={savingId === svc._id}
 													>
-														✓
+														{savingId === svc._id ? "⏳" : "✓"}
 													</button>
 													<button
 														className="btn-cancel-edit"
 														onClick={cancelEdit}
+														disabled={savingId === svc._id}
 													>
 														✕
 													</button>

@@ -171,9 +171,83 @@ const getServiceById = async (req, res) => {
 	}
 };
 
+const updateService = async (req, res) => {
+	try {
+		console.log("===================================================");
+		console.log("Comenzando el proceso para actualizar un servicio...");
+
+		const user = req.user;
+		const serviceId = req.params.id;
+
+		// Validar admin
+		if (!user || user.role !== "admin") {
+			console.log("Acceso denegado");
+			return res.status(403).json({ message: "Acceso denegado" });
+		}
+
+		const { name, description, price } = req.body;
+
+		// Validar que el servicio existe
+		const service = await Services.findById(serviceId);
+		if (!service) {
+			return res.status(404).json({ message: "Servicio no encontrado" });
+		}
+
+		// Validar datos
+		if (!name?.trim() || !description?.trim() || price === undefined) {
+			return res.status(400).json({ message: "Faltan datos requeridos" });
+		}
+
+		const priceNumber = parseFloat(price);
+		if (isNaN(priceNumber) || priceNumber < 0) {
+			return res
+				.status(400)
+				.json({ message: "El precio debe ser un número válido" });
+		}
+
+		// Actualizar
+		const updatedService = await Services.findByIdAndUpdate(
+			serviceId,
+			{
+				name: name.trim(),
+				description: description.trim(),
+				price: priceNumber,
+			},
+			{ new: true },
+		);
+
+		const precioFormateado = formatoDinero(priceNumber);
+
+		// Log
+		await createLog(
+			"UPDATE",
+			"SERVICE",
+			`El servicio ${name} ha sido actualizado`,
+			{
+				user: req.user.username,
+				email: req.user.email,
+				role: req.user.role,
+				precioFinal: precioFormateado,
+				id_service: serviceId,
+			},
+			user._id,
+		);
+
+		console.log("Servicio actualizado exitosamente");
+		res.status(200).json({
+			message: "Servicio actualizado exitosamente",
+			service: updatedService,
+		});
+	} catch (error) {
+		console.error("Error al actualizar el servicio:", error);
+		res.status(500).json({ message: "Error al actualizar el servicio" });
+	}
+};
+
 module.exports = {
 	createService,
 	getAllServices,
 	changeStatus,
 	getServiceById,
+	updateService,
 };

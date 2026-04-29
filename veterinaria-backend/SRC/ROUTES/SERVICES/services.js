@@ -4,6 +4,7 @@ const {
 	getAllServices,
 	changeStatus,
 	getServiceById,
+	updateService,
 } = require("../../CONTROLLERS/SERVICES/services.js");
 const { noNumbers } = require("../../MIDDLEWARES/noNumbers.js");
 const { verificarToken } = require("../../MIDDLEWARES/authToken.js");
@@ -21,5 +22,12 @@ servicesRouter.patch("/:id/toggleActive", verificarToken, changeStatus);
 servicesRouter.get("/all", verificarToken, getAllServices);
 //Ruta para obtener un servicio por id
 servicesRouter.get("/:id", verificarToken, getServiceById);
+//Ruta para actualizar el servicio
+servicesRouter.patch(
+	"/:id",
+	verificarToken,
+	noNumbers(["name"]),
+	updateService,
+);
 
 module.exports = servicesRouter;
