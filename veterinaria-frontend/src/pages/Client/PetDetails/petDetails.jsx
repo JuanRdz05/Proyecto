@@ -19,6 +19,9 @@ export function PetDetails() {
 	const [error, setError] = useState(null);
 	const [isEditing, setIsEditing] = useState(false);
 	const [formData, setFormData] = useState({});
+	const [especieOtro, setEspecieOtro] = useState("");
+
+	const OPCIONES_PREDEFINIDAS = ["Perro", "Gato", "Conejo", "Ave", "Reptil"];
 
 	const fetchPet = async () => {
 		try {
@@ -38,35 +41,67 @@ export function PetDetails() {
 	}, [id]);
 
 	const handleEditClick = () => {
+		const esPredefinida = OPCIONES_PREDEFINIDAS.includes(pet.petType);
+
 		setFormData({
 			name: pet.name,
-			petType: pet.petType,
+			petType: esPredefinida ? pet.petType : "Otro",
 			birthDate: pet.birthDate ? pet.birthDate.split("T")[0] : "",
 		});
+		setEspecieOtro(esPredefinida ? "" : pet.petType);
 		setIsEditing(true);
 	};
 
 	const handleChange = (e) => {
-		setFormData({ ...formData, [e.target.name]: e.target.value });
+		const { name, value } = e.target;
+		setFormData({ ...formData, [name]: value });
+	};
+
+	const handleEspecieOtroChange = (e) => {
+		const filteredValue = e.target.value.replace(
+			/[^a-záéíóúñA-ZÁÉÍÓÚÑ\s]/g,
+			"",
+		);
+		setEspecieOtro(filteredValue);
 	};
 
 	const handleSave = async () => {
-		// Validar que el nombre no esté vacío
 		if (!formData.name.trim()) {
 			toast.warning("El nombre de la mascota no puede estar vacío");
 			return;
 		}
 
+		if (formData.petType === "Otro") {
+			if (!especieOtro.trim()) {
+				toast.warning("Especifique la especie de la mascota");
+				return;
+			}
+			if (especieOtro.trim().length > 50) {
+				toast.warning("La especie no puede exceder 50 caracteres");
+				return;
+			}
+			if (!/^[a-záéíóúñA-ZÁÉÍÓÚÑ\s]+$/.test(especieOtro.trim())) {
+				toast.warning("La especie solo debe contener letras y espacios");
+				return;
+			}
+		}
+
+		const petDataToSave = {
+			...formData,
+			petType:
+				formData.petType === "Otro" ? especieOtro.trim() : formData.petType,
+		};
+
 		try {
-			await updatePet(id, formData);
-			// Actualizar el estado localmente sin refetch innecesario
+			await updatePet(id, petDataToSave);
 			setPet({
 				...pet,
 				name: formData.name,
-				petType: formData.petType,
+				petType: petDataToSave.petType,
 				birthDate: formData.birthDate,
 			});
 			setIsEditing(false);
+			setEspecieOtro("");
 			toast.success("Mascota actualizada correctamente");
 		} catch (err) {
 			console.error("Error al guardar:", err);
@@ -74,14 +109,17 @@ export function PetDetails() {
 		}
 	};
 
+	const handleCancel = () => {
+		setIsEditing(false);
+		setEspecieOtro("");
+	};
+
 	const handleToggleStatus = async () => {
 		try {
 			const newStatus = !pet.isActive;
 			await togglePetStatus(id);
-			// Actualizar el estatus localmente de forma inmediata
 			setPet({ ...pet, isActive: newStatus });
 
-			// Toast dinámico según el estado
 			if (newStatus) {
 				toast.success("Mascota reactivada");
 			} else {
@@ -167,6 +205,25 @@ export function PetDetails() {
 						)}
 					</div>
 
+					{/* Input extra solo en modo edición y cuando petType es "Otro" */}
+					{isEditing && formData.petType === "Otro" && (
+						<div className="petdetails-field petdetails-field-extra">
+							<label>
+								¿Qué especie es? <span style={{ color: "#dc3545" }}>*</span>
+							</label>
+							<input
+								type="text"
+								name="especieOtro"
+								value={especieOtro}
+								onChange={handleEspecieOtroChange}
+								placeholder="Ej: Hámster, Cobaya, Tortuga"
+								className="input-editable"
+								maxLength="50"
+							/>
+							<span className="char-count">{especieOtro.length}/50</span>
+						</div>
+					)}
+
 					<div className="petdetails-field">
 						<label>Fecha de nacimiento</label>
 						{isEditing ? (
@@ -193,10 +250,7 @@ export function PetDetails() {
 					<div className="petdetails-actions">
 						{isEditing ? (
 							<>
-								<button
-									className="btn-cancel"
-									onClick={() => setIsEditing(false)}
-								>
+								<button className="btn-cancel" onClick={handleCancel}>
 									Cancelar
 								</button>
 								<button className="btn-save" onClick={handleSave}>
