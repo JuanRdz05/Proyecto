@@ -167,27 +167,6 @@ export function Appointment() {
 								/>
 							</div>
 						</div>
-
-						{/* Veterinario */}
-						<div className="appointment-field full-width">
-							<label htmlFor="veterinario">Veterinario</label>
-							<div className="select-wrapper">
-								<select
-									id="veterinario"
-									name="veterinario"
-									value={formData.veterinario}
-									onChange={handleChange}
-								>
-									<option value="" disabled></option>
-									<option value="dr_garcia">Dr. García</option>
-									<option value="dra_lopez">Dra. López</option>
-									<option value="dr_martinez">Dr. Martínez</option>
-									<option value="dra_ramos">Dra. Ramos</option>
-								</select>
-								<span className="select-arrow">&#8964;</span>
-							</div>
-						</div>
-
 						{/* Horarios disponibles */}
 						<div className="appointment-field full-width">
 							<label htmlFor="horario">Horarios disponibles</label>

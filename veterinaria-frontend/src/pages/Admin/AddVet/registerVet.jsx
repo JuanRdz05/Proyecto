@@ -51,14 +51,14 @@ export function RegisterVet() {
 
 			await registerUser(formData);
 
-			toast.success("✅ Veterinario registrado exitosamente", {
+			toast.success("Veterinario registrado", {
 				position: "top-right",
 				autoClose: 2000,
 				onClose: () => navigate("/admin/veterinarios"),
 			});
 		} catch (error) {
 			console.error("Error al registrar veterinario:", error);
-			toast.error(`❌ ${error.message || "Error al registrar veterinario"}`, {
+			toast.error(`${error.message || "Error al registrar veterinario"}`, {
 				position: "top-right",
 				autoClose: 4000,
 			});
