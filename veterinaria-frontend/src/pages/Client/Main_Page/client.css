@@ -125,6 +125,46 @@
 	font-size: 0.95rem;
 }
 
+/* === TARJETAS DE CITAS === */
+.item-card-appointment {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 14px 18px;
+}
+
+.appointment-status {
+	flex-shrink: 0;
+}
+
+.status-dot-home {
+	display: inline-block;
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+}
+
+.appointment-service {
+	font-size: 0.95rem;
+	font-weight: 600;
+	color: #1a1a2e;
+	margin: 0 0 3px 0;
+}
+
+.item-date {
+	font-size: 0.85rem;
+	color: #6b7280;
+	margin: 0;
+}
+
+/* === ESTADO VACÍO MEJORADO === */
+.empty-subtext {
+	font-size: 0.8rem;
+	color: #9ca3af;
+	margin-top: 4px;
+	display: block;
+}
+
 /* --- Responsive --- */
 @media (max-width: 768px) {
 	.dashboard-grid {

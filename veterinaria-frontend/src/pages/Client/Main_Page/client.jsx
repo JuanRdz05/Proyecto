@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { NavbarClient } from "../../../components/NavbarClient/navbarClient.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
 import { getPets } from "../../../services/Client/pet.js";
+import { getUserAppointments } from "../../../services/Client/appointment.js";
 import "./client.css";
 
 export function ClientHome() {
@@ -11,7 +12,9 @@ export function ClientHome() {
 	const userName = localStorage.getItem("userName") || "User";
 
 	const [pets, setPets] = useState([]);
+	const [appointments, setAppointments] = useState([]);
 	const [loadingPets, setLoadingPets] = useState(true);
+	const [loadingAppointments, setLoadingAppointments] = useState(true);
 
 	useEffect(() => {
 		const fetchPets = async () => {
@@ -27,11 +30,108 @@ export function ClientHome() {
 				setLoadingPets(false);
 			}
 		};
+
+		const fetchAppointments = async () => {
+			try {
+				setLoadingAppointments(true);
+				const data = await getUserAppointments();
+				setAppointments(data.appointments || []);
+			} catch (error) {
+				console.error("Error al obtener las citas:", error);
+				setAppointments([]);
+			} finally {
+				setLoadingAppointments(false);
+			}
+		};
+
 		fetchPets();
+		fetchAppointments();
 	}, []);
 
-	// Tomar máximo 3 mascotas
 	const petsToShow = pets.slice(0, 3);
+
+	// Comparar fechas como strings YYYY-MM-DD (sin timezone)
+	const todayStr = new Date().toISOString().split("T")[0];
+
+	const upcomingAppointments = appointments
+		.filter((apt) => {
+			// Solo comparar la parte de fecha (YYYY-MM-DD)
+			return apt.date >= todayStr && apt.status !== "Cancelada";
+		})
+		.sort((a, b) => {
+			// Ordenar por fecha + hora como strings
+			const dateTimeA = `${a.date}T${a.time}`;
+			const dateTimeB = `${b.date}T${b.time}`;
+			return dateTimeA.localeCompare(dateTimeB);
+		})
+		.slice(0, 3);
+
+	// Formatear fecha con validación
+	const formatDateTime = (dateStr, timeStr) => {
+		if (!dateStr || !timeStr) return "Fecha no disponible";
+
+		// Si viene con formato ISO (2026-04-29T00:00:00.000Z), extraer solo YYYY-MM-DD
+		const cleanDate = dateStr.includes("T") ? dateStr.split("T")[0] : dateStr;
+
+		const [year, month, day] = cleanDate.split("-").map(Number);
+
+		// Validar que los valores sean números válidos
+		if (!year || !month || !day) return "Fecha no disponible";
+
+		const date = new Date(year, month - 1, day);
+
+		// Validar que la fecha sea válida
+		if (isNaN(date.getTime())) return "Fecha no disponible";
+
+		return (
+			date.toLocaleDateString("es-MX", {
+				day: "2-digit",
+				month: "2-digit",
+				year: "numeric",
+			}) + `, ${timeStr}`
+		);
+	};
+
+	// NUEVO: StatusBadge reemplaza a StatusDot para incluir el texto
+	const StatusBadge = ({ status }) => {
+		const colors = {
+			Pendiente: "#ffc107",
+			Aceptada: "#28a745",
+			"En progreso": "#007bff",
+			Terminada: "#6c757d",
+			Cancelada: "#dc3545",
+			Rechazada: "#dc3545",
+		};
+
+		const currentColor = colors[status] || "#6c757d";
+
+		return (
+			<div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+				<span
+					className="status-dot-home"
+					style={{
+						backgroundColor: currentColor,
+						// Agrego estas propiedades por si el CSS original asumía que estaba solo
+						display: "inline-block",
+						width: "12px",
+						height: "12px",
+						borderRadius: "50%",
+					}}
+					title={status}
+				/>
+				<span
+					style={{
+						color: currentColor,
+						fontWeight: "600",
+						fontSize: "0.85rem",
+						textTransform: "capitalize",
+					}}
+				>
+					{status}
+				</span>
+			</div>
+		);
+	};
 
 	return (
 		<div className="client-page-container">
@@ -44,27 +144,58 @@ export function ClientHome() {
 					{/* Columna Izquierda: Citas */}
 					<section className="dashboard-section">
 						<div className="section-header">
-							<h2>Proximas citas</h2>
+							<h2>Próximas citas</h2>
 							<button
-								className="btn-view-all"
-								onClick={() => navigate("/historial")}
+								className="btn-add"
+								onClick={() => navigate("/agendar-cita")}
 							>
-								Ver todas
+								+ Agendar cita
 							</button>
 						</div>
 
 						<div className="list-container">
-							{[1, 2, 3].map((i) => (
-								<div key={i} className="item-card">
-									<div className="item-badge">Cita {i}</div>
-									<div className="item-info">
-										<p className="item-date">
-											10/10/2024, 10:00 - Chequeo Anual
-										</p>
-									</div>
+							{loadingAppointments ? (
+								<div className="item-card item-card-empty">
+									<p>Cargando citas...</p>
 								</div>
-							))}
+							) : upcomingAppointments.length === 0 ? (
+								<div className="item-card item-card-empty">
+									<p>No tienes citas próximas</p>
+								</div>
+							) : (
+								upcomingAppointments.map((apt) => (
+									<div
+										key={apt._id}
+										className="item-card item-card-appointment"
+									>
+										<div className="appointment-status">
+											{/* Usamos el nuevo componente aquí */}
+											<StatusBadge status={apt.status} />
+										</div>
+										<div className="item-info">
+											<p className="appointment-service">
+												{apt.service?.name || "Servicio"}
+											</p>
+											<p className="item-date">
+												{formatDateTime(apt.date, apt.time)} -{" "}
+												{apt.pet?.name || "Mascota"}
+											</p>
+										</div>
+									</div>
+								))
+							)}
 						</div>
+
+						{appointments.length > 3 && (
+							<div className="view-more-container">
+								<button
+									className="btn-view-all"
+									onClick={() => navigate("/historial")}
+								>
+									Ver todas las citas
+								</button>
+							</div>
+						)}
 					</section>
 
 					{/* Columna Derecha: Mascotas */}

@@ -4,9 +4,8 @@ import { FooterGuest } from "../../../components/Footer/footer.jsx";
 import { getUserAppointments } from "../../../services/Client/appointment.js";
 import "./history.css";
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 6;
 
-// Badge de estado con colores
 function StatusBadge({ status }) {
 	const statusConfig = {
 		Pendiente: { class: "status-pendiente", label: "Pendiente" },
@@ -36,7 +35,18 @@ export function History() {
 			try {
 				setLoading(true);
 				const data = await getUserAppointments();
-				setAppointments(data.appointments || []);
+
+				const rawAppointments = data.appointments || [];
+
+				// ORDENAMIENTO ASCENDENTE:
+				// La cita más próxima a la fecha actual aparece primero.
+				const sorted = [...rawAppointments].sort((a, b) => {
+					const dateTimeA = new Date(`${a.date}T${a.time || "00:00"}`);
+					const dateTimeB = new Date(`${b.date}T${b.time || "00:00"}`);
+					return dateTimeA - dateTimeB;
+				});
+
+				setAppointments(sorted);
 			} catch (err) {
 				console.error("Error al cargar citas:", err);
 				setError(err.message);
@@ -48,7 +58,6 @@ export function History() {
 		fetchAppointments();
 	}, []);
 
-	// Paginación
 	const totalPages = Math.ceil(appointments.length / ITEMS_PER_PAGE);
 	const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
 	const paginatedAppointments = appointments.slice(
@@ -59,12 +68,18 @@ export function History() {
 	const goToPage = (page) => {
 		if (page >= 1 && page <= totalPages) {
 			setCurrentPage(page);
+			window.scrollTo({ top: 0, behavior: "smooth" });
 		}
 	};
 
-	// Formatear fecha
 	const formatDate = (dateString) => {
-		const date = new Date(dateString);
+		if (!dateString) return "Fecha no disponible";
+		const cleanDate = dateString.includes("T")
+			? dateString.split("T")[0]
+			: dateString;
+		const [year, month, day] = cleanDate.split("-").map(Number);
+		const date = new Date(year, month - 1, day);
+
 		return date.toLocaleDateString("es-MX", {
 			day: "2-digit",
 			month: "2-digit",
@@ -79,7 +94,7 @@ export function History() {
 				<main className="history-main">
 					<div className="history-card">
 						<h2 className="history-title">Historial de citas</h2>
-						<p className="history-loading">Cargando citas...</p>
+						<p className="history-loading">Cargando tu historial...</p>
 					</div>
 				</main>
 				<FooterGuest />
@@ -94,7 +109,7 @@ export function History() {
 				<main className="history-main">
 					<div className="history-card">
 						<h2 className="history-title">Historial de citas</h2>
-						<p className="history-error">❌ {error}</p>
+						<p className="history-error">❌ Hubo un problema: {error}</p>
 					</div>
 				</main>
 				<FooterGuest />
@@ -119,7 +134,9 @@ export function History() {
 						<div className="history-empty">
 							<div className="empty-icon">📅</div>
 							<p>No tienes citas registradas</p>
-							<span>Agenda tu primera cita desde el menú principal</span>
+							<span>
+								Agenda una cita desde el menú principal para verla aquí.
+							</span>
 						</div>
 					) : (
 						<>
@@ -131,20 +148,19 @@ export function History() {
 									>
 										<div className="history-info">
 											<span className="history-pet-label">
-												{item.pet?.name || "Mascota"} -{" "}
-												{item.pet?.petType || item.pet?.species || "N/A"}
+												<strong>{item.pet?.name || "Mascota"}</strong> —{" "}
+												{item.pet?.petType || "N/A"}
 											</span>
 											<StatusBadge status={item.status} />
 										</div>
 										<div className="history-datetime">
 											<span>{formatDate(item.date)}</span>
-											<span>{item.time}</span>
+											<span className="history-time">{item.time}</span>
 										</div>
 									</li>
 								))}
 							</ul>
 
-							{/* Paginación */}
 							{totalPages > 1 && (
 								<div className="pagination">
 									<button
@@ -180,7 +196,7 @@ export function History() {
 							)}
 
 							<div className="pagination-info">
-								Página {currentPage} de {totalPages}
+								Mostrando página {currentPage} de {totalPages}
 							</div>
 						</>
 					)}

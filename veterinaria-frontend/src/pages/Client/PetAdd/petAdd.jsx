@@ -136,7 +136,7 @@ export function PetAdd() {
 			await addPet(petToSave);
 
 			// Toast de éxito
-			toast.success(`✅ ¡${petToSave.name} ha sido agregado correctamente!`, {
+			toast.success(`¡${petToSave.name} ha sido agregado correctamente!`, {
 				position: "top-right",
 				autoClose: 1500,
 				onClose: () => navigate("/mascotas"),
@@ -150,7 +150,7 @@ export function PetAdd() {
 				error.message ||
 				"No se pudo agregar la mascota";
 
-			toast.error(`❌ Error: ${errorMessage}`, {
+			toast.error(`Error: ${errorMessage}`, {
 				position: "top-right",
 				autoClose: 4000,
 			});
@@ -293,14 +293,14 @@ export function PetAdd() {
 								onClick={handleCancel}
 								disabled={isSubmitting}
 							>
-								❌ Cancelar
+								Cancelar
 							</button>
 							<button
 								type="submit"
 								className="btn-submit-petadd"
 								disabled={isSubmitting}
 							>
-								{isSubmitting ? "⏳ Agregando..." : "✅ Agregar mascota"}
+								{isSubmitting ? "⏳ Agregando..." : "Agregar mascota"}
 							</button>
 						</div>
 					</form>

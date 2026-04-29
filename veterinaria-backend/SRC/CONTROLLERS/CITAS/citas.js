@@ -88,12 +88,12 @@ const getAllAppointments = async (req, res) => {
 
 const getAppointmentsByUser = async (req, res) => {
 	try {
-		const userId = req.user._id || req.user.id; // Ajusta según tu token
+		const userId = req.user._id || req.user.id;
 
 		const appointments = await Appointments.find({ owner: userId })
 			.populate("pet", "name petType")
 			.populate("service", "name price")
-			.sort({ date: -1, time: -1 }); // Más recientes primero
+			.sort({ date: 1, time: 1 }); // Más cercanas a hoy primero
 
 		res.status(200).json({
 			message: appointments.length
