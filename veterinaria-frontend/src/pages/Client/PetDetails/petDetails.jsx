@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { NavbarClient } from "../../../components/NavbarClient/navbarClient.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
 import {
@@ -26,6 +27,7 @@ export function PetDetails() {
 			setPet(data);
 		} catch (err) {
 			setError("No se pudo cargar la información.");
+			toast.error("Error al cargar los datos de la mascota");
 		} finally {
 			setLoading(false);
 		}
@@ -49,6 +51,12 @@ export function PetDetails() {
 	};
 
 	const handleSave = async () => {
+		// Validar que el nombre no esté vacío
+		if (!formData.name.trim()) {
+			toast.warning("El nombre de la mascota no puede estar vacío");
+			return;
+		}
+
 		try {
 			await updatePet(id, formData);
 			// Actualizar el estado localmente sin refetch innecesario
@@ -59,18 +67,29 @@ export function PetDetails() {
 				birthDate: formData.birthDate,
 			});
 			setIsEditing(false);
+			toast.success("Mascota actualizada correctamente");
 		} catch (err) {
-			alert("Error al guardar");
+			console.error("Error al guardar:", err);
+			toast.error("Error al guardar la información");
 		}
 	};
 
 	const handleToggleStatus = async () => {
 		try {
+			const newStatus = !pet.isActive;
 			await togglePetStatus(id);
 			// Actualizar el estatus localmente de forma inmediata
-			setPet({ ...pet, isActive: !pet.isActive });
+			setPet({ ...pet, isActive: newStatus });
+
+			// Toast dinámico según el estado
+			if (newStatus) {
+				toast.success("Mascota reactivada");
+			} else {
+				toast.error("Mascota desactivada");
+			}
 		} catch (err) {
-			alert("Error al cambiar el estatus");
+			console.error("Error al cambiar el estatus:", err);
+			toast.error("Error al cambiar el estatus");
 		}
 	};
 
@@ -178,15 +197,15 @@ export function PetDetails() {
 									className="btn-cancel"
 									onClick={() => setIsEditing(false)}
 								>
-									❌ Cancelar
+									Cancelar
 								</button>
 								<button className="btn-save" onClick={handleSave}>
-									💾 Guardar
+									Guardar
 								</button>
 							</>
 						) : (
 							<button className="btn-edit-petdetails" onClick={handleEditClick}>
-								✏️ Editar información
+								Editar
 							</button>
 						)}
 					</div>
