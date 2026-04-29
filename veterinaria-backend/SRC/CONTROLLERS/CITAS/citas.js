@@ -86,42 +86,24 @@ const getAllAppointments = async (req, res) => {
 	}
 };
 
-//Función para mostrar las citas por usuario
 const getAppointmentsByUser = async (req, res) => {
 	try {
-		console.log("===================================================");
-		console.log("Comenzando el proceso para obtener las citas de usuario...");
-		const userId = req.user.id;
-		const userRole = req.user.role;
-		//Verificar que el usuario sea un cliente
-		if (userRole !== "client" && userRole !== "admin") {
-			console.log("Acceso denegado");
-			return res
-				.status(403)
-				.json({ message: "Acceso denegado: Servicio solo para clientes" });
-		}
-		console.log("===================================================");
-		console.log("Procesando la solicitud de las citas de usuario...");
-		//Mostramos las citas del usuario
+		const userId = req.user._id || req.user.id; // Ajusta según tu token
+
 		const appointments = await Appointments.find({ owner: userId })
-			.populate("pet", "name species")
+			.populate("pet", "name petType")
 			.populate("service", "name price")
-			.sort({ date: 1, time: 1 });
-		if (appointments.length === 0) {
-			console.log("===================================================");
-			console.log("No hay citas para mostrar");
-			return res
-				.status(404)
-				.json({ message: "No hay citas en la base de datos" });
-		}
-		console.log("===================================================");
-		console.log("Citas obtenidas exitosamente");
-		res.status(200).json({ message: "Citas obtenidas", appointments });
+			.sort({ date: -1, time: -1 }); // Más recientes primero
+
+		res.status(200).json({
+			message: appointments.length
+				? "Citas obtenidas"
+				: "No tienes citas registradas",
+			appointments,
+		});
 	} catch (error) {
-		console.error("Error al obtener las citas de usuario: ", error);
-		res
-			.status(500)
-			.json({ message: "Error al obtener las citas de usuario", error });
+		console.error("Error al obtener las citas:", error);
+		res.status(500).json({ message: "Error al obtener las citas", error });
 	}
 };
 

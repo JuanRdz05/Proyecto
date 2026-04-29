@@ -27,3 +27,25 @@ export const createAppointment = async (appointmentData) => {
 
 	return await response.json();
 };
+
+export const getUserAppointments = async () => {
+	const token = localStorage.getItem("token");
+
+	const response = await fetch(`${BASE_URL}/appointments/v1/user/me`, {
+		method: "GET",
+		credentials: "include",
+		headers: {
+			"Content-Type": "application/json",
+			Authorization: token ? `Bearer ${token}` : "",
+		},
+	});
+
+	if (!response.ok) {
+		const errorData = await response
+			.json()
+			.catch(() => ({ message: "Error desconocido" }));
+		throw new Error(errorData.message || "No se pudieron cargar las citas");
+	}
+
+	return await response.json();
+};

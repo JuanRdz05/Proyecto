@@ -11,8 +11,9 @@ const { verificarToken } = require("../../MIDDLEWARES/authToken.js");
 citasRouter.post("/create", verificarToken, createAppointments);
 //Rutas para obtener todas las citas en general
 citasRouter.get("/all", verificarToken, getAllAppointments);
-//Rutas para obtener las citas por usuario
-citasRouter.get("/user/:id", verificarToken, getAppointmentsByUser);
+// //Rutas para obtener las citas por usuario
+citasRouter.get("/user/me", verificarToken, getAppointmentsByUser);
+// citasRouter.get("/user/:id", verificarToken, getAppointmentsByUser);
 //Ruta para cancelar una cita
 citasRouter.patch("/cancel/:id", verificarToken, cancelAppointment);
 
