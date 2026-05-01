@@ -172,9 +172,9 @@ const toggleVetStatus = async (req, res) => {
 
 // Funcion para obtener el perfil del usuario
 const getProfile = async (req, res) => {
-	const userId = req.user.id; // viene del token
+	const userId = req.user.id;
 	const user = await Users.findById(userId);
-	res.json(user);
+	res.json(user); // debe incluir isActive
 };
 
 module.exports = {
