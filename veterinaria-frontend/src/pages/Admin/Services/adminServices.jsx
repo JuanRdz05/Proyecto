@@ -112,6 +112,11 @@ export function AdminServices() {
 			toast.warning("El precio debe ser un número válido");
 			return;
 		}
+		// ← NUEVO: Límite de precio igual que en AddService
+		if (priceNum > 999999.99) {
+			toast.warning("El precio no puede exceder $999,999.99");
+			return;
+		}
 
 		try {
 			setSavingId(id);
@@ -275,6 +280,8 @@ export function AdminServices() {
 													type="number"
 													step="0.01"
 													min="0"
+													// ← NUEVO: max igual que en AddService
+													max="999999.99"
 													value={editDraft.price}
 													onChange={(e) =>
 														handleEditChange("price", e.target.value)
