@@ -242,6 +242,49 @@ const getProfile = async (req, res) => {
 	res.json(user); // debe incluir isActive
 };
 
+const toggleClientStatus = async (req, res) => {
+	try {
+		const { id } = req.params;
+		const client = await Users.findOne({ _id: id, role: "client" });
+		if (!client)
+			return res.status(404).json({ message: "Cliente no encontrado" });
+
+		client.isActive = !client.isActive;
+		await client.save();
+
+		res.status(200).json({
+			message: `Cliente ${client.isActive ? "activado" : "desactivado"} exitosamente`,
+			client: {
+				_id: client._id,
+				name: client.name,
+				email: client.email,
+				isActive: client.isActive,
+			},
+		});
+	} catch (error) {
+		res
+			.status(500)
+			.json({ message: "Error al cambiar estado del cliente", error });
+	}
+};
+
+const getAllClients = async (req, res) => {
+	try {
+		const clients = await Users.find({ role: "client" }).select(
+			"-password -__v",
+		);
+		console.log("===================================================");
+		console.log(`Mostrando ${clients.length} clientes`);
+		res.status(200).json({
+			message: "Clientes encontrados",
+			clients,
+		});
+	} catch (error) {
+		console.error("Error al obtener clientes:", error);
+		res.status(500).json({ message: "Error al obtener clientes", error });
+	}
+};
+
 module.exports = {
 	getAllUsers,
 	registerUser,
@@ -251,4 +294,6 @@ module.exports = {
 	toggleVetStatus,
 	getAllAdmins,
 	toggleAdminStatus,
+	getAllClients,
+	toggleClientStatus,
 };

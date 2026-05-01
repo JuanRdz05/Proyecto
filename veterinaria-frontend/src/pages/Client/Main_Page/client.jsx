@@ -5,6 +5,7 @@ import { NavbarClient } from "../../../components/NavbarClient/navbarClient.jsx"
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
 import { getPets } from "../../../services/Client/pet.js";
 import { getUserAppointments } from "../../../services/Client/appointment.js";
+import { getProfile } from "../../../services/Client/profile.js";
 import "./client.css";
 
 export function ClientHome() {
@@ -17,15 +18,29 @@ export function ClientHome() {
 	const [loadingAppointments, setLoadingAppointments] = useState(true);
 	const [petsError, setPetsError] = useState(false);
 	const [appointmentsError, setAppointmentsError] = useState(false);
+	const [isActive, setIsActive] = useState(true);
+	const [checking, setChecking] = useState(true);
 
 	useEffect(() => {
+		// Verificar estado del cliente primero
+		const checkStatus = async () => {
+			try {
+				const data = await getProfile();
+				if (data.isActive === false) {
+					setIsActive(false);
+				}
+			} catch (error) {
+				console.error("Error al verificar estado:", error);
+			} finally {
+				setChecking(false);
+			}
+		};
+
 		const fetchPets = async () => {
 			try {
 				setLoadingPets(true);
 				setPetsError(false);
 				const data = await getPets();
-
-				// Si la respuesta es exitosa pero vacía, no es error
 				if (Array.isArray(data)) {
 					setPets(data);
 				} else if (data && Array.isArray(data.pets)) {
@@ -34,7 +49,6 @@ export function ClientHome() {
 					setPets([]);
 				}
 			} catch (error) {
-				// Solo mostrar toast si es un error REAL (no 404 de "no hay datos")
 				if (
 					error.message &&
 					!error.message.includes("No hay") &&
@@ -54,7 +68,6 @@ export function ClientHome() {
 				setLoadingAppointments(true);
 				setAppointmentsError(false);
 				const data = await getUserAppointments();
-
 				if (data && Array.isArray(data.appointments)) {
 					setAppointments(data.appointments);
 				} else if (Array.isArray(data)) {
@@ -77,18 +90,34 @@ export function ClientHome() {
 			}
 		};
 
+		checkStatus();
 		fetchPets();
 		fetchAppointments();
 	}, []);
+
+	const handleLogout = async () => {
+		try {
+			await fetch("http://localhost:3050/users/v1/logout", {
+				method: "POST",
+				credentials: "include",
+			});
+			toast.success("Sesión cerrada correctamente.");
+		} catch (e) {
+			toast.error("Error al cerrar sesión.");
+		} finally {
+			localStorage.clear();
+			setTimeout(() => {
+				navigate("/inicio-sesion");
+			}, 1500);
+		}
+	};
 
 	const petsToShow = pets.slice(0, 3);
 
 	const todayStr = new Date().toISOString().split("T")[0];
 
 	const upcomingAppointments = appointments
-		.filter((apt) => {
-			return apt.date >= todayStr && apt.status !== "Cancelada";
-		})
+		.filter((apt) => apt.date >= todayStr && apt.status !== "Cancelada")
 		.sort((a, b) => {
 			const dateTimeA = `${a.date}T${a.time}`;
 			const dateTimeB = `${b.date}T${b.time}`;
@@ -149,6 +178,44 @@ export function ClientHome() {
 		);
 	};
 
+	// ── Pantalla de carga mientras verifica ──────────────────────────────────
+	if (checking) {
+		return (
+			<div className="client-page-container">
+				<div className="client-loading-screen">
+					<p>Cargando...</p>
+				</div>
+			</div>
+		);
+	}
+
+	// ── Pantalla de cuenta desactivada ───────────────────────────────────────
+	if (!isActive) {
+		return (
+			<div className="client-page-container">
+				<div className="client-blocked-screen">
+					<div className="client-blocked-card">
+						<div className="blocked-icon">🚫</div>
+						<h2>Cuenta desactivada</h2>
+						<p>
+							Tu cuenta ha sido desactivada temporalmente.
+							<br />
+							No puedes acceder a tus mascotas ni agendar citas en este momento.
+						</p>
+						<p className="blocked-contact">
+							Si crees que esto es un error, comunícate con la clínica para
+							recibir más información.
+						</p>
+						<button className="btn-logout-blocked" onClick={handleLogout}>
+							Cerrar sesión
+						</button>
+					</div>
+				</div>
+			</div>
+		);
+	}
+
+	// ── Vista normal ─────────────────────────────────────────────────────────
 	return (
 		<div className="client-page-container">
 			<NavbarClient />
