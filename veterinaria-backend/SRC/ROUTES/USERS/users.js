@@ -3,6 +3,8 @@ const {
 	registerUser,
 	getUser,
 	getProfile,
+	getAllVets,
+	toggleVetStatus,
 } = require("../../CONTROLLERS/USERS/users.js");
 const {
 	updateProfile,
@@ -60,6 +62,25 @@ usersRouter.patch(
 		.notEmpty()
 		.withMessage("La nueva contraseña es requerida"),
 	updatePassword,
+);
+
+//Ruta para obtener todos los veterinarios
+usersRouter.get("/vets", verificarToken, authRole("admin"), getAllVets);
+
+//Ruta para activar o desactivar un veterinario
+usersRouter.get(
+	"/vets/:id",
+	verificarToken,
+	authRole("admin"),
+	toggleVetStatus,
+);
+
+//Ruta para activar/desactivar veterinario
+usersRouter.patch(
+	"/vets/:id",
+	verificarToken,
+	authRole("admin"),
+	toggleVetStatus,
 );
 
 // Rutas para los administradores

@@ -111,6 +111,65 @@ const getUser = async (req, res) => {
 	}
 };
 
+// Obtener todos los veterinarios (role: "vet")
+const getAllVets = async (req, res) => {
+	try {
+		const vets = await Users.find({ role: "vet" }).select("-password -__v");
+		console.log("===================================================");
+		console.log(`Mostrando ${vets.length} veterinarios`);
+		res.status(200).json({
+			message: "Veterinarios encontrados",
+			vets,
+		});
+	} catch (error) {
+		console.error("Error al obtener veterinarios:", error);
+		res.status(500).json({
+			message: "Error al obtener veterinarios",
+			error,
+		});
+	}
+};
+
+// Activar/Desactivar veterinario (toggle isActive)
+const toggleVetStatus = async (req, res) => {
+	try {
+		const { id } = req.params;
+
+		// Verificar que el usuario existe y es veterinario
+		const vet = await Users.findOne({ _id: id, role: "vet" });
+		if (!vet) {
+			return res.status(404).json({
+				message: "Veterinario no encontrado",
+			});
+		}
+
+		// Toggle del estado
+		vet.isActive = !vet.isActive;
+		await vet.save();
+
+		console.log("===================================================");
+		console.log(
+			`Veterinario ${vet.name} ahora está ${vet.isActive ? "activo" : "inactivo"}`,
+		);
+
+		res.status(200).json({
+			message: `Veterinario ${vet.isActive ? "activado" : "desactivado"} exitosamente`,
+			vet: {
+				_id: vet._id,
+				name: vet.name,
+				email: vet.email,
+				isActive: vet.isActive,
+			},
+		});
+	} catch (error) {
+		console.error("Error al cambiar estado del veterinario:", error);
+		res.status(500).json({
+			message: "Error al cambiar estado del veterinario",
+			error,
+		});
+	}
+};
+
 // Funcion para obtener el perfil del usuario
 const getProfile = async (req, res) => {
 	const userId = req.user.id; // viene del token
@@ -123,4 +182,6 @@ module.exports = {
 	registerUser,
 	getUser,
 	getProfile,
+	getAllVets,
+	toggleVetStatus,
 };
