@@ -135,7 +135,7 @@ export function Appointment() {
 			setIsSubmitting(true);
 			await createAppointment(appointmentData);
 
-			toast.success("✅ Cita agendada exitosamente", {
+			toast.success("Cita agendada exitosamente", {
 				position: "top-right",
 				autoClose: 2000,
 				onClose: () => navigate("/historial"),

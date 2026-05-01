@@ -32,8 +32,13 @@ const registerUser = async (req, res) => {
 			email,
 			password,
 			username,
-			role, // ← AGREGA ESTO
+			role,
 		} = req.body;
+
+		// Validar que la contraseña exista
+		if (!password) {
+			return res.status(400).json({ message: "La contraseña es requerida" });
+		}
 
 		const passwordHash = hashPassword(password);
 
@@ -41,16 +46,17 @@ const registerUser = async (req, res) => {
 			return res.status(400).json({ message: "El email no es valido" });
 		}
 
-		// Validar que el rol sea válido (opcional pero recomendado)
+		// Validar que el rol sea válido
 		const validRoles = ["client", "vet", "admin"];
 		const userRole = validRoles.includes(role) ? role : "client";
 
-		// --- Convertir la imagen a Base64 ---
-		let profilePictureBase64 = null;
+		// --- Con diskStorage, la imagen se guarda en disco ---
+		// req.file contiene path y filename, NO buffer
+		let profilePictureUrl = null;
 
 		if (req.file) {
-			const b64 = Buffer.from(req.file.buffer).toString("base64");
-			profilePictureBase64 = `data:${req.file.mimetype};base64,${b64}`;
+			// Guardamos la ruta relativa para servirla con express.static
+			profilePictureUrl = `/uploads/${req.file.filename}`;
 		}
 
 		const user = new Users({
@@ -61,7 +67,7 @@ const registerUser = async (req, res) => {
 			password: passwordHash,
 			username,
 			role: userRole,
-			profilePicture: profilePictureBase64,
+			profilePicture: profilePictureUrl,
 		});
 
 		await user.save();
@@ -73,6 +79,7 @@ const registerUser = async (req, res) => {
 				name: user.name,
 				email: user.email,
 				role: user.role,
+				profilePicture: user.profilePicture,
 			},
 		});
 	} catch (error) {
@@ -81,7 +88,7 @@ const registerUser = async (req, res) => {
 	}
 };
 
-//Función para obtener el usuerio por email
+// Función para obtener el usuario por email
 const getUser = async (req, res) => {
 	try {
 		const { email } = req.params;
@@ -104,7 +111,7 @@ const getUser = async (req, res) => {
 	}
 };
 
-//Funcion para obtener el perfil del usuario
+// Funcion para obtener el perfil del usuario
 const getProfile = async (req, res) => {
 	const userId = req.user.id; // viene del token
 	const user = await Users.findById(userId);

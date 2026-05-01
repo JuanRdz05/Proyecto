@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { getProfile } from "../../services/Client/profile.js";
 import logo from "../../assets/imagenes/logo.png";
 import "./navbarClient.css";
 
@@ -10,10 +11,7 @@ export function NavbarClient() {
 	const [profilePic, setProfilePic] = useState(null);
 
 	useEffect(() => {
-		fetch("http://localhost:3050/users/v1/profile", {
-			credentials: "include",
-		})
-			.then((res) => (res.ok ? res.json() : null))
+		getProfile() // ← Usa el servicio que ya convierte la URL
 			.then((data) => {
 				if (data?.profilePicture) {
 					setProfilePic(data.profilePicture);

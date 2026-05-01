@@ -1,43 +1,61 @@
 const Users = require("../../MODELS/users.js");
 const { hashPassword } = require("../../MIDDLEWARES/passwords.js");
+const bcrypt = require("bcrypt");
 
-//Funcion par actualizar el perfil del usuario
+const validateEmail = (email) => {
+	const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+	return regex.test(email);
+};
+
+const comparePassword = async (plainPassword, hashedPassword) => {
+	return await bcrypt.compare(plainPassword, hashedPassword);
+};
+
 const updateProfile = async (req, res) => {
 	try {
-		//Campos permitidos para actualizar el perfil
 		const camposPermitidos = [
 			"name",
 			"paternalLastName",
 			"maternalLastName",
 			"email",
+			"profilePicture",
 		];
 		const cambios = {};
-		//Obtenemos los campos que se han enviado
+
 		camposPermitidos.forEach((campo) => {
-			if (req.body[campo]) {
+			if (req.body[campo] !== undefined && req.body[campo] !== "") {
 				cambios[campo] = req.body[campo];
 			}
 		});
 
+		// Si hay archivo de imagen subido por multer (diskStorage)
+		if (req.file) {
+			cambios.profilePicture = `/uploads/${req.file.filename}`;
+		}
+
 		if (cambios.email && !validateEmail(cambios.email)) {
-			consol.log("===================================================");
+			console.log("===================================================");
 			console.log("El email no es valido");
 			return res.status(400).json({ message: "El email no es valido" });
 		}
-		//Verificar que el email sea único
+
 		if (cambios.email) {
-			const existe = await Users.findOne({ email: cambios.email });
+			const existe = await Users.findOne({
+				email: cambios.email,
+				_id: { $ne: req.user.id },
+			});
 			if (existe) {
 				console.log("===================================================");
 				console.log("El email ya existe");
 				return res.status(400).json({ message: "El email ya existe" });
 			}
 		}
-		//Guardamos los cambios a la base de datos
+
 		const user = await Users.findByIdAndUpdate(req.user.id, cambios, {
 			new: true,
 			runValidators: true,
 		});
+
 		if (!user) {
 			console.log("===================================================");
 			console.log("No se pudo actualizar el perfil del usuario");
@@ -45,6 +63,7 @@ const updateProfile = async (req, res) => {
 				.status(404)
 				.json({ message: "No se pudo actualizar el perfil del usuario" });
 		}
+
 		console.log("===================================================");
 		console.log("Perfil actualizado exitosamente");
 		res.status(200).json({ message: "Perfil actualizado exitosamente", user });
@@ -60,28 +79,27 @@ const updatePassword = async (req, res) => {
 	try {
 		const { currentPassword, newPassword } = req.body;
 
-		//Validar que se enviaaron ambas contraseñas
 		if (!currentPassword || !newPassword) {
 			return res.status(400).json({
 				message: "Debe proporcionar la contraseña actual y la nueva",
 			});
 		}
 
-		//Validar la fuerza de la contraseña
 		if (newPassword.length < 8) {
 			return res.status(400).json({
 				message: "La contraseña debe tener al menos 8 caracteres",
 			});
 		}
 
-		//Obtener el usuario actual
 		const user = await Users.findById(req.user.id);
 		if (!user) {
 			return res.status(404).json({ message: "Usuario no encontrado" });
 		}
 
-		//Verificar que la contraseña actual sea correcta
-		const isPasswordValid = await bcrypt.compare(currenPassword, user.password);
+		const isPasswordValid = await bcrypt.compare(
+			currentPassword,
+			user.password,
+		);
 
 		if (!isPasswordValid) {
 			return res.status(401).json({
@@ -89,7 +107,6 @@ const updatePassword = async (req, res) => {
 			});
 		}
 
-		//No puede ser igual a la anterior
 		const isSamePassword = await comparePassword(newPassword, user.password);
 		if (isSamePassword) {
 			return res.status(400).json({
@@ -97,10 +114,8 @@ const updatePassword = async (req, res) => {
 			});
 		}
 
-		//Hashear la nueva contraseña
 		const passwordHash = hashPassword(newPassword);
 
-		//Actualizar la contraseña del usuario
 		const updatedUser = await Users.findByIdAndUpdate(
 			req.user.id,
 			{ password: passwordHash },
@@ -115,7 +130,7 @@ const updatePassword = async (req, res) => {
 
 		res.status(200).json({
 			message: "Contraseña actualizada exitosamente",
-			user: userResponse, // Sin la contraseña
+			user: userResponse,
 		});
 	} catch (error) {
 		console.error("Error al actualizar la contraseña: ", error);
@@ -124,6 +139,7 @@ const updatePassword = async (req, res) => {
 		});
 	}
 };
+
 module.exports = {
 	updateProfile,
 	updatePassword,
