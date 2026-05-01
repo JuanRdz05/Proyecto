@@ -5,6 +5,8 @@ const {
 	getProfile,
 	getAllVets,
 	toggleVetStatus,
+	getAllAdmins,
+	toggleAdminStatus,
 } = require("../../CONTROLLERS/USERS/users.js");
 const {
 	updateProfile,
@@ -81,6 +83,17 @@ usersRouter.patch(
 	verificarToken,
 	authRole("admin"),
 	toggleVetStatus,
+);
+
+// Ruta para obtener todos los administradores
+usersRouter.get("/admins", verificarToken, authRole("admin"), getAllAdmins);
+
+// Ruta para activar/desactivar un administrador
+usersRouter.patch(
+	"/admins/:id",
+	verificarToken,
+	authRole("admin"),
+	toggleAdminStatus,
 );
 
 // Rutas para los administradores

@@ -170,6 +170,71 @@ const toggleVetStatus = async (req, res) => {
 	}
 };
 
+const getAllAdmins = async (req, res) => {
+	try {
+		const admins = await Users.find({ role: "admin" }).select("-password -__v");
+		console.log("===================================================");
+		console.log(`Mostrando ${admins.length} administradores`);
+		res.status(200).json({
+			message: "Administradores encontrados",
+			admins,
+		});
+	} catch (error) {
+		console.error("Error al obtener administradores:", error);
+		res.status(500).json({
+			message: "Error al obtener administradores",
+			error,
+		});
+	}
+};
+
+// Activar/Desactivar administrador (toggle isActive) — no puede desactivarse a sí mismo
+const toggleAdminStatus = async (req, res) => {
+	try {
+		const { id } = req.params;
+
+		// Verificar que no se esté intentando desactivar a sí mismo
+		if (req.user.id === id) {
+			return res.status(403).json({
+				message: "No puedes desactivar tu propia cuenta",
+			});
+		}
+
+		// Verificar que el usuario existe y es administrador
+		const admin = await Users.findOne({ _id: id, role: "admin" });
+		if (!admin) {
+			return res.status(404).json({
+				message: "Administrador no encontrado",
+			});
+		}
+
+		// Toggle del estado
+		admin.isActive = !admin.isActive;
+		await admin.save();
+
+		console.log("===================================================");
+		console.log(
+			`Administrador ${admin.name} ahora está ${admin.isActive ? "activo" : "inactivo"}`,
+		);
+
+		res.status(200).json({
+			message: `Administrador ${admin.isActive ? "activado" : "desactivado"} exitosamente`,
+			admin: {
+				_id: admin._id,
+				name: admin.name,
+				email: admin.email,
+				isActive: admin.isActive,
+			},
+		});
+	} catch (error) {
+		console.error("Error al cambiar estado del administrador:", error);
+		res.status(500).json({
+			message: "Error al cambiar estado del administrador",
+			error,
+		});
+	}
+};
+
 // Funcion para obtener el perfil del usuario
 const getProfile = async (req, res) => {
 	const userId = req.user.id;
@@ -184,4 +249,6 @@ module.exports = {
 	getProfile,
 	getAllVets,
 	toggleVetStatus,
+	getAllAdmins,
+	toggleAdminStatus,
 };
