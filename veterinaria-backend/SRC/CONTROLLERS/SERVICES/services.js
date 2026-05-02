@@ -2,6 +2,15 @@ const Services = require("../../MODELS/services.js");
 const { createLog } = require("../../MIDDLEWARES/logs.js");
 const { formatoDinero } = require("../../MIDDLEWARES/formateoDinero.js");
 
+// Helper para loguear de forma segura
+const safeLog = async (action, resource, description, metadata, userId) => {
+	try {
+		await createLog(action, resource, description, metadata, userId);
+	} catch (logError) {
+		console.warn("[safeLog] Log no creado, pero operación continúa");
+	}
+};
+
 const createService = async (req, res) => {
 	try {
 		console.log("===================================================");
@@ -16,7 +25,6 @@ const createService = async (req, res) => {
 		console.log("Email: ", user?.email);
 		console.log("Rol del usuario: ", user?.role);
 
-		// Validar que sea admin
 		if (!user || user.role !== "admin") {
 			console.log("===================================================");
 			console.log("Acceso denegado");
@@ -26,7 +34,6 @@ const createService = async (req, res) => {
 		const { name, description, price } = req.body;
 		console.log("Datos del servicio: ", { name, description, price });
 
-		// Validar datos requeridos ANTES de guardar
 		if (!name || !description || price === undefined || price === null) {
 			return res.status(400).json({ message: "Faltan datos requeridos" });
 		}
@@ -38,33 +45,32 @@ const createService = async (req, res) => {
 				.json({ message: "El precio debe ser un número válido" });
 		}
 
-		// Crear el servicio (aún NO guardar)
 		const service = new Services({
 			name,
 			description,
 			price: priceNumber,
 		});
 
-		// Formatear el precio para el log (antes de guardar, si falla no se guarda nada)
 		const precioFormateado = formatoDinero(priceNumber);
 		console.log("Precio formateado: ", precioFormateado);
 
-		// Ahora sí guardar
 		await service.save();
 		console.log("===================================================");
 		console.log("Servicio creado exitosamente");
 
-		// Guardar el log
-		await createLog(
+		// Log de auditoría mejorado
+		await safeLog(
 			"CREATE",
 			"SERVICE",
-			`El servicio ${name} ha sido creado`,
+			`El administrador ${user.username} creó el servicio "${name}" con precio ${precioFormateado}`,
 			{
-				user: req.user.username,
-				email: req.user.email,
-				role: req.user.role,
-				precioFinal: precioFormateado,
-				id_service: service._id,
+				serviceId: service._id,
+				serviceName: name,
+				serviceDescription: description?.substring(0, 200),
+				price: priceNumber,
+				priceFormatted: precioFormateado,
+				createdBy: user.username,
+				createdByEmail: user.email,
 			},
 			user._id,
 		);
@@ -76,13 +82,12 @@ const createService = async (req, res) => {
 	}
 };
 
-// Función para obtener todos los servicios
 const getAllServices = async (req, res) => {
 	try {
 		console.log("===================================================");
 		console.log("Comenzando el proceso para obtener todos los servicios...");
 
-		const services = await Services.find({}); // ✅ Quité .select("-_id")
+		const services = await Services.find({});
 
 		if (services.length === 0) {
 			console.log("===================================================");
@@ -103,20 +108,20 @@ const getAllServices = async (req, res) => {
 	}
 };
 
-//Función para cambiar el estado de un servicio
 const changeStatus = async (req, res) => {
 	try {
 		console.log("===================================================");
 		console.log(
 			"Comenzando el proceso para cambiar el estado de un servicio...",
 		);
+
 		const serviceId = req.params.id;
 		const user = req.user;
-		//Buscamos el servicio
+
 		console.log("===================================================");
 		console.log("Buscando servicio...");
 		const service = await Services.findById(serviceId);
-		//Validamos que existe
+
 		console.log("===================================================");
 		console.log("Validando que el servicio existe...");
 		if (!service) {
@@ -124,7 +129,7 @@ const changeStatus = async (req, res) => {
 			console.log("Servicio no encontrado");
 			return res.status(404).json({ message: "Servicio no encontrado" });
 		}
-		//Validamos que sea un administrador quien intenta cambiar el estado
+
 		console.log("===================================================");
 		console.log("Validando el rol del usuario...");
 		if (user.role !== "admin") {
@@ -132,12 +137,32 @@ const changeStatus = async (req, res) => {
 			console.log("Acceso denegado");
 			return res.status(403).json({ message: "Acceso denegado" });
 		}
-		//Actualizamos el estado
+
+		const oldStatus = service.isActive;
 		const updatedService = await Services.findByIdAndUpdate(
 			serviceId,
 			{ isActive: !service.isActive },
 			{ new: true },
 		);
+
+		const actionType = updatedService.isActive ? "activado" : "desactivado";
+
+		// Log de auditoría
+		await safeLog(
+			"UPDATE",
+			"SERVICE",
+			`El administrador ${user.username} ${actionType} el servicio "${service.name}"`,
+			{
+				serviceId: serviceId,
+				serviceName: service.name,
+				oldStatus: oldStatus,
+				newStatus: updatedService.isActive,
+				actionBy: user.username,
+				actionById: user.id,
+			},
+			user._id,
+		);
+
 		console.log("===================================================");
 		console.log("Servicio actualizado exitosamente");
 		res
@@ -149,19 +174,20 @@ const changeStatus = async (req, res) => {
 	}
 };
 
-//Ruta para obtener un servicio por id
 const getServiceById = async (req, res) => {
 	try {
 		console.log("===================================================");
 		console.log("Buscando el servicio seleccionado...");
+
 		const serviceId = req.params.id;
-		//Verificamos que el servicio exista
 		const service = await Services.findById(serviceId);
+
 		if (!service) {
 			console.log("===================================================");
 			console.log("Servicio no encontrado");
 			return res.status(404).json({ message: "Servicio no encontrado" });
 		}
+
 		console.log("===================================================");
 		console.log("Servicio encontrado exitosamente");
 		res.status(200).json({ message: "Servicio encontrado", service });
@@ -179,7 +205,6 @@ const updateService = async (req, res) => {
 		const user = req.user;
 		const serviceId = req.params.id;
 
-		// Validar admin
 		if (!user || user.role !== "admin") {
 			console.log("Acceso denegado");
 			return res.status(403).json({ message: "Acceso denegado" });
@@ -187,13 +212,11 @@ const updateService = async (req, res) => {
 
 		const { name, description, price } = req.body;
 
-		// Validar que el servicio existe
 		const service = await Services.findById(serviceId);
 		if (!service) {
 			return res.status(404).json({ message: "Servicio no encontrado" });
 		}
 
-		// Validar datos
 		if (!name?.trim() || !description?.trim() || price === undefined) {
 			return res.status(400).json({ message: "Faltan datos requeridos" });
 		}
@@ -205,7 +228,13 @@ const updateService = async (req, res) => {
 				.json({ message: "El precio debe ser un número válido" });
 		}
 
-		// Actualizar
+		// Guardar datos antiguos para el log
+		const oldData = {
+			name: service.name,
+			description: service.description,
+			price: service.price,
+		};
+
 		const updatedService = await Services.findByIdAndUpdate(
 			serviceId,
 			{
@@ -218,17 +247,26 @@ const updateService = async (req, res) => {
 
 		const precioFormateado = formatoDinero(priceNumber);
 
-		// Log
-		await createLog(
+		// Log de auditoría mejorado con datos antes/después
+		await safeLog(
 			"UPDATE",
 			"SERVICE",
-			`El servicio ${name} ha sido actualizado`,
+			`El administrador ${user.username} actualizó el servicio "${oldData.name}" → "${name}"`,
 			{
-				user: req.user.username,
-				email: req.user.email,
-				role: req.user.role,
-				precioFinal: precioFormateado,
-				id_service: serviceId,
+				serviceId: serviceId,
+				oldData: {
+					name: oldData.name,
+					description: oldData.description?.substring(0, 100),
+					price: oldData.price,
+				},
+				newData: {
+					name: updatedService.name,
+					description: updatedService.description?.substring(0, 100),
+					price: updatedService.price,
+				},
+				priceFormatted: precioFormateado,
+				updatedBy: user.username,
+				updatedByEmail: user.email,
 			},
 			user._id,
 		);

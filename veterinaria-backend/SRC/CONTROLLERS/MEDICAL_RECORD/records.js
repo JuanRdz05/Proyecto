@@ -1,5 +1,15 @@
 const MedicalRecords = require("../../MODELS/medicalRecords.js");
+const Appointments = require("../../MODELS/appointment.js");
 const { createLog } = require("../../MIDDLEWARES/logs.js");
+
+// Helper para loguear de forma segura
+const safeLog = async (action, resource, description, metadata, userId) => {
+	try {
+		await createLog(action, resource, description, metadata, userId);
+	} catch (logError) {
+		console.warn("[safeLog] Log no creado, pero operación continúa");
+	}
+};
 
 const createRecord = async (req, res) => {
 	try {
@@ -16,20 +26,17 @@ const createRecord = async (req, res) => {
 			nextVisitDate,
 		} = req.body;
 
-		//Verificamos que la cita exista.
 		const appointmentDB = await Appointments.findById(appointmentId);
 		if (!appointmentDB) {
 			return res.status(404).json({ message: "Cita no encontrada" });
 		}
 
-		//Validamos que el usuario sea un veterinario
 		if (user.role !== "vet") {
 			return res
 				.status(403)
 				.json({ message: "Acceso denegado: Solo veterinarios" });
 		}
 
-		//Creamos el registro del rcord medico
 		const record = new MedicalRecords({
 			pet: appointmentDB.pet,
 			appointment: appointmentDB._id,
@@ -47,19 +54,28 @@ const createRecord = async (req, res) => {
 
 		await record.save();
 
-		//Actualizamos el estatus de la cita
+		// Actualizar estado de la cita
+		const oldStatus = appointmentDB.status;
 		appointmentDB.status = "Terminada";
 		await appointmentDB.save();
 
-		//Registro en el Log
-		await createLog(
+		// Log de auditoría mejorado
+		await safeLog(
 			"CREATE",
-			"RECORD",
-			`El veterinario ${user.username} ha completado la cita y creado un historial médico`,
+			"MEDICALRECORD",
+			`El veterinario ${user.username} completó la cita #${appointmentId} y creó historial médico #${record._id}`,
 			{
-				username: user.username,
-				id_record: record._id,
-				pet_id: appointmentDB.pet,
+				recordId: record._id,
+				appointmentId: appointmentDB._id,
+				petId: appointmentDB.pet,
+				serviceId: appointmentDB.service,
+				vetId: user.id,
+				vetUsername: user.username,
+				diagnosis: diagnosis?.substring(0, 100),
+				oldAppointmentStatus: oldStatus,
+				newAppointmentStatus: "Terminada",
+				weight: weight,
+				temperature: temperature,
 			},
 			user.id,
 		);
@@ -76,18 +92,18 @@ const createRecord = async (req, res) => {
 	}
 };
 
-//Ruta para mostrar todos los registros medicos
 const getAllRecords = async (req, res) => {
 	try {
 		console.log("===================================================");
 		console.log("Obteniendo todos los historiales médicos...");
-		//Verificamos que el usuario sea un administrador
+
 		const user = req.user;
 		if (user.role !== "admin") {
 			console.log("===================================================");
 			console.log("Acceso denegado");
 			return res.status(403).json({ message: "Acceso denegado" });
 		}
+
 		const records = await MedicalRecords.find({})
 			.populate("pet", "name petType")
 			.populate("vet", "username email")
@@ -96,29 +112,33 @@ const getAllRecords = async (req, res) => {
 
 		if (records.length === 0) {
 			return res
-				.status(404)
-				.json({ message: "No hay registros en la base de datos" });
+				.status(200)
+				.json({ message: "No hay registros en la base de datos", records: [] });
 		}
 
 		console.log(`Se encontraron ${records.length} registros.`);
 		res.status(200).json({ message: "Registros obtenidos con éxito", records });
 	} catch (error) {
 		console.error("Error al obtener los registros: ", error);
-		res.status(500).json({
-			message: "Error al obtener los registros",
-			error: error.message,
-		});
+		res
+			.status(500)
+			.json({
+				message: "Error al obtener los registros",
+				error: error.message,
+			});
 	}
 };
-//Ruta para obtener los registros por usuario
+
 const getRecordsByUser = async (req, res) => {
 	try {
 		const user = req.user;
 		console.log("===================================================");
 		console.log("Obteniendo todos los registros del usuario...");
+
 		if (user.role !== "admin" && user.role !== "vet") {
 			return res.status(403).json({ message: "Acceso denegado" });
 		}
+
 		const targetId = req.params.id || user.id;
 
 		const records = await MedicalRecords.find({ vet: targetId })
@@ -126,15 +146,18 @@ const getRecordsByUser = async (req, res) => {
 			.populate("vet", "username email")
 			.populate("service", "name price")
 			.sort({ createdAt: -1 });
+
 		console.log("===================================================");
 		console.log("Verificando la existencia de los registros...");
+
 		if (records.length === 0) {
 			console.log("===================================================");
 			console.log("No hay registros para mostrar");
 			return res
-				.status(404)
-				.json({ message: "No hay registros para este usuario" });
+				.status(200)
+				.json({ message: "No hay registros para este usuario", records: [] });
 		}
+
 		console.log("===================================================");
 		console.log("Registros obtenidos exitosamente");
 		res.status(200).json({ message: "Registros obtenidos", records });

@@ -1,6 +1,16 @@
 const Users = require("../../MODELS/users.js");
 const { hashPassword } = require("../../MIDDLEWARES/passwords.js");
 const { validateEmail } = require("../../MIDDLEWARES/emailFormatter.js");
+const { createLog } = require("../../MIDDLEWARES/logs.js");
+
+// Helper para loguear de forma segura (no bloquea la operación principal)
+const safeLog = async (action, resource, description, metadata, userId) => {
+	try {
+		await createLog(action, resource, description, metadata, userId);
+	} catch (logError) {
+		console.warn("[safeLog] Log no creado, pero operación continúa");
+	}
+};
 
 const getAllUsers = async (req, res) => {
 	try {
@@ -22,7 +32,6 @@ const getAllUsers = async (req, res) => {
 	}
 };
 
-// Registrar un nuevo usuario
 const registerUser = async (req, res) => {
 	try {
 		const {
@@ -35,7 +44,6 @@ const registerUser = async (req, res) => {
 			role,
 		} = req.body;
 
-		// Validar que la contraseña exista
 		if (!password) {
 			return res.status(400).json({ message: "La contraseña es requerida" });
 		}
@@ -46,16 +54,11 @@ const registerUser = async (req, res) => {
 			return res.status(400).json({ message: "El email no es valido" });
 		}
 
-		// Validar que el rol sea válido
 		const validRoles = ["client", "vet", "admin"];
 		const userRole = validRoles.includes(role) ? role : "client";
 
-		// --- Con diskStorage, la imagen se guarda en disco ---
-		// req.file contiene path y filename, NO buffer
 		let profilePictureUrl = null;
-
 		if (req.file) {
-			// Guardamos la ruta relativa para servirla con express.static
 			profilePictureUrl = `/uploads/${req.file.filename}`;
 		}
 
@@ -71,6 +74,23 @@ const registerUser = async (req, res) => {
 		});
 
 		await user.save();
+
+		// Log de auditoría para registro
+		await safeLog(
+			"CREATE",
+			"USER",
+			`Nuevo usuario registrado: ${username} (${email}) con rol ${userRole}`,
+			{
+				userId: user._id,
+				username: user.username,
+				email: user.email,
+				role: user.role,
+				name: `${name} ${paternalLastName || ""} ${maternalLastName || ""}`.trim(),
+				registeredBy: req.user?.id || "self-registration",
+			},
+			user._id,
+		);
+
 		res.status(201).json({
 			message: "Usuario registrado exitosamente",
 			user: {
@@ -88,7 +108,6 @@ const registerUser = async (req, res) => {
 	}
 };
 
-// Función para obtener el usuario por email
 const getUser = async (req, res) => {
 	try {
 		const { email } = req.params;
@@ -111,7 +130,12 @@ const getUser = async (req, res) => {
 	}
 };
 
-// Obtener todos los veterinarios (role: "vet")
+const getProfile = async (req, res) => {
+	const userId = req.user.id;
+	const user = await Users.findById(userId);
+	res.json(user);
+};
+
 const getAllVets = async (req, res) => {
 	try {
 		const vets = await Users.find({ role: "vet" }).select("-password -__v");
@@ -130,22 +154,40 @@ const getAllVets = async (req, res) => {
 	}
 };
 
-// Activar/Desactivar veterinario (toggle isActive)
 const toggleVetStatus = async (req, res) => {
 	try {
 		const { id } = req.params;
-
-		// Verificar que el usuario existe y es veterinario
 		const vet = await Users.findOne({ _id: id, role: "vet" });
+
 		if (!vet) {
 			return res.status(404).json({
 				message: "Veterinario no encontrado",
 			});
 		}
 
-		// Toggle del estado
+		const oldStatus = vet.isActive;
 		vet.isActive = !vet.isActive;
 		await vet.save();
+
+		const actionType = vet.isActive ? "activado" : "desactivado";
+
+		// Log de auditoría
+		await safeLog(
+			"UPDATE",
+			"USER",
+			`El administrador ${req.user?.username || "sistema"} ${actionType} al veterinario ${vet.name} (${vet.email})`,
+			{
+				vetId: vet._id,
+				vetName: vet.name,
+				vetEmail: vet.email,
+				oldStatus: oldStatus,
+				newStatus: vet.isActive,
+				actionBy: req.user?.username,
+				actionById: req.user?.id,
+				actionByRole: req.user?.role,
+			},
+			req.user?.id,
+		);
 
 		console.log("===================================================");
 		console.log(
@@ -188,19 +230,16 @@ const getAllAdmins = async (req, res) => {
 	}
 };
 
-// Activar/Desactivar administrador (toggle isActive) — no puede desactivarse a sí mismo
 const toggleAdminStatus = async (req, res) => {
 	try {
 		const { id } = req.params;
 
-		// Verificar que no se esté intentando desactivar a sí mismo
 		if (req.user.id === id) {
 			return res.status(403).json({
 				message: "No puedes desactivar tu propia cuenta",
 			});
 		}
 
-		// Verificar que el usuario existe y es administrador
 		const admin = await Users.findOne({ _id: id, role: "admin" });
 		if (!admin) {
 			return res.status(404).json({
@@ -208,9 +247,29 @@ const toggleAdminStatus = async (req, res) => {
 			});
 		}
 
-		// Toggle del estado
+		const oldStatus = admin.isActive;
 		admin.isActive = !admin.isActive;
 		await admin.save();
+
+		const actionType = admin.isActive ? "activado" : "desactivado";
+
+		// Log de auditoría
+		await safeLog(
+			"UPDATE",
+			"USER",
+			`El administrador ${req.user?.username || "sistema"} ${actionType} al administrador ${admin.name} (${admin.email})`,
+			{
+				adminId: admin._id,
+				adminName: admin.name,
+				adminEmail: admin.email,
+				oldStatus: oldStatus,
+				newStatus: admin.isActive,
+				actionBy: req.user?.username,
+				actionById: req.user?.id,
+				actionByRole: req.user?.role,
+			},
+			req.user?.id,
+		);
 
 		console.log("===================================================");
 		console.log(
@@ -235,39 +294,6 @@ const toggleAdminStatus = async (req, res) => {
 	}
 };
 
-// Funcion para obtener el perfil del usuario
-const getProfile = async (req, res) => {
-	const userId = req.user.id;
-	const user = await Users.findById(userId);
-	res.json(user); // debe incluir isActive
-};
-
-const toggleClientStatus = async (req, res) => {
-	try {
-		const { id } = req.params;
-		const client = await Users.findOne({ _id: id, role: "client" });
-		if (!client)
-			return res.status(404).json({ message: "Cliente no encontrado" });
-
-		client.isActive = !client.isActive;
-		await client.save();
-
-		res.status(200).json({
-			message: `Cliente ${client.isActive ? "activado" : "desactivado"} exitosamente`,
-			client: {
-				_id: client._id,
-				name: client.name,
-				email: client.email,
-				isActive: client.isActive,
-			},
-		});
-	} catch (error) {
-		res
-			.status(500)
-			.json({ message: "Error al cambiar estado del cliente", error });
-	}
-};
-
 const getAllClients = async (req, res) => {
 	try {
 		const clients = await Users.find({ role: "client" }).select(
@@ -282,6 +308,55 @@ const getAllClients = async (req, res) => {
 	} catch (error) {
 		console.error("Error al obtener clientes:", error);
 		res.status(500).json({ message: "Error al obtener clientes", error });
+	}
+};
+
+const toggleClientStatus = async (req, res) => {
+	try {
+		const { id } = req.params;
+		const client = await Users.findOne({ _id: id, role: "client" });
+
+		if (!client) {
+			return res.status(404).json({ message: "Cliente no encontrado" });
+		}
+
+		const oldStatus = client.isActive;
+		client.isActive = !client.isActive;
+		await client.save();
+
+		const actionType = client.isActive ? "activado" : "desactivado";
+
+		// Log de auditoría
+		await safeLog(
+			"UPDATE",
+			"USER",
+			`El administrador ${req.user?.username || "sistema"} ${actionType} al cliente ${client.name} (${client.email})`,
+			{
+				clientId: client._id,
+				clientName: client.name,
+				clientEmail: client.email,
+				oldStatus: oldStatus,
+				newStatus: client.isActive,
+				actionBy: req.user?.username,
+				actionById: req.user?.id,
+				actionByRole: req.user?.role,
+			},
+			req.user?.id,
+		);
+
+		res.status(200).json({
+			message: `Cliente ${client.isActive ? "activado" : "desactivado"} exitosamente`,
+			client: {
+				_id: client._id,
+				name: client.name,
+				email: client.email,
+				isActive: client.isActive,
+			},
+		});
+	} catch (error) {
+		res
+			.status(500)
+			.json({ message: "Error al cambiar estado del cliente", error });
 	}
 };
 

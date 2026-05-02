@@ -1,19 +1,9 @@
 const Logs = require("../../MODELS/logs.js");
 
-// Función para obtener logs con filtros, búsqueda y paginación
 const getAllLogs = async (req, res) => {
 	try {
-		const {
-			action, // Filtrar por acción: CREATE, UPDATE, DELETE, LOGIN, LOGOUT
-			search, // Búsqueda en descripción o nombre de usuario
-			page = 1, // Página actual (default 1)
-			limit = 10, // Logs por página (default 10)
-		} = req.query;
-
-		// Construir el filtro base
+		const { action, search, page = 1, limit = 10 } = req.query;
 		let query = {};
-
-		// Filtro por acción
 		if (
 			action &&
 			action !== "TODAS" &&
@@ -32,11 +22,10 @@ const getAllLogs = async (req, res) => {
 		const limitNum = Math.min(50, Math.max(1, parseInt(limit))); // Máximo 50 por página
 		const skip = (pageNum - 1) * limitNum;
 
-		// Obtener logs paginados con populate del usuario
 		const [logs, totalCount] = await Promise.all([
 			Logs.find(query)
 				.populate("user", "name role")
-				.sort({ createdAt: -1 }) // Más recientes primero
+				.sort({ createdAt: -1 })
 				.skip(skip)
 				.limit(limitNum)
 				.lean(),
