@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { PageTransition } from "../../../components/PageTransition/PageTransition.jsx";
 import { toast } from "react-toastify";
 import { NavbarAdmin } from "../../../components/NavbarAdmin/navbarAdmin.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
-import { useAdminGuard } from "../../../hooks/useAdminGuard.jsx";
 import {
 	getAllAppointments,
 	acceptAppointment,
@@ -24,9 +24,7 @@ export function AdminCitas() {
 	const navigate = useNavigate();
 
 	// ── Guard: verifica si el administrador está activo ────────────────────
-	const { checking, isActive, BlockedScreen } = useAdminGuard();
-
-	const [appointments, setAppointments] = useState([]);
+const [appointments, setAppointments] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [refreshing, setRefreshing] = useState(false);
 	const [filter, setFilter] = useState("Pendientes");
@@ -62,9 +60,7 @@ export function AdminCitas() {
 	}, []);
 
 	// ── Bloquear si está verificando o inactivo ────────────────────────────
-	if (checking || !isActive) return <BlockedScreen />;
-
-	const handleAceptar = async (id) => {
+const handleAceptar = async (id) => {
 		setProcessingId(id);
 		try {
 			const result = await acceptAppointment(id);
@@ -157,12 +153,12 @@ export function AdminCitas() {
 		if (!person) return "N/A";
 		return `${person.name || ""} ${person.paternalLastName || ""}`.trim();
 	};
-	if (checking || !isActive) return <BlockedScreen />;
-	return (
+return (
 		<div className="admin-citas-container">
 			<NavbarAdmin />
 
-			<main className="admin-citas-main">
+			<PageTransition>
+<main className="admin-citas-main">
 				<h1 className="admin-citas-title">Citas por aprobar</h1>
 
 				<div className="admin-citas-subheader">
@@ -306,6 +302,7 @@ export function AdminCitas() {
 					</table>
 				</div>
 			</main>
+			</PageTransition>
 
 			<FooterGuest />
 

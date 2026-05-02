@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { PageTransition } from "../../../components/PageTransition/PageTransition.jsx";
 import { toast } from "react-toastify";
 import { NavbarAdmin } from "../../../components/NavbarAdmin/navbarAdmin.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
-import { getProfile } from "../../../services/Client/profile.js";
 import { getAllPets, togglePetStatus } from "../../../services/Admin/pets.js";
 import "./adminPets.css";
-import { useAdminGuard } from "../../../hooks/useAdminGuard.jsx";
 
 function initials(name) {
 	if (!name) return "??";
@@ -20,9 +19,7 @@ function initials(name) {
 
 export function AdminPets() {
 	const navigate = useNavigate();
-	const { checking, isActive, BlockedScreen } = useAdminGuard();
-
-	// Estados para la lista y paginación
+// Estados para la lista y paginación
 	const [pets, setPets] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [search, setSearch] = useState("");
@@ -67,9 +64,7 @@ export function AdminPets() {
 		}
 	};
 
-	useEffect(() => {
-		if (isActiveAdmin) fetchPets();
-	}, [isActiveAdmin]);
+	useEffect(() => { fetchPets(); }, []);
 
 	// Lógica de Logout para cuenta bloqueada[cite: 1]
 	const handleLogout = async () => {
@@ -100,8 +95,7 @@ export function AdminPets() {
 			toast.error("No se pudo cambiar el estado de la mascota.");
 		}
 	};
-	if (checking || !isActive) return <BlockedScreen />;
-	// Filtrado local para la búsqueda por texto
+// Filtrado local para la búsqueda por texto
 	const filtered = pets.filter((p) => {
 		const q = search.toLowerCase();
 		const ownerFull =
@@ -113,38 +107,14 @@ export function AdminPets() {
 		);
 	});
 
-	// --- RENDERIZADO DE SEGURIDAD ---
-
-	if (checkingAdmin) {
-		return (
-			<div className="admin-loading-screen">
-				<p>Verificando credenciales...</p>
-			</div>
-		);
-	}
-
-	if (!isActiveAdmin) {
-		return (
-			<div className="admin-blocked-screen">
-				<div className="admin-blocked-card">
-					<div className="blocked-icon">🚫</div>
-					<h2>Acceso Restringido</h2>
-					<p>Tu cuenta de administrador ha sido suspendida.</p>
-					<button className="btn-logout-blocked" onClick={handleLogout}>
-						Cerrar sesión
-					</button>
-				</div>
-			</div>
-		);
-	}
-
 	// --- RENDERIZADO PRINCIPAL ---
 
 	return (
 		<div className="adminpets-container">
 			<NavbarAdmin />
 
-			<main className="adminpets-main">
+			<PageTransition>
+<main className="adminpets-main">
 				<h1 className="adminpets-title">Gestión de Mascotas</h1>
 
 				<div className="adminpets-toolbar">
@@ -272,6 +242,7 @@ export function AdminPets() {
 					</div>
 				)}
 			</main>
+			</PageTransition>
 
 			<FooterGuest />
 		</div>

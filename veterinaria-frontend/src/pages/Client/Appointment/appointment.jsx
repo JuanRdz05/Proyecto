@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { PageTransition } from "../../../components/PageTransition/PageTransition.jsx";
 import { toast } from "react-toastify";
 import { NavbarClient } from "../../../components/NavbarClient/navbarClient.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
@@ -7,16 +8,10 @@ import { getPets } from "../../../services/Client/pet.js";
 import { getAllServices } from "../../../services/Admin/services.js";
 import { createAppointment } from "../../../services/Client/appointment.js";
 import "./appointment.css";
-import { useClientGuard } from "../../../hooks/useClientGuard.jsx";
 
 export function Appointment() {
 	const navigate = useNavigate();
-
-	const { checking, isActive, BlockedScreen } = useClientGuard();
-
-	if (checking || !isActive) return <BlockedScreen />;
-
-	const [formData, setFormData] = useState({
+const [formData, setFormData] = useState({
 		pet: "",
 		service: "",
 		date: "",
@@ -175,22 +170,24 @@ export function Appointment() {
 		return (
 			<div className="appointment-page-container">
 				<NavbarClient />
-				<main className="appointment-main">
+				<PageTransition>
+<main className="appointment-main">
 					<div className="appointment-card">
 						<h2 className="appointment-title">Información de la cita</h2>
 						<p>Cargando datos...</p>
 					</div>
 				</main>
+			</PageTransition>
 				<FooterGuest />
 			</div>
 		);
 	}
-
-	return (
+return (
 		<div className="appointment-page-container">
 			<NavbarClient />
 
-			<main className="appointment-main">
+			<PageTransition>
+<main className="appointment-main">
 				<div className="appointment-card">
 					<h2 className="appointment-title">Información de la cita</h2>
 
@@ -353,6 +350,7 @@ export function Appointment() {
 					</form>
 				</div>
 			</main>
+			</PageTransition>
 
 			<FooterGuest />
 		</div>

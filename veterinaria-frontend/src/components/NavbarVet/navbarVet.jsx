@@ -7,7 +7,7 @@ export function NavbarVet() {
     const navigate = useNavigate();
     const location = useLocation();
     const userName = localStorage.getItem("userName") || "Veterinario";
-    const [profilePic, setProfilePic] = useState(null);
+    const [profilePic, setProfilePic] = useState(() => localStorage.getItem("profilePic") || null);
 
     useEffect(() => {
         fetch("http://localhost:3050/users/v1/profile", {
@@ -17,6 +17,7 @@ export function NavbarVet() {
             .then((data) => {
                 if (data?.profilePicture) {
                     setProfilePic(data.profilePicture);
+                    localStorage.setItem("profilePic", data.profilePicture);
                 }
             })
             .catch(() => {});

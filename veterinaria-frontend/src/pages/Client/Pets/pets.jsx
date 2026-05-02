@@ -1,19 +1,16 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { PageTransition } from "../../../components/PageTransition/PageTransition.jsx";
 import { NavbarClient } from "../../../components/NavbarClient/navbarClient.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
 import "./pets.css";
 import { getPets } from "../../../services/Client/pet.js";
-import { useClientGuard } from "../../../hooks/useClientGuard.jsx";
 
 const ITEMS_PER_PAGE = 6;
 
 export function Pets() {
 	const navigate = useNavigate();
-	const { checking, isActive, BlockedScreen } = useClientGuard();
-
-	if (checking || !isActive) return <BlockedScreen />;
-	const [pets, setPets] = useState([]);
+const [pets, setPets] = useState([]);
 	const [currentPage, setCurrentPage] = useState(1);
 
 	useEffect(() => {
@@ -39,12 +36,12 @@ export function Pets() {
 			window.scrollTo({ top: 0, behavior: "smooth" });
 		}
 	};
-
-	return (
+return (
 		<div className="pets-page-container">
 			<NavbarClient />
 
-			<main className="pets-main">
+			<PageTransition>
+<main className="pets-main">
 				<div className="pets-card">
 					{/* Encabezado */}
 					<div className="pets-header">
@@ -125,6 +122,7 @@ export function Pets() {
 					)}
 				</div>
 			</main>
+			</PageTransition>
 
 			<FooterGuest />
 		</div>

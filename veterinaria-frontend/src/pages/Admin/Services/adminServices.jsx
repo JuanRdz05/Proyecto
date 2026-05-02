@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { PageTransition } from "../../../components/PageTransition/PageTransition.jsx";
 import { toast } from "react-toastify";
 import { NavbarAdmin } from "../../../components/NavbarAdmin/navbarAdmin.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
@@ -9,7 +10,6 @@ import {
 	updateService,
 } from "../../../services/Admin/services.js";
 import "./adminServices.css";
-import { useAdminGuard } from "../../../hooks/useAdminGuard.jsx";
 
 function PencilIcon() {
 	return (
@@ -29,9 +29,7 @@ function PencilIcon() {
 }
 
 export function AdminServices() {
-	const { checking, isActive, BlockedScreen } = useAdminGuard();
-
-	const navigate = useNavigate();
+const navigate = useNavigate();
 	const [services, setServices] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [editingId, setEditingId] = useState(null);
@@ -172,22 +170,24 @@ export function AdminServices() {
 		return (
 			<div className="svc-container">
 				<NavbarAdmin />
-				<main className="svc-main">
+				<PageTransition>
+<main className="svc-main">
 					<div className="svc-header">
 						<h1 className="svc-title">Servicios</h1>
 					</div>
 					<div className="svc-loading">Cargando servicios...</div>
 				</main>
+			</PageTransition>
 				<FooterGuest />
 			</div>
 		);
 	}
-	if (checking || !isActive) return <BlockedScreen />;
-	return (
+return (
 		<div className="svc-container">
 			<NavbarAdmin />
 
-			<main className="svc-main">
+			<PageTransition>
+<main className="svc-main">
 				{/* Encabezado */}
 				<div className="svc-header">
 					<h1 className="svc-title">Servicios</h1>
@@ -353,6 +353,7 @@ export function AdminServices() {
 					)}
 				</div>
 			</main>
+			</PageTransition>
 
 			<FooterGuest />
 		</div>

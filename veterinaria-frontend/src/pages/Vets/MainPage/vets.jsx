@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { PageTransition } from "../../../components/PageTransition/PageTransition.jsx";
 import { NavbarVet } from "../../../components/NavbarVet/navbarVet.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
-import { useVetGuard } from "../../../hooks/useVetGuard.jsx";
 import "./vets.css";
 
 // Datos placeholder
@@ -79,12 +79,8 @@ export function VetHome() {
 	const [showAll, setShowAll] = useState(false);
 
 	// ── Guard: verifica si el veterinario está activo ──────────────────────
-	const { checking, isActive, BlockedScreen } = useVetGuard();
-
-	// Bloquear si está verificando o inactivo
-	if (checking || !isActive) return <BlockedScreen />;
-
-	const visibleAppointments = showAll
+// Bloquear si está verificando o inactivo
+const visibleAppointments = showAll
 		? ALL_APPOINTMENTS
 		: ALL_APPOINTMENTS.slice(0, INITIAL_COUNT);
 
@@ -92,7 +88,8 @@ export function VetHome() {
 		<div className="vet-page-container">
 			<NavbarVet />
 
-			<main className="vet-main">
+			<PageTransition>
+<main className="vet-main">
 				<h1 className="vet-welcome">¡Bienvenido, Dr. {userName}!</h1>
 
 				<div className="vet-stats-grid">
@@ -148,6 +145,7 @@ export function VetHome() {
 					</div>
 				</section>
 			</main>
+			</PageTransition>
 
 			<FooterGuest />
 		</div>

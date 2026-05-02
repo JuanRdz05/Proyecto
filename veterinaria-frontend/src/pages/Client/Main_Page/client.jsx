@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { PageTransition } from "../../../components/PageTransition/PageTransition.jsx";
 import { toast } from "react-toastify";
 import { NavbarClient } from "../../../components/NavbarClient/navbarClient.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
 import { getPets } from "../../../services/Client/pet.js";
 import { getUserAppointments } from "../../../services/Client/appointment.js";
-import { useClientGuard } from "../../../hooks/useClientGuard.jsx";
 import "./client.css";
 
 export function ClientHome() {
@@ -13,9 +13,7 @@ export function ClientHome() {
 	const userName = localStorage.getItem("userName") || "User";
 
 	// ── Guard: verifica si el cliente está activo ──────────────────────────
-	const { checking, isActive, BlockedScreen } = useClientGuard();
-
-	const [pets, setPets] = useState([]);
+const [pets, setPets] = useState([]);
 	const [appointments, setAppointments] = useState([]);
 	const [loadingPets, setLoadingPets] = useState(true);
 	const [loadingAppointments, setLoadingAppointments] = useState(true);
@@ -82,9 +80,7 @@ export function ClientHome() {
 	}, []);
 
 	// ── Bloquear si está verificando o inactivo ────────────────────────────
-	if (checking || !isActive) return <BlockedScreen />;
-
-	// ── Lógica de vista ────────────────────────────────────────────────────
+// ── Lógica de vista ────────────────────────────────────────────────────
 	const petsToShow = pets.slice(0, 3);
 	const todayStr = new Date().toISOString().split("T")[0];
 
@@ -154,7 +150,8 @@ export function ClientHome() {
 		<div className="client-page-container">
 			<NavbarClient />
 
-			<main className="client-main">
+			<PageTransition>
+<main className="client-main">
 				<h1 className="welcome-text">¡Bienvenido, {userName}!</h1>
 
 				<div className="dashboard-grid">
@@ -277,6 +274,7 @@ export function ClientHome() {
 					</section>
 				</div>
 			</main>
+			</PageTransition>
 
 			<FooterGuest />
 		</div>

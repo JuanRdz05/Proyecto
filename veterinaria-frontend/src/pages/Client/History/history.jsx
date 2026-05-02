@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
+import { PageTransition } from "../../../components/PageTransition/PageTransition.jsx";
 import { NavbarClient } from "../../../components/NavbarClient/navbarClient.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
 import { getUserAppointments } from "../../../services/Client/appointment.js";
 import "./history.css";
-import { useClientGuard } from "../../../hooks/useClientGuard.jsx";
-
 const ITEMS_PER_PAGE = 6;
 
 function StatusBadge({ status }) {
@@ -113,11 +112,7 @@ function AppointmentModal({ appointment, onClose, formatDate }) {
 
 // ── Componente principal ─────────────────────────────────────────────────────
 export function History() {
-	const { checking, isActive, BlockedScreen } = useClientGuard();
-
-	if (checking || !isActive) return <BlockedScreen />;
-
-	const [appointments, setAppointments] = useState([]);
+const [appointments, setAppointments] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 	const [currentPage, setCurrentPage] = useState(1);
@@ -185,12 +180,14 @@ export function History() {
 		return (
 			<div className="history-page-container">
 				<NavbarClient />
-				<main className="history-main">
+				<PageTransition>
+<main className="history-main">
 					<div className="history-card">
 						<h2 className="history-title">Historial de citas</h2>
 						<p className="history-loading">Cargando tu historial...</p>
 					</div>
 				</main>
+			</PageTransition>
 				<FooterGuest />
 			</div>
 		);
@@ -200,22 +197,24 @@ export function History() {
 		return (
 			<div className="history-page-container">
 				<NavbarClient />
-				<main className="history-main">
+				<PageTransition>
+<main className="history-main">
 					<div className="history-card">
 						<h2 className="history-title">Historial de citas</h2>
 						<p className="history-error">❌ Hubo un problema: {error}</p>
 					</div>
 				</main>
+			</PageTransition>
 				<FooterGuest />
 			</div>
 		);
 	}
-
-	return (
+return (
 		<div className="history-page-container">
 			<NavbarClient />
 
-			<main className="history-main">
+			<PageTransition>
+<main className="history-main">
 				<div className="history-card">
 					<div className="history-header">
 						<h2 className="history-title">Historial de citas</h2>
@@ -295,6 +294,7 @@ export function History() {
 					)}
 				</div>
 			</main>
+			</PageTransition>
 
 			<FooterGuest />
 

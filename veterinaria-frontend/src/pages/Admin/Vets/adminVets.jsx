@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { PageTransition } from "../../../components/PageTransition/PageTransition.jsx";
 import { toast } from "react-toastify";
 import { NavbarAdmin } from "../../../components/NavbarAdmin/navbarAdmin.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
 import { getAllVets, toggleVetStatus } from "../../../services/Admin/vets.js";
 import "./adminVets.css";
-import { useAdminGuard } from "../../../hooks/useAdminGuard.jsx";
 
 function initials(name) {
 	return name
@@ -18,9 +18,7 @@ function initials(name) {
 
 export function AdminVets() {
 	const navigate = useNavigate();
-	const { checking, isActive, BlockedScreen } = useAdminGuard();
-
-	// Todos los hooks se declaran aquí, antes de cualquier retorno condicional
+// Todos los hooks se declaran aquí, antes de cualquier retorno condicional
 	const [search, setSearch] = useState("");
 	const [vets, setVets] = useState([]);
 	const [loading, setLoading] = useState(true);
@@ -46,9 +44,7 @@ export function AdminVets() {
 	}, []);
 
 	// Ahora sí, si el guard indica que estamos cargando o inactivos, mostramos la pantalla de bloqueo
-	if (checking || !isActive) return <BlockedScreen />;
-
-	const filtered = vets.filter((v) => {
+const filtered = vets.filter((v) => {
 		const q = search.toLowerCase();
 		return (
 			v.name?.toLowerCase().includes(q) || v.email?.toLowerCase().includes(q)
@@ -80,7 +76,8 @@ export function AdminVets() {
 		<div className="adminvets-container">
 			<NavbarAdmin />
 
-			<main className="adminvets-main">
+			<PageTransition>
+<main className="adminvets-main">
 				<h1 className="adminvets-title">Veterinarios</h1>
 
 				<div className="adminvets-toolbar">
@@ -168,6 +165,7 @@ export function AdminVets() {
 					)}
 				</div>
 			</main>
+			</PageTransition>
 
 			<FooterGuest />
 		</div>

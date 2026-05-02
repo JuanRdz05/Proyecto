@@ -4,13 +4,10 @@ import { toast } from "react-toastify";
 import { InputField } from "../../../components/Inputfield/inputfield.jsx";
 import { registerUser } from "../../../services/Guest/register.js";
 import "./registerVet.css";
-import { useAdminGuard } from "../../../hooks/useAdminGuard.jsx";
 
 export function RegisterVet() {
 	const navigate = useNavigate();
-	const { checking, isActive, BlockedScreen } = useAdminGuard();
-
-	const [username, setUsername] = useState("");
+const [username, setUsername] = useState("");
 	const [name, setName] = useState("");
 	const [paternalLastName, setPaternalLastName] = useState("");
 	const [maternalLastName, setMaternalLastName] = useState("");
@@ -22,9 +19,7 @@ export function RegisterVet() {
 	const [selectedFile, setSelectedFile] = useState(null);
 	const [previewUrl, setPreviewUrl] = useState(null);
 	const [loading, setLoading] = useState(false);
-
-	if (checking || !isActive) return <BlockedScreen />;
-	const handleFileClick = () => fileInputRef.current.click();
+const handleFileClick = () => fileInputRef.current.click();
 
 	const handleFileChange = (e) => {
 		const file = e.target.files[0];

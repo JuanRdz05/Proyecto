@@ -8,13 +8,14 @@ export function NavbarClient() {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const userName = localStorage.getItem("userName") || "Usuario";
-	const [profilePic, setProfilePic] = useState(null);
+	const [profilePic, setProfilePic] = useState(() => localStorage.getItem("profilePic") || null);
 
 	useEffect(() => {
 		getProfile() // ← Usa el servicio que ya convierte la URL
 			.then((data) => {
 				if (data?.profilePicture) {
 					setProfilePic(data.profilePicture);
+					localStorage.setItem("profilePic", data.profilePicture);
 				}
 			})
 			.catch(() => {}); // Si falla, queda el placeholder

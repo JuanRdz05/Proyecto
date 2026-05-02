@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { PageTransition } from "../../../components/PageTransition/PageTransition.jsx";
 import { NavbarAdmin } from "../../../components/NavbarAdmin/navbarAdmin.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
 import { getAllLogs } from "../../../services/Admin/logs.js";
 import "./adminLogs.css";
-import { useAdminGuard } from "../../../hooks/useAdminGuard.jsx";
-
 const ACTION_CONFIG = {
 	CREATE: { label: "Crear", cls: "action-create" },
 	UPDATE: { label: "Editar", cls: "action-update" },
@@ -22,9 +21,7 @@ const ROLE_LABEL = {
 const ACTIONS = ["TODAS", "CREATE", "UPDATE", "DELETE", "LOGIN", "LOGOUT"];
 
 export function AdminLogs() {
-	const { checking, isActive, BlockedScreen } = useAdminGuard();
-
-	const [logs, setLogs] = useState([]);
+const [logs, setLogs] = useState([]);
 	const [filterAction, setFilterAction] = useState("TODAS");
 	const [searchQuery, setSearchQuery] = useState("");
 	const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -193,12 +190,12 @@ export function AdminLogs() {
 			</tr>
 		);
 	};
-	if (checking || !isActive) return <BlockedScreen />;
-	return (
+return (
 		<div className="logs-container">
 			<NavbarAdmin />
 
-			<main className="logs-main">
+			<PageTransition>
+<main className="logs-main">
 				<div className="logs-header">
 					<div>
 						<h1 className="logs-title">Logs</h1>
@@ -360,6 +357,7 @@ export function AdminLogs() {
 					</div>
 				)}
 			</main>
+			</PageTransition>
 
 			<FooterGuest />
 		</div>

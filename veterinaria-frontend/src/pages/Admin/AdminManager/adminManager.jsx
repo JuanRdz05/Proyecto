@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { PageTransition } from "../../../components/PageTransition/PageTransition.jsx";
 import { toast } from "react-toastify";
 import { NavbarAdmin } from "../../../components/NavbarAdmin/navbarAdmin.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
@@ -8,7 +9,6 @@ import {
 	toggleAdminStatus,
 } from "../../../services/Admin/admins.js";
 import "./adminManager.css";
-import { useAdminGuard } from "../../../hooks/useAdminGuard.jsx";
 
 function initials(name) {
 	return name
@@ -21,9 +21,7 @@ function initials(name) {
 
 export function AdminManager() {
 	const navigate = useNavigate();
-	const { checking, isActive, BlockedScreen } = useAdminGuard();
-
-	const [search, setSearch] = useState("");
+const [search, setSearch] = useState("");
 	const [admins, setAdmins] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const currentUserId = localStorage.getItem("userId"); // ID del admin logueado
@@ -87,13 +85,12 @@ export function AdminManager() {
 	};
 
 	const isCurrentUser = (id) => id === currentUserId;
-	if (checking || !isActive) return <BlockedScreen />;
-
-	return (
+return (
 		<div className="adminmgr-container">
 			<NavbarAdmin />
 
-			<main className="adminmgr-main">
+			<PageTransition>
+<main className="adminmgr-main">
 				<h1 className="adminmgr-title">Administradores</h1>
 
 				<div className="adminmgr-toolbar">
@@ -199,6 +196,7 @@ export function AdminManager() {
 					)}
 				</div>
 			</main>
+			</PageTransition>
 
 			<FooterGuest />
 		</div>

@@ -1,8 +1,7 @@
 import { NavbarVet } from "../../../components/NavbarVet/navbarVet.jsx";
+import { PageTransition } from "../../../components/PageTransition/PageTransition.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
 import "./vetHistory.css";
-import { useVetGuard } from "../../../hooks/useVetGuard.jsx";
-
 // Datos placeholder — se conectará al backend más adelante
 const MOCK_HISTORY = [
 	{
@@ -88,16 +87,13 @@ const STATUS_CONFIG = {
 };
 
 export function VetHistory() {
-	const { checking, isActive, BlockedScreen } = useVetGuard();
-
-	// Bloquear si está verificando o inactivo
-	if (checking || !isActive) return <BlockedScreen />;
-
-	return (
+// Bloquear si está verificando o inactivo
+return (
 		<div className="vethist-page-container">
 			<NavbarVet />
 
-			<main className="vethist-main">
+			<PageTransition>
+<main className="vethist-main">
 				<h1 className="vethist-title">Historial de citas</h1>
 
 				<div className="vethist-table-wrapper">
@@ -142,6 +138,7 @@ export function VetHistory() {
 					</table>
 				</div>
 			</main>
+			</PageTransition>
 
 			<FooterGuest />
 		</div>

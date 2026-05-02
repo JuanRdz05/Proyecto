@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { PageTransition } from "../../../components/PageTransition/PageTransition.jsx";
 import { toast } from "react-toastify";
 import { NavbarClient } from "../../../components/NavbarClient/navbarClient.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
@@ -9,16 +10,11 @@ import {
 	togglePetStatus,
 } from "../../../services/Client/pet.js";
 import "./petDetails.css";
-import { useClientGuard } from "../../../hooks/useClientGuard.jsx";
 
 export function PetDetails() {
 	const { id } = useParams();
-
-	const { checking, isActive, BlockedScreen } = useClientGuard();
-
-	if (checking || !isActive) return <BlockedScreen />;
-
-	const [pet, setPet] = useState(null);
+	const navigate = useNavigate();
+const [pet, setPet] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 	const [isEditing, setIsEditing] = useState(false);
@@ -130,9 +126,11 @@ export function PetDetails() {
 		return (
 			<div className="petdetails-page-container">
 				<NavbarClient />
-				<main className="petdetails-main">
+				<PageTransition>
+<main className="petdetails-main">
 					<div className="loading-container">Cargando información...</div>
 				</main>
+			</PageTransition>
 			</div>
 		);
 	}
@@ -141,21 +139,23 @@ export function PetDetails() {
 		return (
 			<div className="petdetails-page-container">
 				<NavbarClient />
-				<main className="petdetails-main">
+				<PageTransition>
+<main className="petdetails-main">
 					<div className="loading-container">
 						{error || "No se encontró la mascota"}
 					</div>
 				</main>
+			</PageTransition>
 			</div>
 		);
 	}
 
 	const adminLocked = !pet.isActive && pet.disabledByAdmin;
-
-	return (
+return (
 		<div className="petdetails-page-container">
 			<NavbarClient />
-			<main className="petdetails-main">
+			<PageTransition>
+<main className="petdetails-main">
 				<div
 					className={`petdetails-card ${adminLocked ? "pet-card-locked" : ""}`}
 				>
@@ -324,6 +324,7 @@ export function PetDetails() {
 					</div>
 				</div>
 			</main>
+			</PageTransition>
 			<FooterGuest />
 		</div>
 	);

@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
+import { PageTransition } from "../../../components/PageTransition/PageTransition.jsx";
 import { NavbarAdmin } from "../../../components/NavbarAdmin/navbarAdmin.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
 import { toast } from "react-toastify";
 import {
-	getAllClients,
+getAllClients,
 	toggleClientStatus,
 } from "../../../services/Admin/clients.js";
 import "./adminClients.css";
-import { useAdminGuard } from "../../../hooks/useAdminGuard.jsx";
-
 function initials(name) {
 	return name
 		.split(" ")
@@ -19,9 +18,7 @@ function initials(name) {
 }
 
 export function AdminClients() {
-	const { checking, isActive, BlockedScreen } = useAdminGuard();
-
-	const [clients, setClients] = useState([]);
+const [clients, setClients] = useState([]);
 	const [search, setSearch] = useState("");
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
@@ -108,15 +105,13 @@ export function AdminClients() {
 	// ── Nombre completo ────────────────────────────────────────────────────────
 	const fullName = (c) =>
 		[c.name, c.paternalLastName, c.maternalLastName].filter(Boolean).join(" ");
-
-	if (checking || !isActive) return <BlockedScreen />;
-
-	// ── Render ─────────────────────────────────────────────────────────────────
+// ── Render ─────────────────────────────────────────────────────────────────
 	return (
 		<div className="admincl-container">
 			<NavbarAdmin />
 
-			<main className="admincl-main">
+			<PageTransition>
+<main className="admincl-main">
 				<h1 className="admincl-title">Clientes</h1>
 
 				{/* Barra de búsqueda */}
@@ -205,6 +200,7 @@ export function AdminClients() {
 					</div>
 				)}
 			</main>
+			</PageTransition>
 
 			<FooterGuest />
 		</div>

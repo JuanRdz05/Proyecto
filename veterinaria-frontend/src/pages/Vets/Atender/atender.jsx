@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { PageTransition } from "../../../components/PageTransition/PageTransition.jsx";
 import { NavbarVet } from "../../../components/NavbarVet/navbarVet.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
 import "./atender.css";
-import { useVetGuard } from "../../../hooks/useVetGuard.jsx";
 
 // Datos dummy para la cita — se conectará al backend
 const MOCK_CITAS = {
@@ -41,9 +41,7 @@ const newMed = () => ({
 });
 
 export function AtenderCita() {
-	const { checking, isActive, BlockedScreen } = useVetGuard();
-	if (checking || !isActive) return <BlockedScreen />;
-	const { id } = useParams();
+const { id } = useParams();
 	const navigate = useNavigate();
 	const cita = MOCK_CITAS[id] || MOCK_CITAS[1];
 
@@ -73,8 +71,7 @@ export function AtenderCita() {
 	const removeMedicamento = (medId) => {
 		setMedicamentos((prev) => prev.filter((m) => m.id !== medId));
 	};
-
-	const handleSubmit = (e) => {
+const handleSubmit = (e) => {
 		e.preventDefault();
 		// TODO: conectar con backend
 		console.log("Cita terminada:", {
@@ -92,7 +89,8 @@ export function AtenderCita() {
 		<div className="atender-page-container">
 			<NavbarVet />
 
-			<main className="atender-main">
+			<PageTransition>
+<main className="atender-main">
 				<div className="atender-card">
 					<h2 className="atender-title">Atender Cita</h2>
 
@@ -315,6 +313,7 @@ export function AtenderCita() {
 					</form>
 				</div>
 			</main>
+			</PageTransition>
 
 			<FooterGuest />
 		</div>

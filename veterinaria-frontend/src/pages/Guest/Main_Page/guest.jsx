@@ -1,10 +1,10 @@
 // src/pages/GuestHome/guest.jsx (Actualizado)
+import { PageTransition } from "../../../components/PageTransition/PageTransition.jsx";
 import { useState, useEffect } from "react"; // 1. Importamos useState y useEffect
 import { NavbarGuest } from "../../../components/NavbarGuest/navbarGuest.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
 // Usaremos la nueva clase que definiremos en el CSS
 import "./guest.css";
-
 export function Guest() {
 	// --- LÓGICA DE ROTACIÓN DEL CARRUSEL ---
 	
@@ -32,7 +32,8 @@ export function Guest() {
 			<NavbarGuest />
 
 			{/* CONTENIDO PRINCIPAL */}
-			<main className="guest-main-content">
+			<PageTransition>
+<main className="guest-main-content">
 				
 				{/* SECCIÓN 1: Carrusel de Imágenes */}
 				<section className="carousel-section">
@@ -138,6 +139,7 @@ export function Guest() {
 				</section>
 
 			</main>
+			</PageTransition>
 
 			{/* IMPORTAMOS EL FOOTER */}
 			<FooterGuest />

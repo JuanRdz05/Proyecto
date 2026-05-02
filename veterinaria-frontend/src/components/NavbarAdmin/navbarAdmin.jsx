@@ -8,12 +8,15 @@ export function NavbarAdmin() {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const userName = localStorage.getItem("userName") || "Admin";
-	const [profilePic, setProfilePic] = useState(null);
+	const [profilePic, setProfilePic] = useState(() => localStorage.getItem("profilePic") || null);
 
 	useEffect(() => {
 		getProfile() // ← Usa el servicio que convierte la URL a completa
 			.then((data) => {
-				if (data?.profilePicture) setProfilePic(data.profilePicture);
+				if (data?.profilePicture) {
+					setProfilePic(data.profilePicture);
+					localStorage.setItem("profilePic", data.profilePicture);
+				}
 			})
 			.catch(() => {}); // Si falla, queda el placeholder
 	}, []);
