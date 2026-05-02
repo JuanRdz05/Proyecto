@@ -70,14 +70,19 @@ const getAllAppointments = async (req, res) => {
 			return res.status(403).json({ message: "Acceso denegado" });
 		}
 
-		const appointments = await Appointments.find({});
+		// POPULATE para traer datos completos
+		const appointments = await Appointments.find({})
+			.populate("pet", "name petType breed") // Datos de la mascota
+			.populate("owner", "name paternalLastName email username") // Datos del dueño
+			.populate("service", "name price description") // Datos del servicio
+			.populate("vet", "name paternalLastName username") // Datos del veterinario asignado
+			.sort({ date: 1, time: 1 });
+
 		if (appointments.length === 0) {
-			return res
-				.status(200)
-				.json({
-					message: "No hay citas en la base de datos",
-					appointments: [],
-				});
+			return res.status(200).json({
+				message: "No hay citas en la base de datos",
+				appointments: [],
+			});
 		}
 
 		res.status(200).json({ message: "Citas obtenidas", appointments });
@@ -143,7 +148,7 @@ const cancelAppointment = async (req, res) => {
 		await safeLog(
 			"UPDATE",
 			"APPOINTMENT",
-			`Cancelación de la cita #${id} (estado anterior: ${oldStatus})`,
+			`Cancelación de la cita #${id}`,
 			{
 				appointmentId: id,
 				oldStatus: oldStatus,
@@ -166,9 +171,142 @@ const cancelAppointment = async (req, res) => {
 	}
 };
 
+const acceptAppointment = async (req, res) => {
+	try {
+		const { id } = req.params;
+		const user = req.user;
+
+		if (user.role !== "admin") {
+			return res
+				.status(403)
+				.json({
+					message: "Acceso denegado: Solo administradores pueden aceptar citas",
+				});
+		}
+
+		const appointment = await Appointments.findById(id);
+
+		if (!appointment) {
+			return res.status(404).json({ message: "Cita no encontrada" });
+		}
+
+		if (appointment.status !== "Pendiente") {
+			return res.status(400).json({
+				message: `No se puede aceptar una cita con estado: ${appointment.status}`,
+			});
+		}
+
+		const oldStatus = appointment.status;
+		appointment.status = "Aceptada";
+		appointment.vet = req.body.vetId || null;
+		await appointment.save();
+
+		// Volver a buscar con populate para devolver datos completos
+		const updatedAppointment = await Appointments.findById(id)
+			.populate("pet", "name petType breed")
+			.populate("owner", "name paternalLastName email username")
+			.populate("service", "name price description")
+			.populate("vet", "name paternalLastName username");
+
+		await safeLog(
+			"UPDATE",
+			"APPOINTMENT",
+			`Aceptación de la cita #${id}`,
+			{
+				appointmentId: id,
+				petName: updatedAppointment.pet?.name,
+				ownerName: updatedAppointment.owner?.name,
+				serviceName: updatedAppointment.service?.name,
+				oldStatus: oldStatus,
+				newStatus: "Aceptada",
+			},
+			user._id || user.id,
+		);
+
+		res.status(200).json({
+			message: "Cita aceptada exitosamente",
+			appointment: updatedAppointment,
+		});
+	} catch (error) {
+		console.error("Error al aceptar la cita:", error);
+		res
+			.status(500)
+			.json({ message: "Error al aceptar la cita", error: error.message });
+	}
+};
+
+const rejectAppointment = async (req, res) => {
+	try {
+		const { id } = req.params;
+		const { rejectionReason } = req.body;
+		const user = req.user;
+
+		if (user.role !== "admin") {
+			return res
+				.status(403)
+				.json({
+					message:
+						"Acceso denegado: Solo administradores pueden rechazar citas",
+				});
+		}
+
+		const appointment = await Appointments.findById(id);
+
+		if (!appointment) {
+			return res.status(404).json({ message: "Cita no encontrada" });
+		}
+
+		if (appointment.status !== "Pendiente") {
+			return res.status(400).json({
+				message: `No se puede rechazar una cita con estado: ${appointment.status}`,
+			});
+		}
+
+		const oldStatus = appointment.status;
+		appointment.status = "Rechazada";
+		appointment.rejectionReason = rejectionReason || null;
+		await appointment.save();
+
+		// Volver a buscar con populate para devolver datos completos
+		const updatedAppointment = await Appointments.findById(id)
+			.populate("pet", "name petType breed")
+			.populate("owner", "name paternalLastName email username")
+			.populate("service", "name price description")
+			.populate("vet", "name paternalLastName username");
+
+		await safeLog(
+			"UPDATE",
+			"APPOINTMENT",
+			`Rechazo de la cita #${id}`,
+			{
+				appointmentId: id,
+				petName: updatedAppointment.pet?.name,
+				ownerName: updatedAppointment.owner?.name,
+				serviceName: updatedAppointment.service?.name,
+				oldStatus: oldStatus,
+				newStatus: "Rechazada",
+				rejectionReason: rejectionReason || null,
+			},
+			user._id || user.id,
+		);
+
+		res.status(200).json({
+			message: "Cita rechazada exitosamente",
+			appointment: updatedAppointment,
+		});
+	} catch (error) {
+		console.error("Error al rechazar la cita:", error);
+		res
+			.status(500)
+			.json({ message: "Error al rechazar la cita", error: error.message });
+	}
+};
+
 module.exports = {
 	createAppointments,
 	getAllAppointments,
 	getAppointmentsByUser,
 	cancelAppointment,
+	acceptAppointment,
+	rejectAppointment,
 };

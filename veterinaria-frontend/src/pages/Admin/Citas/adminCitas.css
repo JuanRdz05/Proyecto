@@ -285,6 +285,109 @@
 	background-color: #c82333;
 }
 
+/* Skeleton loading */
+.skeleton-row td {
+	padding: 0.9rem 1.1rem;
+}
+
+.skeleton {
+	background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+	background-size: 200% 100%;
+	animation: skeleton-shimmer 1.5s infinite;
+	border-radius: 4px;
+	height: 14px;
+}
+
+.skeleton-text {
+	width: 80%;
+}
+
+.skeleton-badge {
+	width: 60px;
+	height: 24px;
+	border-radius: 20px;
+}
+
+.skeleton-actions {
+	width: 60px;
+}
+
+@keyframes skeleton-shimmer {
+	0% {
+		background-position: 200% 0;
+	}
+	100% {
+		background-position: -200% 0;
+	}
+}
+
+/* Refresh overlay */
+.refresh-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 3px;
+	background: linear-gradient(90deg, transparent, #007bff, transparent);
+	animation: refresh-slide 1s infinite;
+	z-index: 10;
+	pointer-events: none;
+}
+
+@keyframes refresh-slide {
+	0% {
+		transform: translateX(-100%);
+	}
+	100% {
+		transform: translateX(100%);
+	}
+}
+
+.admin-citas-table-wrapper {
+	position: relative;
+}
+
+/* Fila en procesamiento */
+.cita-row.processing {
+	opacity: 0.6;
+	pointer-events: none;
+}
+
+/* Botón de recargar */
+.btn-refresh {
+	margin-left: 0.5rem;
+	font-size: 1rem;
+}
+
+/* Estado sin acciones */
+.no-actions {
+	color: #9ca3af;
+	font-size: 0.9rem;
+}
+
+/* Empty state mejorado */
+.empty-content {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 2rem;
+}
+
+.empty-icon {
+	font-size: 2rem;
+	margin-bottom: 0.5rem;
+	opacity: 0.6;
+}
+
+/* Transiciones suaves */
+.cita-row {
+	transition: background-color 0.15s;
+}
+
+.cita-row:hover {
+	background-color: #f8f9ff;
+}
+
 /* ---- RESPONSIVE ---- */
 @media (max-width: 768px) {
 	.admin-citas-subheader {

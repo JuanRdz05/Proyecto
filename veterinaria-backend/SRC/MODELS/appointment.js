@@ -11,7 +11,6 @@ const appointmentSchema = new mongoose.Schema(
 			required: true,
 			validate: {
 				validator: function (v) {
-					// Validar formato HH:MM
 					return /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/.test(v);
 				},
 				message: "El formato de hora debe ser HH:MM",
@@ -20,17 +19,17 @@ const appointmentSchema = new mongoose.Schema(
 		pet: {
 			type: mongoose.Schema.Types.ObjectId,
 			required: true,
-			ref: "Pets",
+			ref: "Pets", // ← Correcto
 		},
 		owner: {
 			type: mongoose.Schema.Types.ObjectId,
 			required: true,
-			ref: "users",
+			ref: "Users", // ← CORREGIDO: era "users" (minúscula)
 		},
 		service: {
 			type: mongoose.Schema.Types.ObjectId,
 			required: true,
-			ref: "Services",
+			ref: "Services", // ← Correcto
 		},
 		status: {
 			type: String,
@@ -51,7 +50,7 @@ const appointmentSchema = new mongoose.Schema(
 		vet: {
 			type: mongoose.Schema.Types.ObjectId,
 			required: false,
-			ref: "users",
+			ref: "Users", // ← CORREGIDO: era "users" (minúscula)
 		},
 		rejectionReason: {
 			type: String,

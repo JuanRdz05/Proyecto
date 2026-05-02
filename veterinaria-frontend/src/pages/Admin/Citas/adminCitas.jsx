@@ -4,86 +4,69 @@ import { toast } from "react-toastify";
 import { NavbarAdmin } from "../../../components/NavbarAdmin/navbarAdmin.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
 import { getProfile } from "../../../services/Client/profile.js";
+import {
+	getAllAppointments,
+	acceptAppointment,
+	rejectAppointment,
+} from "../../../services/Admin/citas.js";
 import "./adminCitas.css";
-
-// Datos placeholder — se conectará al backend más adelante
-const ALL_APPOINTMENTS = [
-	{
-		id: 1,
-		pet: "Max",
-		owner: "Juan Pérez",
-		service: "Vacunación",
-		datetime: "2024-01-15 10:00",
-		status: "Pendiente",
-	},
-	{
-		id: 2,
-		pet: "Rocky",
-		owner: "Carlos López",
-		service: "Cirugía menor",
-		datetime: "2024-01-15 14:00",
-		status: "Pendiente",
-	},
-	{
-		id: 3,
-		pet: "Toby",
-		owner: "Pedro Sánchez",
-		service: "Revisión anual",
-		datetime: "2024-01-16 16:30",
-		status: "Pendiente",
-	},
-	{
-		id: 4,
-		pet: "Bella",
-		owner: "Ana Martínez",
-		service: "Consulta",
-		datetime: "2024-01-17 09:00",
-		status: "Aceptada",
-	},
-	{
-		id: 5,
-		pet: "Luna",
-		owner: "Laura Vega",
-		service: "Desparasitación",
-		datetime: "2024-01-18 11:00",
-		status: "Cancelada",
-	},
-];
 
 const STATUS_CONFIG = {
 	Pendiente: { label: "Pendiente", cls: "status-pendiente" },
 	Aceptada: { label: "Aceptada", cls: "status-aceptada" },
-	Cancelada: { label: "Cancelada", cls: "status-cancelada" },
 	Rechazada: { label: "Rechazada", cls: "status-rechazada" },
+	"En progreso": { label: "En progreso", cls: "status-progreso" },
+	Cancelada: { label: "Cancelada", cls: "status-cancelada" },
+	Terminada: { label: "Terminada", cls: "status-terminada" },
 };
 
 export function AdminCitas() {
 	const navigate = useNavigate();
-	const [filter, setFilter] = useState("Pendientes"); // "Pendientes" | "Todas"
 
-	// Estados para la validación de la cuenta
+	const [appointments, setAppointments] = useState([]);
+	const [loading, setLoading] = useState(true);
+	const [refreshing, setRefreshing] = useState(false);
+	const [filter, setFilter] = useState("Pendientes");
+	const [processingId, setProcessingId] = useState(null);
 	const [isActive, setIsActive] = useState(true);
 	const [checking, setChecking] = useState(true);
 
-	// Verificar estado del administrador al cargar
+	// Verificar estado del admin
 	useEffect(() => {
 		const checkStatus = async () => {
 			try {
 				const data = await getProfile();
-				if (data.isActive === false) {
-					setIsActive(false);
-				}
+				if (data.isActive === false) setIsActive(false);
 			} catch (error) {
 				console.error("Error al verificar estado:", error);
-				toast.error("Error al verificar tu estado.", {
-					position: "top-right",
-					autoClose: 4000,
-				});
+				toast.error("Error al verificar tu estado.", { autoClose: 4000 });
 			} finally {
 				setChecking(false);
 			}
 		};
 		checkStatus();
+	}, []);
+
+	const fetchAppointments = async (showRefreshing = false) => {
+		if (showRefreshing) setRefreshing(true);
+		else setLoading(true);
+
+		try {
+			const data = await getAllAppointments();
+			setAppointments(data.appointments || []);
+		} catch (error) {
+			console.error("Error cargando citas:", error);
+			toast.error(error.message || "Error al cargar las citas", {
+				autoClose: 4000,
+			});
+		} finally {
+			setLoading(false);
+			setRefreshing(false);
+		}
+	};
+
+	useEffect(() => {
+		fetchAppointments();
 	}, []);
 
 	const handleLogout = async () => {
@@ -97,28 +80,67 @@ export function AdminCitas() {
 			toast.error("Error al cerrar sesión.");
 		} finally {
 			localStorage.clear();
-			setTimeout(() => {
-				navigate("/inicio-sesion");
-			}, 1500);
+			setTimeout(() => navigate("/inicio-sesion"), 1500);
+		}
+	};
+
+	const handleAceptar = async (id) => {
+		setProcessingId(id);
+		try {
+			const result = await acceptAppointment(id);
+			toast.success("Cita aceptada exitosamente", { autoClose: 3000 });
+			// Reemplazar la cita actualizada en el estado
+			setAppointments((prev) =>
+				prev.map((a) => (a._id === id ? result.appointment : a)),
+			);
+		} catch (error) {
+			toast.error(error.message || "Error al aceptar la cita", {
+				autoClose: 4000,
+			});
+		} finally {
+			setProcessingId(null);
+		}
+	};
+
+	const handleRechazar = async (id) => {
+		setProcessingId(id);
+		try {
+			const result = await rejectAppointment(id);
+			toast.success("Cita rechazada exitosamente", { autoClose: 3000 });
+			setAppointments((prev) =>
+				prev.map((a) => (a._id === id ? result.appointment : a)),
+			);
+		} catch (error) {
+			toast.error(error.message || "Error al rechazar la cita", {
+				autoClose: 4000,
+			});
+		} finally {
+			setProcessingId(null);
 		}
 	};
 
 	const visibleCitas =
 		filter === "Pendientes"
-			? ALL_APPOINTMENTS.filter((c) => c.status === "Pendiente")
-			: ALL_APPOINTMENTS;
+			? appointments.filter((c) => c.status === "Pendiente")
+			: appointments;
 
-	const handleAceptar = (id) => {
-		// TODO: llamar al backend para aceptar
-		console.log("Aceptar cita:", id);
+	const formatDateTime = (dateStr, timeStr) => {
+		if (!dateStr) return "N/A";
+		const date = new Date(dateStr);
+		const formattedDate = date.toLocaleDateString("es-ES", {
+			year: "numeric",
+			month: "2-digit",
+			day: "2-digit",
+		});
+		return `${formattedDate} ${timeStr || ""}`;
 	};
 
-	const handleRechazar = (id) => {
-		// TODO: llamar al backend para rechazar
-		console.log("Rechazar cita:", id);
+	// Helper para obtener nombre completo
+	const getFullName = (person) => {
+		if (!person) return "N/A";
+		return `${person.name || ""} ${person.paternalLastName || ""}`.trim();
 	};
 
-	// Mostrar loading mientras verifica
 	if (checking) {
 		return (
 			<div className="admin-citas-container">
@@ -129,7 +151,6 @@ export function AdminCitas() {
 		);
 	}
 
-	// Si el admin está inactivo, mostrar pantalla de bloqueo
 	if (!isActive) {
 		return (
 			<div className="admin-citas-container">
@@ -158,9 +179,12 @@ export function AdminCitas() {
 			<main className="admin-citas-main">
 				<h1 className="admin-citas-title">Citas por aprobar</h1>
 
-				{/* Subtítulo + filtros */}
 				<div className="admin-citas-subheader">
-					<p className="admin-citas-subtitle">Próximas citas</p>
+					<p className="admin-citas-subtitle">
+						{filter === "Pendientes"
+							? `Citas pendientes (${visibleCitas.length})`
+							: `Todas las citas (${visibleCitas.length})`}
+					</p>
 
 					<div className="filter-group">
 						<button
@@ -175,11 +199,20 @@ export function AdminCitas() {
 						>
 							Todas
 						</button>
+						<button
+							className="btn-filter btn-refresh"
+							onClick={() => fetchAppointments(true)}
+							disabled={refreshing}
+							title="Recargar citas"
+						>
+							{refreshing ? "⟳" : "↻"}
+						</button>
 					</div>
 				</div>
 
-				{/* Tabla */}
 				<div className="admin-citas-table-wrapper">
+					{refreshing && <div className="refresh-overlay"></div>}
+
 					<table className="admin-citas-table">
 						<thead>
 							<tr>
@@ -192,10 +225,36 @@ export function AdminCitas() {
 							</tr>
 						</thead>
 						<tbody>
-							{visibleCitas.length === 0 ? (
+							{loading ? (
+								Array.from({ length: 5 }).map((_, i) => (
+									<tr key={`skeleton-${i}`} className="skeleton-row">
+										<td>
+											<div className="skeleton skeleton-text"></div>
+										</td>
+										<td>
+											<div className="skeleton skeleton-text"></div>
+										</td>
+										<td>
+											<div className="skeleton skeleton-text"></div>
+										</td>
+										<td>
+											<div className="skeleton skeleton-text"></div>
+										</td>
+										<td>
+											<div className="skeleton skeleton-badge"></div>
+										</td>
+										<td>
+											<div className="skeleton skeleton-actions"></div>
+										</td>
+									</tr>
+								))
+							) : visibleCitas.length === 0 ? (
 								<tr>
 									<td colSpan={6} className="empty-row">
-										No hay citas que mostrar.
+										<div className="empty-content">
+											<span className="empty-icon">📅</span>
+											<p>No hay citas que mostrar.</p>
+										</div>
 									</td>
 								</tr>
 							) : (
@@ -204,34 +263,54 @@ export function AdminCitas() {
 										label: cita.status,
 										cls: "status-pendiente",
 									};
+									const isProcessing = processingId === cita._id;
+									const isPending = cita.status === "Pendiente";
+
 									return (
-										<tr key={cita.id}>
+										<tr
+											key={cita._id}
+											className={`cita-row ${isProcessing ? "processing" : ""}`}
+										>
 											<td className="col-pet">
-												<strong>{cita.pet}</strong>
+												<strong>{cita.pet?.name || "N/A"}</strong>
+												{cita.pet?.petType && (
+													<span className="pet-type">{cita.pet.petType}</span>
+												)}
 											</td>
-											<td className="col-owner">{cita.owner}</td>
-											<td className="col-service">{cita.service}</td>
-											<td className="col-datetime">{cita.datetime}</td>
+											<td className="col-owner">{getFullName(cita.owner)}</td>
+											<td className="col-service">
+												{cita.service?.name || "N/A"}
+											</td>
+											<td className="col-datetime">
+												{formatDateTime(cita.date, cita.time)}
+											</td>
 											<td className="col-status">
 												<span className={`cita-status-badge ${cfg.cls}`}>
 													{cfg.label}
 												</span>
 											</td>
 											<td className="col-actions">
-												<button
-													className="btn-action btn-aceptar"
-													onClick={() => handleAceptar(cita.id)}
-													title="Aceptar cita"
-												>
-													✓
-												</button>
-												<button
-													className="btn-action btn-rechazar"
-													onClick={() => handleRechazar(cita.id)}
-													title="Rechazar cita"
-												>
-													✕
-												</button>
+												{isPending && (
+													<>
+														<button
+															className="btn-action btn-aceptar"
+															onClick={() => handleAceptar(cita._id)}
+															disabled={isProcessing}
+															title="Aceptar cita"
+														>
+															{isProcessing ? "..." : "✓"}
+														</button>
+														<button
+															className="btn-action btn-rechazar"
+															onClick={() => handleRechazar(cita._id)}
+															disabled={isProcessing}
+															title="Rechazar cita"
+														>
+															{isProcessing ? "..." : "✕"}
+														</button>
+													</>
+												)}
+												{!isPending && <span className="no-actions">—</span>}
 											</td>
 										</tr>
 									);
