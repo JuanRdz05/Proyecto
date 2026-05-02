@@ -3,7 +3,6 @@ const { hashPassword } = require("../../MIDDLEWARES/passwords.js");
 const { validateEmail } = require("../../MIDDLEWARES/emailFormatter.js");
 const { createLog } = require("../../MIDDLEWARES/logs.js");
 
-// Helper para loguear de forma segura (no bloquea la operación principal)
 const safeLog = async (action, resource, description, metadata, userId) => {
 	try {
 		await createLog(action, resource, description, metadata, userId);
@@ -15,16 +14,11 @@ const safeLog = async (action, resource, description, metadata, userId) => {
 const getAllUsers = async (req, res) => {
 	try {
 		const users = await Users.find({}).select("-_id");
-		console.log("===================================================");
-		console.log("Mostrando los usuarios registrados...");
 		if (users.length === 0) {
-			console.log("===================================================");
-			console.log("No hay usuarios por mostrar");
 			return res
 				.status(404)
 				.json({ message: "No hay usuarios en la base de datos" });
 		}
-
 		res.status(200).json({ message: "Usuarios encontrados", users });
 	} catch (error) {
 		console.error("Error al obtener los usuarios: ", error);
@@ -75,18 +69,16 @@ const registerUser = async (req, res) => {
 
 		await user.save();
 
-		// Log de auditoría para registro
 		await safeLog(
 			"CREATE",
 			"USER",
-			`Nuevo usuario registrado: ${username} (${email}) con rol ${userRole}`,
+			`Registro de nuevo usuario con rol ${userRole}`,
 			{
 				userId: user._id,
 				username: user.username,
 				email: user.email,
 				role: user.role,
 				name: `${name} ${paternalLastName || ""} ${maternalLastName || ""}`.trim(),
-				registeredBy: req.user?.id || "self-registration",
 			},
 			user._id,
 		);
@@ -111,18 +103,12 @@ const registerUser = async (req, res) => {
 const getUser = async (req, res) => {
 	try {
 		const { email } = req.params;
-		console.log("===================================================");
-		console.log("Buscando usuario...");
 		const user = await Users.findOne({ email }).select(
 			"-_id name paternalLastName maternalLastName email role isActive",
 		);
 		if (!user) {
-			console.log("===================================================");
-			console.log("No hay usuario con ese email");
 			return res.status(404).json({ message: "No hay usuario con ese email" });
 		}
-		console.log("===================================================");
-		console.log("Usuario encontrado: ", user);
 		res.status(200).json({ message: "Usuario encontrado: ", user });
 	} catch (error) {
 		console.error("Error al obtener el usuario: ", error);
@@ -139,18 +125,10 @@ const getProfile = async (req, res) => {
 const getAllVets = async (req, res) => {
 	try {
 		const vets = await Users.find({ role: "vet" }).select("-password -__v");
-		console.log("===================================================");
-		console.log(`Mostrando ${vets.length} veterinarios`);
-		res.status(200).json({
-			message: "Veterinarios encontrados",
-			vets,
-		});
+		res.status(200).json({ message: "Veterinarios encontrados", vets });
 	} catch (error) {
 		console.error("Error al obtener veterinarios:", error);
-		res.status(500).json({
-			message: "Error al obtener veterinarios",
-			error,
-		});
+		res.status(500).json({ message: "Error al obtener veterinarios", error });
 	}
 };
 
@@ -160,38 +138,27 @@ const toggleVetStatus = async (req, res) => {
 		const vet = await Users.findOne({ _id: id, role: "vet" });
 
 		if (!vet) {
-			return res.status(404).json({
-				message: "Veterinario no encontrado",
-			});
+			return res.status(404).json({ message: "Veterinario no encontrado" });
 		}
 
 		const oldStatus = vet.isActive;
 		vet.isActive = !vet.isActive;
 		await vet.save();
 
-		const actionType = vet.isActive ? "activado" : "desactivado";
+		const actionType = vet.isActive ? "Activación" : "Desactivación";
 
-		// Log de auditoría
 		await safeLog(
 			"UPDATE",
 			"USER",
-			`El administrador ${req.user?.username || "sistema"} ${actionType} al veterinario ${vet.name} (${vet.email})`,
+			`${actionType} del veterinario ${vet.name} (${vet.email})`,
 			{
 				vetId: vet._id,
 				vetName: vet.name,
 				vetEmail: vet.email,
 				oldStatus: oldStatus,
 				newStatus: vet.isActive,
-				actionBy: req.user?.username,
-				actionById: req.user?.id,
-				actionByRole: req.user?.role,
 			},
 			req.user?.id,
-		);
-
-		console.log("===================================================");
-		console.log(
-			`Veterinario ${vet.name} ahora está ${vet.isActive ? "activo" : "inactivo"}`,
 		);
 
 		res.status(200).json({
@@ -205,28 +172,21 @@ const toggleVetStatus = async (req, res) => {
 		});
 	} catch (error) {
 		console.error("Error al cambiar estado del veterinario:", error);
-		res.status(500).json({
-			message: "Error al cambiar estado del veterinario",
-			error,
-		});
+		res
+			.status(500)
+			.json({ message: "Error al cambiar estado del veterinario", error });
 	}
 };
 
 const getAllAdmins = async (req, res) => {
 	try {
 		const admins = await Users.find({ role: "admin" }).select("-password -__v");
-		console.log("===================================================");
-		console.log(`Mostrando ${admins.length} administradores`);
-		res.status(200).json({
-			message: "Administradores encontrados",
-			admins,
-		});
+		res.status(200).json({ message: "Administradores encontrados", admins });
 	} catch (error) {
 		console.error("Error al obtener administradores:", error);
-		res.status(500).json({
-			message: "Error al obtener administradores",
-			error,
-		});
+		res
+			.status(500)
+			.json({ message: "Error al obtener administradores", error });
 	}
 };
 
@@ -235,45 +195,34 @@ const toggleAdminStatus = async (req, res) => {
 		const { id } = req.params;
 
 		if (req.user.id === id) {
-			return res.status(403).json({
-				message: "No puedes desactivar tu propia cuenta",
-			});
+			return res
+				.status(403)
+				.json({ message: "No puedes desactivar tu propia cuenta" });
 		}
 
 		const admin = await Users.findOne({ _id: id, role: "admin" });
 		if (!admin) {
-			return res.status(404).json({
-				message: "Administrador no encontrado",
-			});
+			return res.status(404).json({ message: "Administrador no encontrado" });
 		}
 
 		const oldStatus = admin.isActive;
 		admin.isActive = !admin.isActive;
 		await admin.save();
 
-		const actionType = admin.isActive ? "activado" : "desactivado";
+		const actionType = admin.isActive ? "Activación" : "Desactivación";
 
-		// Log de auditoría
 		await safeLog(
 			"UPDATE",
 			"USER",
-			`El administrador ${req.user?.username || "sistema"} ${actionType} al administrador ${admin.name} (${admin.email})`,
+			`${actionType} del administrador ${admin.name} (${admin.email})`,
 			{
 				adminId: admin._id,
 				adminName: admin.name,
 				adminEmail: admin.email,
 				oldStatus: oldStatus,
 				newStatus: admin.isActive,
-				actionBy: req.user?.username,
-				actionById: req.user?.id,
-				actionByRole: req.user?.role,
 			},
 			req.user?.id,
-		);
-
-		console.log("===================================================");
-		console.log(
-			`Administrador ${admin.name} ahora está ${admin.isActive ? "activo" : "inactivo"}`,
 		);
 
 		res.status(200).json({
@@ -287,10 +236,9 @@ const toggleAdminStatus = async (req, res) => {
 		});
 	} catch (error) {
 		console.error("Error al cambiar estado del administrador:", error);
-		res.status(500).json({
-			message: "Error al cambiar estado del administrador",
-			error,
-		});
+		res
+			.status(500)
+			.json({ message: "Error al cambiar estado del administrador", error });
 	}
 };
 
@@ -299,12 +247,7 @@ const getAllClients = async (req, res) => {
 		const clients = await Users.find({ role: "client" }).select(
 			"-password -__v",
 		);
-		console.log("===================================================");
-		console.log(`Mostrando ${clients.length} clientes`);
-		res.status(200).json({
-			message: "Clientes encontrados",
-			clients,
-		});
+		res.status(200).json({ message: "Clientes encontrados", clients });
 	} catch (error) {
 		console.error("Error al obtener clientes:", error);
 		res.status(500).json({ message: "Error al obtener clientes", error });
@@ -324,22 +267,18 @@ const toggleClientStatus = async (req, res) => {
 		client.isActive = !client.isActive;
 		await client.save();
 
-		const actionType = client.isActive ? "activado" : "desactivado";
+		const actionType = client.isActive ? "Activación" : "Desactivación";
 
-		// Log de auditoría
 		await safeLog(
 			"UPDATE",
 			"USER",
-			`El administrador ${req.user?.username || "sistema"} ${actionType} al cliente ${client.name} (${client.email})`,
+			`${actionType} del cliente ${client.name} (${client.email})`,
 			{
 				clientId: client._id,
 				clientName: client.name,
 				clientEmail: client.email,
 				oldStatus: oldStatus,
 				newStatus: client.isActive,
-				actionBy: req.user?.username,
-				actionById: req.user?.id,
-				actionByRole: req.user?.role,
 			},
 			req.user?.id,
 		);
