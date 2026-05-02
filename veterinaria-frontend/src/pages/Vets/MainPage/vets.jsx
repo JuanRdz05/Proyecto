@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
 import { NavbarVet } from "../../../components/NavbarVet/navbarVet.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
-import { getProfile } from "../../../services/Client/profile.js";
+import { useVetGuard } from "../../../hooks/useVetGuard.jsx";
 import "./vets.css";
 
 // Datos placeholder
@@ -78,83 +77,12 @@ export function VetHome() {
 	const navigate = useNavigate();
 	const userName = localStorage.getItem("userName") || "Doctor";
 	const [showAll, setShowAll] = useState(false);
-	const [isActive, setIsActive] = useState(true);
-	const [checking, setChecking] = useState(true);
 
-	// Verificar estado del veterinario al cargar
-	useEffect(() => {
-		const checkStatus = async () => {
-			try {
-				const data = await getProfile();
-				if (data.isActive === false) {
-					setIsActive(false);
-				}
-			} catch (error) {
-				console.error("Error al verificar estado:", error);
-				toast.error("Error al verificar tu estado.", {
-					position: "top-right",
-					autoClose: 4000,
-				});
-			} finally {
-				setChecking(false);
-			}
-		};
-		checkStatus();
-	}, []);
+	// ── Guard: verifica si el veterinario está activo ──────────────────────
+	const { checking, isActive, BlockedScreen } = useVetGuard();
 
-	const handleLogout = async () => {
-		try {
-			await fetch("http://localhost:3050/users/v1/logout", {
-				method: "POST",
-				credentials: "include",
-			});
-			toast.success("Sesión cerrada correctamente.");
-		} catch (e) {
-			toast.error("Error al cerrar sesión.");
-		} finally {
-			localStorage.clear();
-			setTimeout(() => {
-				navigate("/inicio-sesion");
-			}, 1500);
-		}
-	};
-
-	// Mostrar loading mientras verifica
-	if (checking) {
-		return (
-			<div className="vet-page-container">
-				<div className="vet-loading-screen">
-					<p>Verificando tu estado...</p>
-				</div>
-			</div>
-		);
-	}
-
-	// Si el veterinario está inactivo, mostrar pantalla de bloqueo
-	if (!isActive) {
-		return (
-			<div className="vet-page-container">
-				<div className="vet-blocked-screen">
-					<div className="vet-blocked-card">
-						<div className="blocked-icon">🚫</div>
-						<h2>Cuenta desactivada</h2>
-						<p>
-							Tu cuenta ha sido desactivada por un administrador.
-							<br />
-							No puedes acceder al sistema en este momento.
-						</p>
-						<p className="blocked-contact">
-							Si crees que esto es un error, contacta al administrador del
-							sistema.
-						</p>
-						<button className="btn-logout-blocked" onClick={handleLogout}>
-							Cerrar sesión
-						</button>
-					</div>
-				</div>
-			</div>
-		);
-	}
+	// Bloquear si está verificando o inactivo
+	if (checking || !isActive) return <BlockedScreen />;
 
 	const visibleAppointments = showAll
 		? ALL_APPOINTMENTS
@@ -197,7 +125,9 @@ export function VetHome() {
 						{visibleAppointments.map((apt, index) => (
 							<div
 								key={apt.id}
-								className={`vet-apt-row ${index < visibleAppointments.length - 1 ? "with-divider" : ""}`}
+								className={`vet-apt-row ${
+									index < visibleAppointments.length - 1 ? "with-divider" : ""
+								}`}
 							>
 								<div className="vet-apt-info">
 									<p className="vet-apt-time">
