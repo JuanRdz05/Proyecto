@@ -8,6 +8,7 @@ import {
 	toggleAdminStatus,
 } from "../../../services/Admin/admins.js";
 import "./adminManager.css";
+import { useAdminGuard } from "../../../hooks/useAdminGuard.jsx";
 
 function initials(name) {
 	return name
@@ -20,6 +21,9 @@ function initials(name) {
 
 export function AdminManager() {
 	const navigate = useNavigate();
+	const { checking, isActive, BlockedScreen } = useAdminGuard();
+
+	if (checking || !isActive) return <BlockedScreen />;
 	const [search, setSearch] = useState("");
 	const [admins, setAdmins] = useState([]);
 	const [loading, setLoading] = useState(true);

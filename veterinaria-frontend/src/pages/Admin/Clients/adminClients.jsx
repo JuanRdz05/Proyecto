@@ -7,6 +7,7 @@ import {
 	toggleClientStatus,
 } from "../../../services/Admin/clients.js";
 import "./adminClients.css";
+import { useAdminGuard } from "../../../hooks/useAdminGuard.jsx";
 
 function initials(name) {
 	return name
@@ -18,6 +19,9 @@ function initials(name) {
 }
 
 export function AdminClients() {
+	const { checking, isActive, BlockedScreen } = useAdminGuard();
+
+	if (checking || !isActive) return <BlockedScreen />;
 	const [clients, setClients] = useState([]);
 	const [search, setSearch] = useState("");
 	const [loading, setLoading] = useState(true);

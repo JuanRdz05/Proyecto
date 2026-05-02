@@ -3,6 +3,7 @@ import { NavbarAdmin } from "../../../components/NavbarAdmin/navbarAdmin.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
 import { getAllLogs } from "../../../services/Admin/logs.js";
 import "./adminLogs.css";
+import { useAdminGuard } from "../../../hooks/useAdminGuard.jsx";
 
 const ACTION_CONFIG = {
 	CREATE: { label: "Crear", cls: "action-create" },
@@ -21,6 +22,9 @@ const ROLE_LABEL = {
 const ACTIONS = ["TODAS", "CREATE", "UPDATE", "DELETE", "LOGIN", "LOGOUT"];
 
 export function AdminLogs() {
+	const { checking, isActive, BlockedScreen } = useAdminGuard();
+
+	if (checking || !isActive) return <BlockedScreen />;
 	const [logs, setLogs] = useState([]);
 	const [filterAction, setFilterAction] = useState("TODAS");
 	const [searchQuery, setSearchQuery] = useState("");

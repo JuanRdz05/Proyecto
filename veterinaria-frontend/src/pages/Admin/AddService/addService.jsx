@@ -5,8 +5,12 @@ import { NavbarAdmin } from "../../../components/NavbarAdmin/navbarAdmin.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
 import { addService } from "../../../services/Admin/services.js";
 import "./addService.css";
+import { useAdminGuard } from "../../../hooks/useAdminGuard.jsx";
 
 export function AddService() {
+	const { checking, isActive, BlockedScreen } = useAdminGuard();
+
+	if (checking || !isActive) return <BlockedScreen />;
 	const navigate = useNavigate();
 	const [loading, setLoading] = useState(false);
 	const [errors, setErrors] = useState({});

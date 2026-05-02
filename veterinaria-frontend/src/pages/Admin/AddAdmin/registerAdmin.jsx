@@ -4,9 +4,13 @@ import { toast } from "react-toastify";
 import { InputField } from "../../../components/Inputfield/inputfield.jsx";
 import { registerUser } from "../../../services/Guest/register.js";
 import "./registerAdmin.css";
+import { useAdminGuard } from "../../../hooks/useAdminGuard.jsx";
 
 export function RegisterAdmin() {
 	const navigate = useNavigate();
+	const { checking, isActive, BlockedScreen } = useAdminGuard();
+
+	if (checking || !isActive) return <BlockedScreen />;
 
 	const [username, setUsername] = useState("");
 	const [name, setName] = useState("");

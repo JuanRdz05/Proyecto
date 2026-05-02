@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { NavbarAdmin } from "../../../components/NavbarAdmin/navbarAdmin.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
-import { getProfile } from "../../../services/Client/profile.js";
+import { useAdminGuard } from "../../../hooks/useAdminGuard.jsx";
 import {
 	getAllAppointments,
 	acceptAppointment,
@@ -23,36 +23,21 @@ const STATUS_CONFIG = {
 export function AdminCitas() {
 	const navigate = useNavigate();
 
+	// ── Guard: verifica si el administrador está activo ────────────────────
+	const { checking, isActive, BlockedScreen } = useAdminGuard();
+
 	const [appointments, setAppointments] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [refreshing, setRefreshing] = useState(false);
 	const [filter, setFilter] = useState("Pendientes");
 	const [processingId, setProcessingId] = useState(null);
-	const [isActive, setIsActive] = useState(true);
-	const [checking, setChecking] = useState(true);
 
-	// Estados para modales
+	// Estados para los modales
 	const [showReasonModal, setShowReasonModal] = useState(false);
 	const [showConfirmModal, setShowConfirmModal] = useState(false);
 	const [selectedCita, setSelectedCita] = useState(null);
 	const [rejectionReason, setRejectionReason] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
-
-	// Verificar estado del admin
-	useEffect(() => {
-		const checkStatus = async () => {
-			try {
-				const data = await getProfile();
-				if (data.isActive === false) setIsActive(false);
-			} catch (error) {
-				console.error("Error al verificar estado:", error);
-				toast.error("Error al verificar tu estado.", { autoClose: 4000 });
-			} finally {
-				setChecking(false);
-			}
-		};
-		checkStatus();
-	}, []);
 
 	const fetchAppointments = async (showRefreshing = false) => {
 		if (showRefreshing) setRefreshing(true);
@@ -76,20 +61,8 @@ export function AdminCitas() {
 		fetchAppointments();
 	}, []);
 
-	const handleLogout = async () => {
-		try {
-			await fetch("http://localhost:3050/users/v1/logout", {
-				method: "POST",
-				credentials: "include",
-			});
-			toast.success("Sesión cerrada correctamente.");
-		} catch (e) {
-			toast.error("Error al cerrar sesión.");
-		} finally {
-			localStorage.clear();
-			setTimeout(() => navigate("/inicio-sesion"), 1500);
-		}
-	};
+	// ── Bloquear si está verificando o inactivo ────────────────────────────
+	if (checking || !isActive) return <BlockedScreen />;
 
 	const handleAceptar = async (id) => {
 		setProcessingId(id);
@@ -184,37 +157,6 @@ export function AdminCitas() {
 		if (!person) return "N/A";
 		return `${person.name || ""} ${person.paternalLastName || ""}`.trim();
 	};
-
-	if (checking) {
-		return (
-			<div className="admin-citas-container">
-				<div className="admin-loading-screen">
-					<p>Verificando tu estado...</p>
-				</div>
-			</div>
-		);
-	}
-
-	if (!isActive) {
-		return (
-			<div className="admin-citas-container">
-				<div className="admin-blocked-screen">
-					<div className="admin-blocked-card">
-						<div className="blocked-icon">🚫</div>
-						<h2>Cuenta desactivada</h2>
-						<p>
-							Tu cuenta de administrador ha sido desactivada.
-							<br />
-							No puedes acceder al panel en este momento.
-						</p>
-						<button className="btn-logout-blocked" onClick={handleLogout}>
-							Cerrar sesión
-						</button>
-					</div>
-				</div>
-			</div>
-		);
-	}
 
 	return (
 		<div className="admin-citas-container">

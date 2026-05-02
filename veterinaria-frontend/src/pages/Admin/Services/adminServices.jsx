@@ -9,6 +9,7 @@ import {
 	updateService,
 } from "../../../services/Admin/services.js";
 import "./adminServices.css";
+import { useAdminGuard } from "../../../hooks/useAdminGuard.jsx";
 
 function PencilIcon() {
 	return (
@@ -28,6 +29,9 @@ function PencilIcon() {
 }
 
 export function AdminServices() {
+	const { checking, isActive, BlockedScreen } = useAdminGuard();
+
+	if (checking || !isActive) return <BlockedScreen />;
 	const navigate = useNavigate();
 	const [services, setServices] = useState([]);
 	const [loading, setLoading] = useState(true);

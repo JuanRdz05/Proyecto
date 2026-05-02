@@ -5,6 +5,7 @@ import { NavbarAdmin } from "../../../components/NavbarAdmin/navbarAdmin.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
 import { getAllVets, toggleVetStatus } from "../../../services/Admin/vets.js";
 import "./adminVets.css";
+import { useAdminGuard } from "../../../hooks/useAdminGuard.jsx";
 
 function initials(name) {
 	return name
@@ -17,6 +18,9 @@ function initials(name) {
 
 export function AdminVets() {
 	const navigate = useNavigate();
+	const { checking, isActive, BlockedScreen } = useAdminGuard();
+
+	if (checking || !isActive) return <BlockedScreen />;
 	const [search, setSearch] = useState("");
 	const [vets, setVets] = useState([]);
 	const [loading, setLoading] = useState(true);
