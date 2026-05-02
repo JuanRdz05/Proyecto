@@ -31,6 +31,13 @@ export function AdminCitas() {
 	const [isActive, setIsActive] = useState(true);
 	const [checking, setChecking] = useState(true);
 
+	// Estados para modales
+	const [showReasonModal, setShowReasonModal] = useState(false);
+	const [showConfirmModal, setShowConfirmModal] = useState(false);
+	const [selectedCita, setSelectedCita] = useState(null);
+	const [rejectionReason, setRejectionReason] = useState("");
+	const [isSubmitting, setIsSubmitting] = useState(false);
+
 	// Verificar estado del admin
 	useEffect(() => {
 		const checkStatus = async () => {
@@ -89,7 +96,6 @@ export function AdminCitas() {
 		try {
 			const result = await acceptAppointment(id);
 			toast.success("Cita aceptada exitosamente", { autoClose: 3000 });
-			// Reemplazar la cita actualizada en el estado
 			setAppointments((prev) =>
 				prev.map((a) => (a._id === id ? result.appointment : a)),
 			);
@@ -102,20 +108,59 @@ export function AdminCitas() {
 		}
 	};
 
-	const handleRechazar = async (id) => {
-		setProcessingId(id);
+	// Abrir modal de motivo
+	const openReasonModal = (cita) => {
+		setSelectedCita(cita);
+		setRejectionReason("");
+		setShowReasonModal(true);
+	};
+
+	// Cerrar modal de motivo
+	const closeReasonModal = () => {
+		setShowReasonModal(false);
+		setSelectedCita(null);
+		setRejectionReason("");
+	};
+
+	// Ir a confirmación
+	const goToConfirm = () => {
+		if (!rejectionReason.trim()) {
+			toast.warning("Debes escribir un motivo de rechazo", { autoClose: 3000 });
+			return;
+		}
+		setShowReasonModal(false);
+		setShowConfirmModal(true);
+	};
+
+	// Volver al modal de motivo
+	const backToReason = () => {
+		setShowConfirmModal(false);
+		setShowReasonModal(true);
+	};
+
+	// Ejecutar rechazo definitivo
+	const confirmReject = async () => {
+		if (!selectedCita) return;
+
+		setIsSubmitting(true);
 		try {
-			const result = await rejectAppointment(id);
+			const result = await rejectAppointment(
+				selectedCita._id,
+				rejectionReason.trim(),
+			);
 			toast.success("Cita rechazada exitosamente", { autoClose: 3000 });
 			setAppointments((prev) =>
-				prev.map((a) => (a._id === id ? result.appointment : a)),
+				prev.map((a) => (a._id === selectedCita._id ? result.appointment : a)),
 			);
+			setShowConfirmModal(false);
+			setSelectedCita(null);
+			setRejectionReason("");
 		} catch (error) {
 			toast.error(error.message || "Error al rechazar la cita", {
 				autoClose: 4000,
 			});
 		} finally {
-			setProcessingId(null);
+			setIsSubmitting(false);
 		}
 	};
 
@@ -135,7 +180,6 @@ export function AdminCitas() {
 		return `${formattedDate} ${timeStr || ""}`;
 	};
 
-	// Helper para obtener nombre completo
 	const getFullName = (person) => {
 		if (!person) return "N/A";
 		return `${person.name || ""} ${person.paternalLastName || ""}`.trim();
@@ -302,7 +346,7 @@ export function AdminCitas() {
 														</button>
 														<button
 															className="btn-action btn-rechazar"
-															onClick={() => handleRechazar(cita._id)}
+															onClick={() => openReasonModal(cita)}
 															disabled={isProcessing}
 															title="Rechazar cita"
 														>
@@ -322,6 +366,153 @@ export function AdminCitas() {
 			</main>
 
 			<FooterGuest />
+
+			{/* ===== MODAL: MOTIVO DE RECHAZO ===== */}
+			{showReasonModal && (
+				<div className="modal-overlay" onClick={closeReasonModal}>
+					<div
+						className="modal-content modal-reason"
+						onClick={(e) => e.stopPropagation()}
+					>
+						<div className="modal-header">
+							<h3>Rechazar cita</h3>
+							<button className="modal-close" onClick={closeReasonModal}>
+								✕
+							</button>
+						</div>
+
+						<div className="modal-body">
+							<p className="modal-subtitle">
+								Indica el motivo por el cual se rechaza esta cita:
+							</p>
+
+							{selectedCita && (
+								<div className="modal-cita-info">
+									<span>
+										<strong>Paciente:</strong> {selectedCita.pet?.name || "N/A"}
+									</span>
+									<span>
+										<strong>Dueño:</strong> {getFullName(selectedCita.owner)}
+									</span>
+									<span>
+										<strong>Servicio:</strong>{" "}
+										{selectedCita.service?.name || "N/A"}
+									</span>
+									<span>
+										<strong>Fecha:</strong>{" "}
+										{formatDateTime(selectedCita.date, selectedCita.time)}
+									</span>
+								</div>
+							)}
+
+							<textarea
+								className="modal-textarea"
+								placeholder="Escribe el motivo del rechazo..."
+								value={rejectionReason}
+								onChange={(e) => setRejectionReason(e.target.value)}
+								rows={4}
+								maxLength={500}
+							/>
+							<div className="modal-char-count">
+								{rejectionReason.length}/500
+							</div>
+						</div>
+
+						<div className="modal-footer">
+							<button
+								className="btn-modal btn-modal-secondary"
+								onClick={closeReasonModal}
+							>
+								Cancelar
+							</button>
+							<button
+								className="btn-modal btn-modal-primary"
+								onClick={goToConfirm}
+								disabled={!rejectionReason.trim()}
+							>
+								Continuar
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
+
+			{/* ===== MODAL: CONFIRMACIÓN FINAL ===== */}
+			{showConfirmModal && (
+				<div className="modal-overlay" onClick={backToReason}>
+					<div
+						className="modal-content modal-confirm"
+						onClick={(e) => e.stopPropagation()}
+					>
+						<div className="modal-header modal-header-warning">
+							<div className="modal-icon-warning">⚠️</div>
+							<h3>¿Estás seguro?</h3>
+						</div>
+
+						<div className="modal-body">
+							<p className="modal-confirm-text">
+								Estás a punto de <strong>rechazar</strong> la siguiente cita:
+							</p>
+
+							{selectedCita && (
+								<div className="modal-cita-summary">
+									<div className="summary-row">
+										<span>Paciente:</span>
+										<strong>{selectedCita.pet?.name || "N/A"}</strong>
+									</div>
+									<div className="summary-row">
+										<span>Dueño:</span>
+										<strong>{getFullName(selectedCita.owner)}</strong>
+									</div>
+									<div className="summary-row">
+										<span>Servicio:</span>
+										<strong>{selectedCita.service?.name || "N/A"}</strong>
+									</div>
+									<div className="summary-row">
+										<span>Fecha:</span>
+										<strong>
+											{formatDateTime(selectedCita.date, selectedCita.time)}
+										</strong>
+									</div>
+								</div>
+							)}
+
+							<div className="modal-reason-box">
+								<span className="reason-label">Motivo de rechazo:</span>
+								<p className="reason-text">{rejectionReason}</p>
+							</div>
+
+							<p className="modal-warning-text">
+								Esta acción no se puede deshacer.
+							</p>
+						</div>
+
+						<div className="modal-footer">
+							<button
+								className="btn-modal btn-modal-secondary"
+								onClick={backToReason}
+								disabled={isSubmitting}
+							>
+								Volver
+							</button>
+							<button
+								className="btn-modal btn-modal-danger"
+								onClick={confirmReject}
+								disabled={isSubmitting}
+							>
+								{isSubmitting ? (
+									<>
+										<span className="spinner-small"></span>
+										Procesando...
+									</>
+								) : (
+									"Sí, rechazar cita"
+								)}
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }
