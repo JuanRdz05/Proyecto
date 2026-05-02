@@ -1,24 +1,6 @@
 const Pets = require("../../MODELS/pets.js");
 
-async function getAllPets(req, res) {
-	try {
-		const pets = await Pets.find({}).select("-_id");
-		console.log("===================================================");
-		console.log("Mostrando todos las mascotas...");
-		if (pets.length === 0) {
-			console.log("===================================================");
-			console.log("No hay mascotas por mostrar");
-			return res
-				.status(404)
-				.json({ message: "No hay mascotas en la base de datos" });
-		}
-		res.status(200).json({ message: "Mascotas encontradas", pets });
-	} catch (error) {
-		console.error("Error al obtener las mascotas: ", error);
-		res.status(500).json({ message: "Error al obtener las mascotas", error });
-	}
-}
-
+// Sin cambios — ya funciona bien
 async function addPet(req, res) {
 	try {
 		console.log("===================================================");
@@ -35,16 +17,15 @@ async function addPet(req, res) {
 		res.status(500).json({ message: "Error al agregar la mascota", error });
 	}
 }
+
+// Sin cambios — ya funciona bien
 const getPetsByUser = async (req, res) => {
 	try {
 		const userId = req.user.id;
-		// QUITAMOS .select("-_id") para que el front reciba los IDs
 		const pets = await Pets.find({ owner: userId });
-
 		if (pets.length === 0) {
 			return res.status(404).json({ message: "No hay mascotas", pets: [] });
 		}
-
 		res.status(200).json(pets);
 	} catch (error) {
 		console.error("Error al obtener las mascotas de usuario: ", error);
@@ -52,89 +33,21 @@ const getPetsByUser = async (req, res) => {
 	}
 };
 
-const changeStatus = async (req, res, next) => {
-	try {
-		const petId = req.params.id;
-		const userId = req.user.id;
-
-		// Buscar mascota
-		console.log("===================================================");
-		console.log("Buscando mascota...");
-		const pet = await Pets.findById(petId);
-
-		//Validar que existe
-		console.log("===================================================");
-		console.log("Validando que la mascota existe...");
-		if (!pet) {
-			console.log("===================================================");
-			console.log("Mascota no encontrada");
-			return res.status(404).json({ message: "Mascota no encontrada" });
-		}
-
-		//Validar que tiene owner
-		console.log("===================================================");
-		console.log("Validando que la mascota tiene dueño...");
-		if (!pet.owner) {
-			console.log("===================================================");
-			console.log("Esta mascota no tiene dueño asignado");
-			return res.status(400).json({
-				message: "Error: Esta mascota no tiene dueño asignado",
-			});
-		}
-		//Verificando que sea el dueño de la mascota
-		console.log("===================================================");
-		console.log("Verificando que el dueño de la mascota es el usuario...");
-		if (pet.owner.toString() !== userId.toString()) {
-			console.log("===================================================");
-			console.log("No puedes modificar mascotas ajenas");
-			return res.status(403).json({
-				message: "No puedes modificar mascotas ajenas",
-			});
-		}
-
-		// Actualizar
-		const updatedPet = await Pets.findByIdAndUpdate(
-			petId,
-			{ isActive: !pet.isActive },
-			{ new: true },
-		);
-		console.log("===================================================");
-		console.log("Mascota actualizada exitosamente");
-		res.status(200).json({
-			message: "Estado de la mascota cambiado",
-			pet: updatedPet,
-		});
-	} catch (error) {
-		console.error("Error:", error);
-		res.status(500).json({ message: "Error", error: error.message });
-	}
-};
-
+// Sin cambios — ya funciona bien
 const modifyPet = async (req, res) => {
 	try {
 		const petId = req.params.id;
 		const userId = req.user.id;
-		//Comenzamos a buscar la mascota
 		console.log("===================================================");
 		console.log("Buscando mascota...");
 		const pet = await Pets.findById(petId);
-		//Validamos que la mascota exista
-		console.log("===================================================");
-		console.log("Validando que la mascota existe...");
 		if (!pet) {
-			console.log("===================================================");
-			console.log("Mascota no encontrada");
 			return res.status(404).json({ message: "Mascota no encontrada" });
 		}
-		//Validamos que el dueño sea el usuario
-		console.log("===================================================");
-		console.log("Validando que el dueño de la mascota es el usuario...");
 		if (pet.owner.toString() !== userId.toString()) {
-			console.log("===================================================");
-			console.log("No puedes modificar mascotas ajenas");
-			return res.status(403).json({
-				message: "No puedes modificar mascotas ajenas",
-			});
+			return res
+				.status(403)
+				.json({ message: "No puedes modificar mascotas ajenas" });
 		}
 		const updatePet = await Pets.findByIdAndUpdate(petId, req.body, {
 			new: true,
@@ -149,39 +62,142 @@ const modifyPet = async (req, res) => {
 	}
 };
 
+// Sin cambios — ya funciona bien
 const getPetById = async (req, res) => {
 	try {
 		const petId = req.params.id;
 		const userId = req.user.id;
 		console.log("===================================================");
 		console.log("Buscando mascota...");
-
 		const pet = await Pets.findById(petId);
-
 		if (!pet) {
-			console.log("===================================================");
-			console.log("Mascota no encontrada");
 			return res.status(404).json({ message: "Mascota no encontrada" });
 		}
-
-		// Validamos que el dueño sea el usuario
-		console.log("===================================================");
-		console.log("Validando que el dueño de la mascota es el usuario...");
 		if (pet.owner.toString() !== userId.toString()) {
-			console.log("===================================================");
-			console.log("Acceso denegado");
-			return res.status(403).json({
-				message: "Acceso denegado",
-			});
+			return res.status(403).json({ message: "Acceso denegado" });
 		}
-
-		console.log("===================================================");
-		console.log("Mascota encontrada exitosamente");
-
 		res.status(200).json(pet);
 	} catch (error) {
 		console.error("Error al obtener la mascota: ", error);
 		res.status(500).json({ message: "Error al obtener la mascota", error });
+	}
+};
+
+// ── MODIFICADA: paginación + populate del dueño ────────────────────────────
+async function getAllPets(req, res) {
+	try {
+		const page = Math.max(1, parseInt(req.query.page) || 1);
+		const limit = Math.min(5, parseInt(req.query.limit) || 5);
+		const skip = (page - 1) * limit;
+
+		const [pets, total] = await Promise.all([
+			Pets.find({})
+				.populate("owner", "name paternalLastName maternalLastName email")
+				.select("-__v") // solo excluimos __v, mantenemos _id
+				.skip(skip)
+				.limit(limit),
+			Pets.countDocuments({}),
+		]);
+
+		console.log("===================================================");
+		console.log(`Mostrando página ${page} — ${pets.length} mascotas`);
+
+		res.status(200).json({
+			message: "Mascotas encontradas",
+			pets,
+			pagination: {
+				total,
+				page,
+				limit,
+				totalPages: Math.ceil(total / limit),
+			},
+		});
+	} catch (error) {
+		console.error("Error al obtener las mascotas: ", error);
+		res.status(500).json({ message: "Error al obtener las mascotas", error });
+	}
+}
+
+// ── MODIFICADA: verifica disabledByAdmin antes de permitir al dueño reactivar
+const changeStatus = async (req, res) => {
+	try {
+		const petId = req.params.id;
+		const userId = req.user.id;
+
+		console.log("===================================================");
+		console.log("Buscando mascota...");
+		const pet = await Pets.findById(petId);
+
+		if (!pet) {
+			return res.status(404).json({ message: "Mascota no encontrada" });
+		}
+		if (!pet.owner) {
+			return res
+				.status(400)
+				.json({ message: "Esta mascota no tiene dueño asignado" });
+		}
+		if (pet.owner.toString() !== userId.toString()) {
+			return res
+				.status(403)
+				.json({ message: "No puedes modificar mascotas ajenas" });
+		}
+
+		// Bloquear si fue desactivada por un admin
+		if (!pet.isActive && pet.disabledByAdmin) {
+			return res.status(403).json({
+				message:
+					"Esta mascota fue desactivada por un administrador. Contacta al administrador para reactivarla.",
+			});
+		}
+
+		const updatedPet = await Pets.findByIdAndUpdate(
+			petId,
+			{ isActive: !pet.isActive },
+			{ new: true },
+		);
+		console.log("===================================================");
+		console.log("Estado de mascota actualizado por dueño");
+		res
+			.status(200)
+			.json({ message: "Estado de la mascota cambiado", pet: updatedPet });
+	} catch (error) {
+		console.error("Error:", error);
+		res.status(500).json({ message: "Error", error: error.message });
+	}
+};
+
+// ── NUEVA: toggle exclusivo del admin ─────────────────────────────────────
+const adminTogglePetStatus = async (req, res) => {
+	try {
+		const { id } = req.params;
+		const pet = await Pets.findById(id);
+		if (!pet) return res.status(404).json({ message: "Mascota no encontrada" });
+
+		const nowActive = !pet.isActive;
+		pet.isActive = nowActive;
+		pet.disabledByAdmin = !nowActive; // desactiva → true | activa → false
+
+		await pet.save();
+
+		console.log("===================================================");
+		console.log(
+			`[Admin] Mascota "${pet.name}" → ${pet.isActive ? "activa" : "inactiva"}`,
+		);
+
+		res.status(200).json({
+			message: `Mascota ${pet.isActive ? "activada" : "desactivada"} por administrador`,
+			pet: {
+				_id: pet._id,
+				name: pet.name,
+				isActive: pet.isActive,
+				disabledByAdmin: pet.disabledByAdmin,
+			},
+		});
+	} catch (error) {
+		console.error("Error al cambiar estado de mascota (admin):", error);
+		res
+			.status(500)
+			.json({ message: "Error al cambiar estado de la mascota", error });
 	}
 };
 
@@ -192,4 +208,5 @@ module.exports = {
 	changeStatus,
 	modifyPet,
 	getPetById,
+	adminTogglePetStatus,
 };

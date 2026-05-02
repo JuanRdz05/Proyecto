@@ -24,163 +24,7 @@
 	max-width: 480px;
 }
 
-.petdetails-title {
-	font-size: 1.5rem;
-	font-weight: 700;
-	color: #1a1a2e;
-	margin: 0 0 1.8rem 0;
-	text-align: center;
-}
-
-.petdetails-field {
-	display: flex;
-	flex-direction: column;
-	gap: 0.4rem;
-	margin-bottom: 1.1rem;
-}
-
-.petdetails-field label {
-	font-size: 0.85rem;
-	font-weight: 600;
-	color: #555;
-}
-
-/* Inputs y Selects base (solo lectura) */
-.petdetails-field input,
-.petdetails-field select {
-	padding: 0.65rem 0.9rem;
-	border: 1px solid #ddd;
-	border-radius: 7px;
-	font-size: 0.95rem;
-	background-color: #f5f5f5;
-	color: #333;
-	cursor: default;
-	outline: none;
-	box-sizing: border-box;
-	width: 100%;
-	font-family: inherit;
-}
-
-/* --- Estilos para el Select (igual a petAdd) --- */
-.select-wrapper-pa {
-	position: relative;
-	width: 100%;
-}
-
-.select-wrapper-pa select {
-	appearance: none;
-	-webkit-appearance: none;
-	padding-right: 2.5rem;
-}
-
-.select-arrow-pa {
-	position: absolute;
-	right: 0.8rem;
-	top: 50%;
-	transform: translateY(-50%);
-	font-size: 1.1rem;
-	color: #6b7280;
-	pointer-events: none;
-}
-
-/* --- Estilos para Modo Edición --- */
-.input-editable {
-	background-color: #ffffff !important;
-	border-color: #007bff !important;
-	cursor: text !important;
-}
-
-.input-editable:focus {
-	box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
-}
-
-/* --- Estados y Botones --- */
-.status-active {
-	color: #28a745 !important;
-	font-weight: 600;
-}
-.status-inactive {
-	color: #dc3545 !important;
-	font-weight: 600;
-}
-
-.petdetails-header {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	margin-bottom: 1.5rem;
-}
-
-.btn-status-toggle {
-	padding: 0.4rem 0.8rem;
-	border-radius: 6px;
-	font-size: 0.8rem;
-	font-weight: 600;
-	cursor: pointer;
-	border: 1px solid;
-	transition: all 0.2s ease;
-}
-
-.active-btn {
-	background-color: #e8f5e9;
-	border-color: #28a745;
-	color: #28a745;
-}
-.inactive-btn {
-	background-color: #ffebee;
-	border-color: #dc3545;
-	color: #dc3545;
-}
-
-.petdetails-actions {
-	display: flex;
-	gap: 10px;
-	margin-top: 1.5rem;
-}
-
-.btn-save {
-	flex: 2;
-	padding: 0.8rem;
-	background-color: #28a745;
-	color: white;
-	border: none;
-	border-radius: 7px;
-	font-weight: bold;
-	cursor: pointer;
-}
-.btn-save:hover {
-	background-color: #218838;
-}
-
-.btn-cancel {
-	flex: 1;
-	padding: 0.8rem;
-	background-color: #6c757d;
-	color: white;
-	border: none;
-	border-radius: 7px;
-	font-weight: bold;
-	cursor: pointer;
-}
-.btn-cancel:hover {
-	background-color: #5a6268;
-}
-
-.btn-edit-petdetails {
-	width: 100%;
-	padding: 0.8rem;
-	background-color: #007bff;
-	color: #fff;
-	border: none;
-	border-radius: 7px;
-	cursor: pointer;
-	font-weight: bold;
-}
-.btn-edit-petdetails:hover {
-	background-color: #0069d9;
-}
-
-/* Estilos para el header mejorado */
+/* ---------- Encabezado ---------- */
 .petdetails-header {
 	display: flex;
 	justify-content: space-between;
@@ -195,15 +39,18 @@
 	align-items: center;
 	gap: 15px;
 	flex: 1;
+	min-width: 0; /* Evita desbordamiento en flex */
 }
 
 .petdetails-title {
 	margin: 0;
 	font-size: 28px;
-	font-weight: bold;
+	font-weight: 700;
 	color: #333;
+	text-align: center; /* Se usa en móvil si el contenedor colapsa */
 }
 
+/* ---------- Badge de estado ---------- */
 .pet-status-badge {
 	display: flex;
 	align-items: center;
@@ -228,39 +75,48 @@
 	border: 1px solid #f5c6cb;
 }
 
+.pet-status-badge.status-admin-lock {
+	background-color: #343a40;
+	color: #ffffff;
+	border: 1px solid #000000;
+}
+
+.pet-status-badge.status-admin-lock .status-dot {
+	background-color: #ffc107;
+	animation: pulse-warning 1.5s infinite;
+}
+
 .status-dot {
 	display: inline-block;
 	width: 8px;
 	height: 8px;
 	border-radius: 50%;
-	animation: pulse 2s infinite;
 }
 
 .pet-status-badge.status-active .status-dot {
 	background-color: #28a745;
+	animation: pulse 2s infinite;
 }
 
 .pet-status-badge.status-inactive .status-dot {
 	background-color: #dc3545;
+	animation: pulse 2s infinite;
 }
 
-/* Animación de pulso para el punto */
-@keyframes pulse {
-	0% {
-		opacity: 1;
-	}
-	50% {
-		opacity: 0.6;
-	}
-	100% {
-		opacity: 1;
-	}
+.admin-lock-label {
+	display: inline-block;
+	font-size: 0.7rem;
+	font-weight: 700;
+	background-color: #dc3545;
+	color: white;
+	padding: 2px 8px;
+	border-radius: 4px;
+	margin-left: 12px;
+	vertical-align: middle;
+	letter-spacing: 0.5px;
 }
 
-.status-text {
-	letter-spacing: 0.3px;
-}
-
+/* ---------- Botón de alternar estado ---------- */
 .btn-status-toggle {
 	padding: 10px 16px;
 	border: none;
@@ -296,8 +152,205 @@
 	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.petdetails-field-extra {
-	animation: slideDown 0.3s ease;
+.btn-status-toggle:disabled {
+	background-color: #e9ecef !important;
+	color: #adb5bd !important;
+	border: 1px solid #dee2e6 !important;
+	cursor: not-allowed;
+	transform: none !important;
+	box-shadow: none !important;
+}
+
+/* ---------- Campos y formulario ---------- */
+.petdetails-field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+	margin-bottom: 1.1rem;
+}
+
+.petdetails-field label {
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: #555;
+}
+
+.petdetails-field input,
+.petdetails-field select {
+	padding: 0.65rem 0.9rem;
+	border: 1px solid #ddd;
+	border-radius: 7px;
+	font-size: 0.95rem;
+	background-color: #f5f5f5;
+	color: #333;
+	cursor: default;
+	outline: none;
+	box-sizing: border-box;
+	width: 100%;
+	font-family: inherit;
+}
+
+/* Campos editables */
+.input-editable {
+	background-color: #ffffff !important;
+	border-color: #007bff !important;
+	cursor: text !important;
+}
+
+.input-editable:focus {
+	box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+}
+
+/* Select personalizado */
+.select-wrapper-pa {
+	position: relative;
+	width: 100%;
+}
+
+.select-wrapper-pa select {
+	appearance: none;
+	-webkit-appearance: none;
+	padding-right: 2.5rem;
+}
+
+.select-arrow-pa {
+	position: absolute;
+	right: 0.8rem;
+	top: 50%;
+	transform: translateY(-50%);
+	font-size: 1.1rem;
+	color: #6b7280;
+	pointer-events: none;
+}
+
+/* Contador de caracteres */
+.char-count {
+	font-size: 0.75rem;
+	color: #888;
+	text-align: right;
+	display: block;
+	margin-top: 0.2rem;
+}
+
+/* ---------- Botones de acción ---------- */
+.petdetails-actions {
+	display: flex;
+	gap: 10px;
+	margin-top: 1.5rem;
+}
+
+.btn-save {
+	flex: 2;
+	padding: 0.8rem;
+	background-color: #28a745;
+	color: white;
+	border: none;
+	border-radius: 7px;
+	font-weight: bold;
+	cursor: pointer;
+}
+
+.btn-save:hover {
+	background-color: #218838;
+}
+
+.btn-cancel {
+	flex: 1;
+	padding: 0.8rem;
+	background-color: #6c757d;
+	color: white;
+	border: none;
+	border-radius: 7px;
+	font-weight: bold;
+	cursor: pointer;
+}
+
+.btn-cancel:hover {
+	background-color: #5a6268;
+}
+
+.btn-edit-petdetails {
+	width: 100%;
+	padding: 0.8rem;
+	background-color: #007bff;
+	color: #fff;
+	border: none;
+	border-radius: 7px;
+	cursor: pointer;
+	font-weight: bold;
+}
+
+.btn-edit-petdetails:hover {
+	background-color: #0069d9;
+}
+
+.btn-edit-petdetails:disabled {
+	background-color: #adb5bd;
+	cursor: not-allowed;
+}
+
+/* ---------- Aviso de administrador ---------- */
+.admin-lock-notice {
+	background-color: #fff4f4;
+	border-left: 4px solid #dc3545;
+	padding: 1rem;
+	margin-bottom: 1.5rem;
+	border-radius: 4px;
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+	animation: shake 0.5s ease-in-out;
+}
+
+.admin-lock-notice p {
+	margin: 0;
+	color: #a94442;
+	font-size: 0.9rem;
+	line-height: 1.4;
+	font-weight: 500;
+}
+
+/* Tarjeta bloqueada */
+.pet-card-locked {
+	border: 2px solid #f5c6cb;
+}
+
+/* ---------- Animaciones ---------- */
+@keyframes pulse {
+	0% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.6;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+
+@keyframes pulse-warning {
+	0% {
+		box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7);
+	}
+	70% {
+		box-shadow: 0 0 0 10px rgba(255, 193, 7, 0);
+	}
+	100% {
+		box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
+	}
+}
+
+@keyframes shake {
+	0%,
+	100% {
+		transform: translateX(0);
+	}
+	25% {
+		transform: translateX(-5px);
+	}
+	75% {
+		transform: translateX(5px);
+	}
 }
 
 @keyframes slideDown {
@@ -311,15 +364,11 @@
 	}
 }
 
-/* Contador de caracteres (igual que en petAdd) */
-.char-count {
-	font-size: 0.75rem;
-	color: #888;
-	text-align: right;
-	display: block;
-	margin-top: 0.2rem;
+.petdetails-field-extra {
+	animation: slideDown 0.3s ease;
 }
 
+/* ---------- Responsive ---------- */
 @media (max-width: 640px) {
 	.petdetails-header {
 		flex-direction: column;
@@ -333,6 +382,7 @@
 
 	.petdetails-title {
 		font-size: 22px;
+		text-align: left;
 	}
 
 	.btn-status-toggle {

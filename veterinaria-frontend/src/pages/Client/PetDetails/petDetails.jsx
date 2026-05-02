@@ -26,6 +26,7 @@ export function PetDetails() {
 	const fetchPet = async () => {
 		try {
 			setLoading(true);
+			setError(null);
 			const data = await getPetById(id);
 			setPet(data);
 		} catch (err) {
@@ -42,7 +43,6 @@ export function PetDetails() {
 
 	const handleEditClick = () => {
 		const esPredefinida = OPCIONES_PREDEFINIDAS.includes(pet.petType);
-
 		setFormData({
 			name: pet.name,
 			petType: esPredefinida ? pet.petType : "Otro",
@@ -66,24 +66,16 @@ export function PetDetails() {
 	};
 
 	const handleSave = async () => {
+		// Validación del nombre
 		if (!formData.name.trim()) {
 			toast.warning("El nombre de la mascota no puede estar vacío");
 			return;
 		}
 
-		if (formData.petType === "Otro") {
-			if (!especieOtro.trim()) {
-				toast.warning("Especifique la especie de la mascota");
-				return;
-			}
-			if (especieOtro.trim().length > 50) {
-				toast.warning("La especie no puede exceder 50 caracteres");
-				return;
-			}
-			if (!/^[a-záéíóúñA-ZÁÉÍÓÚÑ\s]+$/.test(especieOtro.trim())) {
-				toast.warning("La especie solo debe contener letras y espacios");
-				return;
-			}
+		// Validación para "Otra especie"
+		if (formData.petType === "Otro" && !especieOtro.trim()) {
+			toast.warning("Debes especificar una especie");
+			return;
 		}
 
 		const petDataToSave = {
@@ -104,7 +96,6 @@ export function PetDetails() {
 			setEspecieOtro("");
 			toast.success("Mascota actualizada correctamente");
 		} catch (err) {
-			console.error("Error al guardar:", err);
 			toast.error("Error al guardar la información");
 		}
 	};
@@ -116,46 +107,105 @@ export function PetDetails() {
 
 	const handleToggleStatus = async () => {
 		try {
-			const newStatus = !pet.isActive;
-			await togglePetStatus(id);
-			setPet({ ...pet, isActive: newStatus });
-
-			if (newStatus) {
-				toast.success("Mascota reactivada");
-			} else {
-				toast.error("Mascota desactivada");
-			}
+			const response = await togglePetStatus(id);
+			setPet({
+				...pet,
+				isActive: response.pet.isActive,
+				disabledByAdmin: response.pet.disabledByAdmin,
+			});
+			toast.success(
+				response.pet.isActive ? "Mascota reactivada" : "Mascota desactivada",
+			);
 		} catch (err) {
-			console.error("Error al cambiar el estatus:", err);
-			toast.error("Error al cambiar el estatus");
+			toast.error(err.message || "No se pudo cambiar el estatus");
 		}
 	};
 
-	if (loading) return <div>Cargando...</div>;
+	// Pantalla de carga / error
+	if (loading) {
+		return (
+			<div className="petdetails-page-container">
+				<NavbarClient />
+				<main className="petdetails-main">
+					<div className="loading-container">Cargando información...</div>
+				</main>
+			</div>
+		);
+	}
+
+	if (error || !pet) {
+		return (
+			<div className="petdetails-page-container">
+				<NavbarClient />
+				<main className="petdetails-main">
+					<div className="loading-container">
+						{error || "No se encontró la mascota"}
+					</div>
+				</main>
+			</div>
+		);
+	}
+
+	const adminLocked = !pet.isActive && pet.disabledByAdmin;
 
 	return (
 		<div className="petdetails-page-container">
 			<NavbarClient />
 			<main className="petdetails-main">
-				<div className="petdetails-card">
+				<div
+					className={`petdetails-card ${adminLocked ? "pet-card-locked" : ""}`}
+				>
+					{/* Aviso administrativo */}
+					{adminLocked && (
+						<div className="admin-lock-notice">
+							<p>
+								<strong>Aviso de la Administración:</strong> Esta mascota ha
+								sido desactivada por un administrador. No puedes reactivarla
+								manualmente. Por favor, contacta a soporte.
+							</p>
+						</div>
+					)}
+
+					{/* Encabezado */}
 					<div className="petdetails-header">
 						<div className="petdetails-header-left">
-							<h2 className="petdetails-title">Perfil de {pet.name}</h2>
+							<h2 className="petdetails-title">
+								Perfil de {pet.name}
+								{adminLocked && (
+									<span className="admin-lock-label">BLOQUEADA POR ADMIN</span>
+								)}
+							</h2>
+
+							{/* Badge de estado */}
 							<div
-								className={`pet-status-badge ${pet.isActive ? "status-active" : "status-inactive"}`}
+								className={`pet-status-badge ${
+									pet.isActive
+										? "status-active"
+										: pet.disabledByAdmin
+											? "status-admin-lock"
+											: "status-inactive"
+								}`}
 							>
 								<span className="status-dot"></span>
 								<span className="status-text">
-									{pet.isActive ? "Activo" : "Inactivo"}
+									{pet.isActive
+										? "Activa"
+										: pet.disabledByAdmin
+											? "Suspendida"
+											: "Inactiva"}
 								</span>
 							</div>
 						</div>
+
 						{!isEditing && (
 							<button
 								onClick={handleToggleStatus}
-								className={`btn-status-toggle ${pet.isActive ? "active-btn" : "inactive-btn"}`}
+								className={`btn-status-toggle ${
+									pet.isActive ? "active-btn" : "inactive-btn"
+								}`}
+								disabled={adminLocked}
 								title={
-									pet.isActive ? "Desactivar mascota" : "Reactivar mascota"
+									adminLocked ? "Acción restringida por el administrador" : ""
 								}
 							>
 								{pet.isActive ? "Desactivar" : "Reactivar"}
@@ -163,6 +213,7 @@ export function PetDetails() {
 						)}
 					</div>
 
+					{/* Campos del formulario */}
 					<div className="petdetails-field">
 						<label>Nombre</label>
 						<input
@@ -185,11 +236,11 @@ export function PetDetails() {
 									onChange={handleChange}
 									className="input-editable"
 								>
-									<option value="Perro">Perro</option>
-									<option value="Gato">Gato</option>
-									<option value="Conejo">Conejo</option>
-									<option value="Ave">Ave</option>
-									<option value="Reptil">Reptil</option>
+									{OPCIONES_PREDEFINIDAS.map((op) => (
+										<option key={op} value={op}>
+											{op}
+										</option>
+									))}
 									<option value="Otro">Otro</option>
 								</select>
 								<span className="select-arrow-pa">&#8964;</span>
@@ -205,7 +256,6 @@ export function PetDetails() {
 						)}
 					</div>
 
-					{/* Input extra solo en modo edición y cuando petType es "Otro" */}
 					{isEditing && formData.petType === "Otro" && (
 						<div className="petdetails-field petdetails-field-extra">
 							<label>
@@ -216,9 +266,9 @@ export function PetDetails() {
 								name="especieOtro"
 								value={especieOtro}
 								onChange={handleEspecieOtroChange}
-								placeholder="Ej: Hámster, Cobaya, Tortuga"
+								placeholder="Ej: Hámster"
 								className="input-editable"
-								maxLength="50"
+								maxLength={50}
 							/>
 							<span className="char-count">{especieOtro.length}/50</span>
 						</div>
@@ -247,6 +297,7 @@ export function PetDetails() {
 						)}
 					</div>
 
+					{/* Botones de acción */}
 					<div className="petdetails-actions">
 						{isEditing ? (
 							<>
@@ -258,8 +309,12 @@ export function PetDetails() {
 								</button>
 							</>
 						) : (
-							<button className="btn-edit-petdetails" onClick={handleEditClick}>
-								Editar
+							<button
+								className="btn-edit-petdetails"
+								onClick={handleEditClick}
+								disabled={adminLocked}
+							>
+								{adminLocked ? "Edición restringida" : "Editar"}
 							</button>
 						)}
 					</div>

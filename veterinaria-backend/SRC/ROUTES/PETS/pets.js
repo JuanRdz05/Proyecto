@@ -7,25 +7,39 @@ const {
 	changeStatus,
 	modifyPet,
 	getPetById,
+	adminTogglePetStatus,
 } = require("../../CONTROLLERS/PETS/pets.js");
-const { verificarToken } = require("../../MIDDLEWARES/authToken.js");
+const { verificarToken, authRole } = require("../../MIDDLEWARES/authToken.js");
 
-//Ruta para obtener todas la mascotas
-mascotasRouter.get("/all", getAllPets);
-//Ruta para que un usuario agregue una mascota nueva
+// Admin: obtener todas las mascotas paginadas
+mascotasRouter.get("/all", verificarToken, authRole("admin"), getAllPets);
+
+// Cliente: agregar mascota
 mascotasRouter.post(
 	"/add",
 	verificarToken,
 	noNumbers(["name", "petType"]),
 	addPet,
 );
-//Ruta para mostrar las mascotas por usuario
+
+// Cliente: ver sus propias mascotas
 mascotasRouter.get("/get-user-pets", verificarToken, getPetsByUser);
-//Ruta para mostrar una mascota por id
-mascotasRouter.get("/:id", verificarToken, getPetById);
-//Rutas para activar o desactivar una mascota
+
+// Admin: activar/desactivar cualquier mascota (con lógica disabledByAdmin)
+mascotasRouter.patch(
+	"/:id/admin-toggle",
+	verificarToken,
+	authRole("admin"),
+	adminTogglePetStatus,
+);
+
+// Cliente: activar/desactivar su propia mascota (bloqueado si fue el admin quien desactivó)
 mascotasRouter.patch("/:id/toggleActive", verificarToken, changeStatus);
-//Ruta para modificar una mascota
+
+// Cliente: ver mascota por id
+mascotasRouter.get("/:id", verificarToken, getPetById);
+
+// Cliente: modificar mascota
 mascotasRouter.patch(
 	"/:id",
 	verificarToken,
