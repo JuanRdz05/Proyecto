@@ -5,9 +5,14 @@ import { NavbarClient } from "../../../components/NavbarClient/navbarClient.jsx"
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
 import "./petAdd.css";
 import { addPet } from "../../../services/Client/pet.js";
+import { useClientGuard } from "../../../hooks/useClientGuard.jsx";
 
 export function PetAdd() {
 	const navigate = useNavigate();
+
+	const { checking, isActive, BlockedScreen } = useClientGuard();
+
+	if (checking || !isActive) return <BlockedScreen />;
 
 	const [formData, setFormData] = useState({
 		name: "",

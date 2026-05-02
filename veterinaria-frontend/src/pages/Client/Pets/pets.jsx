@@ -4,11 +4,15 @@ import { NavbarClient } from "../../../components/NavbarClient/navbarClient.jsx"
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
 import "./pets.css";
 import { getPets } from "../../../services/Client/pet.js";
+import { useClientGuard } from "../../../hooks/useClientGuard.jsx";
 
 const ITEMS_PER_PAGE = 6;
 
 export function Pets() {
 	const navigate = useNavigate();
+	const { checking, isActive, BlockedScreen } = useClientGuard();
+
+	if (checking || !isActive) return <BlockedScreen />;
 	const [pets, setPets] = useState([]);
 	const [currentPage, setCurrentPage] = useState(1);
 

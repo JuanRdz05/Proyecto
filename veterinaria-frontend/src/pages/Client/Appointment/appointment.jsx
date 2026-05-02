@@ -7,9 +7,14 @@ import { getPets } from "../../../services/Client/pet.js";
 import { getAllServices } from "../../../services/Admin/services.js";
 import { createAppointment } from "../../../services/Client/appointment.js";
 import "./appointment.css";
+import { useClientGuard } from "../../../hooks/useClientGuard.jsx";
 
 export function Appointment() {
 	const navigate = useNavigate();
+
+	const { checking, isActive, BlockedScreen } = useClientGuard();
+
+	if (checking || !isActive) return <BlockedScreen />;
 
 	const [formData, setFormData] = useState({
 		pet: "",

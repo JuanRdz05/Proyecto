@@ -5,12 +5,15 @@ import { NavbarClient } from "../../../components/NavbarClient/navbarClient.jsx"
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
 import { getPets } from "../../../services/Client/pet.js";
 import { getUserAppointments } from "../../../services/Client/appointment.js";
-import { getProfile } from "../../../services/Client/profile.js";
+import { useClientGuard } from "../../../hooks/useClientGuard.jsx";
 import "./client.css";
 
 export function ClientHome() {
 	const navigate = useNavigate();
 	const userName = localStorage.getItem("userName") || "User";
+
+	// ── Guard: verifica si el cliente está activo ──────────────────────────
+	const { checking, isActive, BlockedScreen } = useClientGuard();
 
 	const [pets, setPets] = useState([]);
 	const [appointments, setAppointments] = useState([]);
@@ -18,24 +21,8 @@ export function ClientHome() {
 	const [loadingAppointments, setLoadingAppointments] = useState(true);
 	const [petsError, setPetsError] = useState(false);
 	const [appointmentsError, setAppointmentsError] = useState(false);
-	const [isActive, setIsActive] = useState(true);
-	const [checking, setChecking] = useState(true);
 
 	useEffect(() => {
-		// Verificar estado del cliente primero
-		const checkStatus = async () => {
-			try {
-				const data = await getProfile();
-				if (data.isActive === false) {
-					setIsActive(false);
-				}
-			} catch (error) {
-				console.error("Error al verificar estado:", error);
-			} finally {
-				setChecking(false);
-			}
-		};
-
 		const fetchPets = async () => {
 			try {
 				setLoadingPets(true);
@@ -90,30 +77,15 @@ export function ClientHome() {
 			}
 		};
 
-		checkStatus();
 		fetchPets();
 		fetchAppointments();
 	}, []);
 
-	const handleLogout = async () => {
-		try {
-			await fetch("http://localhost:3050/users/v1/logout", {
-				method: "POST",
-				credentials: "include",
-			});
-			toast.success("Sesión cerrada correctamente.");
-		} catch (e) {
-			toast.error("Error al cerrar sesión.");
-		} finally {
-			localStorage.clear();
-			setTimeout(() => {
-				navigate("/inicio-sesion");
-			}, 1500);
-		}
-	};
+	// ── Bloquear si está verificando o inactivo ────────────────────────────
+	if (checking || !isActive) return <BlockedScreen />;
 
+	// ── Lógica de vista ────────────────────────────────────────────────────
 	const petsToShow = pets.slice(0, 3);
-
 	const todayStr = new Date().toISOString().split("T")[0];
 
 	const upcomingAppointments = appointments
@@ -178,44 +150,6 @@ export function ClientHome() {
 		);
 	};
 
-	// ── Pantalla de carga mientras verifica ──────────────────────────────────
-	if (checking) {
-		return (
-			<div className="client-page-container">
-				<div className="client-loading-screen">
-					<p>Cargando...</p>
-				</div>
-			</div>
-		);
-	}
-
-	// ── Pantalla de cuenta desactivada ───────────────────────────────────────
-	if (!isActive) {
-		return (
-			<div className="client-page-container">
-				<div className="client-blocked-screen">
-					<div className="client-blocked-card">
-						<div className="blocked-icon">🚫</div>
-						<h2>Cuenta desactivada</h2>
-						<p>
-							Tu cuenta ha sido desactivada temporalmente.
-							<br />
-							No puedes acceder a tus mascotas ni agendar citas en este momento.
-						</p>
-						<p className="blocked-contact">
-							Si crees que esto es un error, comunícate con la clínica para
-							recibir más información.
-						</p>
-						<button className="btn-logout-blocked" onClick={handleLogout}>
-							Cerrar sesión
-						</button>
-					</div>
-				</div>
-			</div>
-		);
-	}
-
-	// ── Vista normal ─────────────────────────────────────────────────────────
 	return (
 		<div className="client-page-container">
 			<NavbarClient />
@@ -263,7 +197,7 @@ export function ClientHome() {
 												{apt.service?.name || "Servicio"}
 											</p>
 											<p className="item-date">
-												{formatDateTime(apt.date, apt.time)} -{" "}
+												{formatDateTime(apt.date, apt.time)} —{" "}
 												{apt.pet?.name || "Mascota"}
 											</p>
 										</div>

@@ -9,10 +9,14 @@ import {
 	togglePetStatus,
 } from "../../../services/Client/pet.js";
 import "./petDetails.css";
+import { useClientGuard } from "../../../hooks/useClientGuard.jsx";
 
 export function PetDetails() {
 	const { id } = useParams();
-	const navigate = useNavigate();
+
+	const { checking, isActive, BlockedScreen } = useClientGuard();
+
+	if (checking || !isActive) return <BlockedScreen />;
 
 	const [pet, setPet] = useState(null);
 	const [loading, setLoading] = useState(true);

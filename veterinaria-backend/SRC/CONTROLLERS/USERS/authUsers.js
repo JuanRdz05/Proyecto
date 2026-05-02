@@ -53,24 +53,6 @@ const loginUser = async (req, res) => {
 			});
 		}
 
-		if (user.isActive === false) {
-			await safeLog(
-				"LOGIN",
-				"USER",
-				`Intento de inicio de sesión bloqueado`,
-				{
-					userId: user._id,
-					email: user.email,
-					reason: "Usuario desactivado",
-					ip: req.ip,
-				},
-				user._id,
-			);
-			return res.status(403).json({
-				message: "Tu cuenta ha sido desactivada. Contacta al administrador.",
-			});
-		}
-
 		const token = jwt.sign(
 			{ id: user._id, role: user.role },
 			process.env.JWT_KEY,
