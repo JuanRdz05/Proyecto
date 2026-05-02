@@ -1,5 +1,6 @@
 const Appointments = require("../../MODELS/appointment.js");
 const Services = require("../../MODELS/services.js");
+const Users = require("../../MODELS/users.js");
 const { createLog } = require("../../MIDDLEWARES/logs.js");
 
 const safeLog = async (action, resource, description, metadata, userId) => {
@@ -162,12 +163,10 @@ const cancelAppointment = async (req, res) => {
 			.json({ message: "La cita ha sido cancelada correctamente" });
 	} catch (error) {
 		console.error("Error al cancelar la cita: ", error);
-		res
-			.status(500)
-			.json({
-				message: "Error al procesar la cancelación",
-				error: error.message,
-			});
+		res.status(500).json({
+			message: "Error al procesar la cancelación",
+			error: error.message,
+		});
 	}
 };
 
@@ -177,11 +176,9 @@ const acceptAppointment = async (req, res) => {
 		const user = req.user;
 
 		if (user.role !== "admin") {
-			return res
-				.status(403)
-				.json({
-					message: "Acceso denegado: Solo administradores pueden aceptar citas",
-				});
+			return res.status(403).json({
+				message: "Acceso denegado: Solo administradores pueden aceptar citas",
+			});
 		}
 
 		const appointment = await Appointments.findById(id);
@@ -196,9 +193,51 @@ const acceptAppointment = async (req, res) => {
 			});
 		}
 
+		// 🔥 BUSCAR VETERINARIO DISPONIBLE AUTOMÁTICAMENTE
+		const appointmentDate = appointment.date;
+		const appointmentTime = appointment.time;
+
+		// 1. Obtener todos los veterinarios activos
+		const allVets = await Users.find({ role: "vet", isActive: true }).select(
+			"_id name paternalLastName",
+		);
+
+		if (allVets.length === 0) {
+			return res.status(409).json({
+				message:
+					"No hay veterinarios disponibles en este momento. No se puede aceptar la cita.",
+			});
+		}
+
+		// 2. Obtener citas ya aceptadas o en progreso en la misma fecha/hora
+		const busyVets = await Appointments.find({
+			date: appointmentDate,
+			time: appointmentTime,
+			status: { $in: ["Aceptada", "En progreso"] },
+			vet: { $exists: true, $ne: null },
+		}).select("vet");
+
+		const busyVetIds = busyVets.map((a) => a.vet.toString());
+
+		// 3. Filtrar veterinarios disponibles
+		const availableVets = allVets.filter(
+			(vet) => !busyVetIds.includes(vet._id.toString()),
+		);
+
+		if (availableVets.length === 0) {
+			return res.status(409).json({
+				message:
+					"No hay veterinarios disponibles para este horario. Todos están ocupados.",
+			});
+		}
+
+		// 4. Asignar aleatoriamente un veterinario disponible
+		const randomIndex = Math.floor(Math.random() * availableVets.length);
+		const assignedVet = availableVets[randomIndex];
+
 		const oldStatus = appointment.status;
 		appointment.status = "Aceptada";
-		appointment.vet = req.body.vetId || null;
+		appointment.vet = assignedVet._id;
 		await appointment.save();
 
 		// Volver a buscar con populate para devolver datos completos
@@ -211,12 +250,14 @@ const acceptAppointment = async (req, res) => {
 		await safeLog(
 			"UPDATE",
 			"APPOINTMENT",
-			`Aceptación de la cita #${id}`,
+			`Aceptación de la cita #${id} - Asignada al veterinario ${assignedVet.name} ${assignedVet.paternalLastName}`,
 			{
 				appointmentId: id,
 				petName: updatedAppointment.pet?.name,
 				ownerName: updatedAppointment.owner?.name,
 				serviceName: updatedAppointment.service?.name,
+				assignedVetId: assignedVet._id,
+				assignedVetName: `${assignedVet.name} ${assignedVet.paternalLastName}`,
 				oldStatus: oldStatus,
 				newStatus: "Aceptada",
 			},
@@ -224,14 +265,15 @@ const acceptAppointment = async (req, res) => {
 		);
 
 		res.status(200).json({
-			message: "Cita aceptada exitosamente",
+			message: `Cita aceptada y asignada al Dr. ${assignedVet.name} ${assignedVet.paternalLastName}`,
 			appointment: updatedAppointment,
 		});
 	} catch (error) {
 		console.error("Error al aceptar la cita:", error);
-		res
-			.status(500)
-			.json({ message: "Error al aceptar la cita", error: error.message });
+		res.status(500).json({
+			message: "Error al aceptar la cita",
+			error: error.message,
+		});
 	}
 };
 
@@ -242,12 +284,9 @@ const rejectAppointment = async (req, res) => {
 		const user = req.user;
 
 		if (user.role !== "admin") {
-			return res
-				.status(403)
-				.json({
-					message:
-						"Acceso denegado: Solo administradores pueden rechazar citas",
-				});
+			return res.status(403).json({
+				message: "Acceso denegado: Solo administradores pueden rechazar citas",
+			});
 		}
 
 		const appointment = await Appointments.findById(id);
@@ -302,6 +341,57 @@ const rejectAppointment = async (req, res) => {
 	}
 };
 
+const getAppointmentsByVet = async (req, res) => {
+	try {
+		const user = req.user;
+
+		if (user.role !== "vet") {
+			return res.status(403).json({
+				message: "Acceso denegado: Solo veterinarios pueden ver sus citas",
+			});
+		}
+
+		const vetId = user._id || user.id;
+
+		// Obtener fecha de hoy en UTC (usando solo año, mes, día)
+		const now = new Date();
+		const year = now.getFullYear();
+		const month = now.getMonth(); // 0-indexed
+		const day = now.getDate();
+
+		// Crear fechas en UTC para evitar problemas de zona horaria
+		const startOfDay = new Date(Date.UTC(year, month, day, 0, 0, 0));
+		const endOfDay = new Date(Date.UTC(year, month, day + 1, 0, 0, 0));
+
+		console.log("Buscando citas entre:", startOfDay, "y", endOfDay);
+		console.log("Vet ID:", vetId);
+
+		const appointments = await Appointments.find({
+			vet: vetId,
+			date: { $gte: startOfDay, $lt: endOfDay },
+			status: { $in: ["Aceptada", "En progreso", "Terminada"] }, // Incluir Terminada para stats
+		})
+			.populate("pet", "name petType breed")
+			.populate("owner", "name paternalLastName email phone")
+			.populate("service", "name price description")
+			.sort({ time: 1 });
+
+		console.log("Citas encontradas:", appointments.length);
+
+		res.status(200).json({
+			message: appointments.length
+				? "Citas obtenidas"
+				: "No tienes citas asignadas para hoy",
+			appointments,
+		});
+	} catch (error) {
+		console.error("Error al obtener citas del veterinario:", error);
+		res
+			.status(500)
+			.json({ message: "Error al obtener las citas", error: error.message });
+	}
+};
+
 module.exports = {
 	createAppointments,
 	getAllAppointments,
@@ -309,4 +399,5 @@ module.exports = {
 	cancelAppointment,
 	acceptAppointment,
 	rejectAppointment,
+	getAppointmentsByVet,
 };

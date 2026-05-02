@@ -34,11 +34,10 @@ export const getAllAppointments = async () => {
 };
 
 /**
- * Acepta una cita (cambia estado a "Aceptada")
+ * Acepta una cita (asigna veterinario automáticamente)
  * @param {string} appointmentId - ID de la cita
- * @param {string} vetId - ID del veterinario asignado (opcional por ahora)
  */
-export const acceptAppointment = async (appointmentId, vetId = null) => {
+export const acceptAppointment = async (appointmentId) => {
 	try {
 		const response = await fetch(
 			`${BASE_URL}/appointments/v1/accept/${appointmentId}`,
@@ -46,7 +45,7 @@ export const acceptAppointment = async (appointmentId, vetId = null) => {
 				method: "PATCH",
 				credentials: "include",
 				headers: getHeaders(),
-				body: JSON.stringify({ vetId }),
+				// Ya no enviamos body, el backend asigna vet automáticamente
 			},
 		);
 

@@ -1,75 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { PageTransition } from "../../../components/PageTransition/PageTransition.jsx";
 import { NavbarVet } from "../../../components/NavbarVet/navbarVet.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
+import { getVetAppointmentsToday } from "../../../services/Vet/citas.js";
+import { toast } from "react-toastify";
 import "./vets.css";
-
-// Datos placeholder
-const STATS = {
-	total: 8,
-	completed: 5,
-	pending: 3,
-};
-
-const ALL_APPOINTMENTS = [
-	{
-		id: 1,
-		time: "10:00 AM",
-		owner: "Carlos Ruiz",
-		pet: "Max",
-		service: "Chequeo Anual",
-	},
-	{
-		id: 2,
-		time: "11:30 AM",
-		owner: "María López",
-		pet: "Charlie",
-		service: "Vacunación",
-	},
-	{
-		id: 3,
-		time: "2:30 PM",
-		owner: "Ana Martínez",
-		pet: "Bella",
-		service: "Consulta",
-	},
-	{
-		id: 4,
-		time: "3:00 PM",
-		owner: "Roberto Silva",
-		pet: "Luna",
-		service: "Desparasitación",
-	},
-	{
-		id: 5,
-		time: "3:45 PM",
-		owner: "Laura Vega",
-		pet: "Toby",
-		service: "Cirugía menor",
-	},
-	{
-		id: 6,
-		time: "4:15 PM",
-		owner: "Jorge Mendoza",
-		pet: "Rocky",
-		service: "Vacunación",
-	},
-	{
-		id: 7,
-		time: "4:50 PM",
-		owner: "Sofía Herrera",
-		pet: "Mia",
-		service: "Chequeo Anual",
-	},
-	{
-		id: 8,
-		time: "5:30 PM",
-		owner: "Diego Torres",
-		pet: "Coco",
-		service: "Consulta",
-	},
-];
 
 const INITIAL_COUNT = 3;
 
@@ -77,74 +13,193 @@ export function VetHome() {
 	const navigate = useNavigate();
 	const userName = localStorage.getItem("userName") || "Doctor";
 	const [showAll, setShowAll] = useState(false);
+	const [appointments, setAppointments] = useState([]);
+	const [loading, setLoading] = useState(true);
+	const [stats, setStats] = useState({ total: 0, completed: 0, pending: 0 });
 
-	// ── Guard: verifica si el veterinario está activo ──────────────────────
-// Bloquear si está verificando o inactivo
-const visibleAppointments = showAll
-		? ALL_APPOINTMENTS
-		: ALL_APPOINTMENTS.slice(0, INITIAL_COUNT);
+	const fetchAppointments = async () => {
+		setLoading(true);
+		try {
+			const data = await getVetAppointmentsToday();
+			const apps = data.appointments || [];
+			setAppointments(apps);
+
+			// Calcular estadísticas
+			const completed = apps.filter((a) => a.status === "Terminada").length;
+			const pending = apps.filter(
+				(a) => a.status === "Aceptada" || a.status === "En progreso",
+			).length;
+			setStats({
+				total: apps.length,
+				completed,
+				pending,
+			});
+		} catch (error) {
+			console.error("Error cargando citas:", error);
+			toast.error(error.message || "Error al cargar las citas", {
+				autoClose: 4000,
+			});
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	useEffect(() => {
+		fetchAppointments();
+	}, []);
+
+	const visibleAppointments = showAll
+		? appointments
+		: appointments.slice(0, INITIAL_COUNT);
+
+	const formatTime = (timeStr) => {
+		if (!timeStr) return "N/A";
+		const [hours, minutes] = timeStr.split(":");
+		const hour = parseInt(hours, 10);
+		const ampm = hour >= 12 ? "PM" : "AM";
+		const displayHour = hour % 12 || 12;
+		return `${displayHour}:${minutes} ${ampm}`;
+	};
+
+	const getOwnerName = (owner) => {
+		if (!owner) return "N/A";
+		return `${owner.name || ""} ${owner.paternalLastName || ""}`.trim();
+	};
+
+	const getStatusClass = (status) => {
+		switch (status) {
+			case "Aceptada":
+				return "status-aceptada";
+			case "En progreso":
+				return "status-progreso";
+			case "Terminada":
+				return "status-terminada";
+			default:
+				return "status-aceptada";
+		}
+	};
+
+	const getStatusLabel = (status) => {
+		switch (status) {
+			case "En progreso":
+				return "En curso";
+			default:
+				return status;
+		}
+	};
 
 	return (
 		<div className="vet-page-container">
 			<NavbarVet />
 
 			<PageTransition>
-<main className="vet-main">
-				<h1 className="vet-welcome">¡Bienvenido, Dr. {userName}!</h1>
+				<main className="vet-main">
+					<h1 className="vet-welcome">¡Bienvenido, Dr. {userName}!</h1>
 
-				<div className="vet-stats-grid">
-					<div className="vet-stat-card">
-						<p className="stat-label">Citas del día de hoy</p>
-						<span className="stat-value">{STATS.total}</span>
-					</div>
-					<div className="vet-stat-card">
-						<p className="stat-label">Completadas</p>
-						<span className="stat-value">{STATS.completed}</span>
-					</div>
-					<div className="vet-stat-card">
-						<p className="stat-label">Pendientes</p>
-						<span className="stat-value">{STATS.pending}</span>
-					</div>
-				</div>
-
-				<section className="vet-appointments-section">
-					<div className="vet-appointments-header">
-						<h2>Citas del día</h2>
-						<button
-							className="btn-ver-todas"
-							onClick={() => setShowAll((prev) => !prev)}
-						>
-							{showAll ? "Ver menos" : "Ver todas"}
-						</button>
+					<div className="vet-stats-grid">
+						<div className="vet-stat-card">
+							<p className="stat-label">Citas del día de hoy</p>
+							<span className="stat-value">{stats.total}</span>
+						</div>
+						<div className="vet-stat-card">
+							<p className="stat-label">Completadas</p>
+							<span className="stat-value">{stats.completed}</span>
+						</div>
+						<div className="vet-stat-card">
+							<p className="stat-label">Pendientes</p>
+							<span className="stat-value">{stats.pending}</span>
+						</div>
 					</div>
 
-					<div className="vet-appointments-card">
-						{visibleAppointments.map((apt, index) => (
-							<div
-								key={apt.id}
-								className={`vet-apt-row ${
-									index < visibleAppointments.length - 1 ? "with-divider" : ""
-								}`}
+					<section className="vet-appointments-section">
+						<div className="vet-appointments-header">
+							<h2>Citas del día</h2>
+							<button
+								className="btn-ver-todas"
+								onClick={() => setShowAll((prev) => !prev)}
 							>
-								<div className="vet-apt-info">
-									<p className="vet-apt-time">
-										{apt.time} — <strong>{apt.owner}</strong>
-									</p>
-									<p className="vet-apt-detail">
-										{apt.pet} · {apt.service}
-									</p>
+								{showAll ? "Ver menos" : "Ver todas"}
+							</button>
+						</div>
+
+						<div className="vet-appointments-card">
+							{loading ? (
+								// Skeleton loading
+								Array.from({ length: 3 }).map((_, i) => (
+									<div
+										key={`skeleton-${i}`}
+										className={`vet-apt-row ${i < 2 ? "with-divider" : ""}`}
+									>
+										<div className="vet-apt-info">
+											<div
+												className="skeleton skeleton-text"
+												style={{ width: "60%" }}
+											></div>
+											<div
+												className="skeleton skeleton-text"
+												style={{ width: "40%" }}
+											></div>
+										</div>
+									</div>
+								))
+							) : appointments.length === 0 ? (
+								<div className="empty-appointments">
+									<span className="empty-icon">📅</span>
+									<p>No tienes citas asignadas para hoy.</p>
 								</div>
-								<button
-									className="btn-atender"
-									onClick={() => navigate(`/atender-cita/${apt.id}`)}
-								>
-									Atender
-								</button>
-							</div>
-						))}
-					</div>
-				</section>
-			</main>
+							) : (
+								visibleAppointments.map((apt, index) => (
+									<div
+										key={apt._id}
+										className={`vet-apt-row ${
+											index < visibleAppointments.length - 1
+												? "with-divider"
+												: ""
+										} ${apt.status === "Terminada" ? "completed" : ""}`}
+									>
+										<div className="vet-apt-info">
+											<div className="vet-apt-header">
+												<p className="vet-apt-time">
+													{formatTime(apt.time)} —{" "}
+													<strong>{getOwnerName(apt.owner)}</strong>
+												</p>
+												<span
+													className={`vet-apt-status ${getStatusClass(
+														apt.status,
+													)}`}
+												>
+													{getStatusLabel(apt.status)}
+												</span>
+											</div>
+											<p className="vet-apt-detail">
+												{apt.pet?.name || "Mascota"} ·{" "}
+												{apt.service?.name || "Servicio"}
+											</p>
+											{apt.owner?.phone && (
+												<p className="vet-apt-owner-info">
+													📞 {apt.owner.phone}
+												</p>
+											)}
+										</div>
+										<button
+											className={`btn-atender ${
+												apt.status === "Terminada" ? "status-completed" : ""
+											}`}
+											onClick={() => {
+												if (apt.status !== "Terminada") {
+													navigate(`/atender-cita/${apt._id}`);
+												}
+											}}
+											disabled={apt.status === "Terminada"}
+										>
+											{apt.status === "Terminada" ? "✓ Completada" : "Atender"}
+										</button>
+									</div>
+								))
+							)}
+						</div>
+					</section>
+				</main>
 			</PageTransition>
 
 			<FooterGuest />

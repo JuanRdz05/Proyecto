@@ -24,7 +24,7 @@ export function AdminCitas() {
 	const navigate = useNavigate();
 
 	// ── Guard: verifica si el administrador está activo ────────────────────
-const [appointments, setAppointments] = useState([]);
+	const [appointments, setAppointments] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [refreshing, setRefreshing] = useState(false);
 	const [filter, setFilter] = useState("Pendientes");
@@ -60,18 +60,42 @@ const [appointments, setAppointments] = useState([]);
 	}, []);
 
 	// ── Bloquear si está verificando o inactivo ────────────────────────────
-const handleAceptar = async (id) => {
+	const handleAceptar = async (id) => {
 		setProcessingId(id);
 		try {
 			const result = await acceptAppointment(id);
-			toast.success("Cita aceptada exitosamente", { autoClose: 3000 });
+
+			// Toast de éxito con el nombre del veterinario asignado
+			toast.success(result.message || "Cita aceptada exitosamente", {
+				autoClose: 4000,
+			});
+
 			setAppointments((prev) =>
 				prev.map((a) => (a._id === id ? result.appointment : a)),
 			);
 		} catch (error) {
-			toast.error(error.message || "Error al aceptar la cita", {
-				autoClose: 4000,
-			});
+			// Manejo específico de errores
+			const errorMessage = error.message || "Error al aceptar la cita";
+
+			if (errorMessage.includes("No hay veterinarios disponibles")) {
+				toast.error(
+					"❌ No hay veterinarios disponibles. No se puede aceptar la cita.",
+					{
+						autoClose: 5000,
+					},
+				);
+			} else if (errorMessage.includes("ocupados")) {
+				toast.error(
+					"❌ Todos los veterinarios están ocupados en este horario.",
+					{
+						autoClose: 5000,
+					},
+				);
+			} else {
+				toast.error(errorMessage, {
+					autoClose: 4000,
+				});
+			}
 		} finally {
 			setProcessingId(null);
 		}
@@ -153,155 +177,155 @@ const handleAceptar = async (id) => {
 		if (!person) return "N/A";
 		return `${person.name || ""} ${person.paternalLastName || ""}`.trim();
 	};
-return (
+	return (
 		<div className="admin-citas-container">
 			<NavbarAdmin />
 
 			<PageTransition>
-<main className="admin-citas-main">
-				<h1 className="admin-citas-title">Citas por aprobar</h1>
+				<main className="admin-citas-main">
+					<h1 className="admin-citas-title">Citas por aprobar</h1>
 
-				<div className="admin-citas-subheader">
-					<p className="admin-citas-subtitle">
-						{filter === "Pendientes"
-							? `Citas pendientes (${visibleCitas.length})`
-							: `Todas las citas (${visibleCitas.length})`}
-					</p>
+					<div className="admin-citas-subheader">
+						<p className="admin-citas-subtitle">
+							{filter === "Pendientes"
+								? `Citas pendientes (${visibleCitas.length})`
+								: `Todas las citas (${visibleCitas.length})`}
+						</p>
 
-					<div className="filter-group">
-						<button
-							className={`btn-filter ${filter === "Pendientes" ? "active" : ""}`}
-							onClick={() => setFilter("Pendientes")}
-						>
-							<span className="filter-dot">●</span> Pendientes
-						</button>
-						<button
-							className={`btn-filter ${filter === "Todas" ? "active" : ""}`}
-							onClick={() => setFilter("Todas")}
-						>
-							Todas
-						</button>
-						<button
-							className="btn-filter btn-refresh"
-							onClick={() => fetchAppointments(true)}
-							disabled={refreshing}
-							title="Recargar citas"
-						>
-							{refreshing ? "⟳" : "↻"}
-						</button>
+						<div className="filter-group">
+							<button
+								className={`btn-filter ${filter === "Pendientes" ? "active" : ""}`}
+								onClick={() => setFilter("Pendientes")}
+							>
+								<span className="filter-dot">●</span> Pendientes
+							</button>
+							<button
+								className={`btn-filter ${filter === "Todas" ? "active" : ""}`}
+								onClick={() => setFilter("Todas")}
+							>
+								Todas
+							</button>
+							<button
+								className="btn-filter btn-refresh"
+								onClick={() => fetchAppointments(true)}
+								disabled={refreshing}
+								title="Recargar citas"
+							>
+								{refreshing ? "⟳" : "↻"}
+							</button>
+						</div>
 					</div>
-				</div>
 
-				<div className="admin-citas-table-wrapper">
-					{refreshing && <div className="refresh-overlay"></div>}
+					<div className="admin-citas-table-wrapper">
+						{refreshing && <div className="refresh-overlay"></div>}
 
-					<table className="admin-citas-table">
-						<thead>
-							<tr>
-								<th>Paciente</th>
-								<th>Dueño</th>
-								<th>Servicio</th>
-								<th>Fecha y hora</th>
-								<th>Estado</th>
-								<th>Acciones</th>
-							</tr>
-						</thead>
-						<tbody>
-							{loading ? (
-								Array.from({ length: 5 }).map((_, i) => (
-									<tr key={`skeleton-${i}`} className="skeleton-row">
-										<td>
-											<div className="skeleton skeleton-text"></div>
-										</td>
-										<td>
-											<div className="skeleton skeleton-text"></div>
-										</td>
-										<td>
-											<div className="skeleton skeleton-text"></div>
-										</td>
-										<td>
-											<div className="skeleton skeleton-text"></div>
-										</td>
-										<td>
-											<div className="skeleton skeleton-badge"></div>
-										</td>
-										<td>
-											<div className="skeleton skeleton-actions"></div>
-										</td>
-									</tr>
-								))
-							) : visibleCitas.length === 0 ? (
+						<table className="admin-citas-table">
+							<thead>
 								<tr>
-									<td colSpan={6} className="empty-row">
-										<div className="empty-content">
-											<span className="empty-icon">📅</span>
-											<p>No hay citas que mostrar.</p>
-										</div>
-									</td>
+									<th>Paciente</th>
+									<th>Dueño</th>
+									<th>Servicio</th>
+									<th>Fecha y hora</th>
+									<th>Estado</th>
+									<th>Acciones</th>
 								</tr>
-							) : (
-								visibleCitas.map((cita) => {
-									const cfg = STATUS_CONFIG[cita.status] || {
-										label: cita.status,
-										cls: "status-pendiente",
-									};
-									const isProcessing = processingId === cita._id;
-									const isPending = cita.status === "Pendiente";
-
-									return (
-										<tr
-											key={cita._id}
-											className={`cita-row ${isProcessing ? "processing" : ""}`}
-										>
-											<td className="col-pet">
-												<strong>{cita.pet?.name || "N/A"}</strong>
-												{cita.pet?.petType && (
-													<span className="pet-type">{cita.pet.petType}</span>
-												)}
+							</thead>
+							<tbody>
+								{loading ? (
+									Array.from({ length: 5 }).map((_, i) => (
+										<tr key={`skeleton-${i}`} className="skeleton-row">
+											<td>
+												<div className="skeleton skeleton-text"></div>
 											</td>
-											<td className="col-owner">{getFullName(cita.owner)}</td>
-											<td className="col-service">
-												{cita.service?.name || "N/A"}
+											<td>
+												<div className="skeleton skeleton-text"></div>
 											</td>
-											<td className="col-datetime">
-												{formatDateTime(cita.date, cita.time)}
+											<td>
+												<div className="skeleton skeleton-text"></div>
 											</td>
-											<td className="col-status">
-												<span className={`cita-status-badge ${cfg.cls}`}>
-													{cfg.label}
-												</span>
+											<td>
+												<div className="skeleton skeleton-text"></div>
 											</td>
-											<td className="col-actions">
-												{isPending && (
-													<>
-														<button
-															className="btn-action btn-aceptar"
-															onClick={() => handleAceptar(cita._id)}
-															disabled={isProcessing}
-															title="Aceptar cita"
-														>
-															{isProcessing ? "..." : "✓"}
-														</button>
-														<button
-															className="btn-action btn-rechazar"
-															onClick={() => openReasonModal(cita)}
-															disabled={isProcessing}
-															title="Rechazar cita"
-														>
-															{isProcessing ? "..." : "✕"}
-														</button>
-													</>
-												)}
-												{!isPending && <span className="no-actions">—</span>}
+											<td>
+												<div className="skeleton skeleton-badge"></div>
+											</td>
+											<td>
+												<div className="skeleton skeleton-actions"></div>
 											</td>
 										</tr>
-									);
-								})
-							)}
-						</tbody>
-					</table>
-				</div>
-			</main>
+									))
+								) : visibleCitas.length === 0 ? (
+									<tr>
+										<td colSpan={6} className="empty-row">
+											<div className="empty-content">
+												<span className="empty-icon">📅</span>
+												<p>No hay citas que mostrar.</p>
+											</div>
+										</td>
+									</tr>
+								) : (
+									visibleCitas.map((cita) => {
+										const cfg = STATUS_CONFIG[cita.status] || {
+											label: cita.status,
+											cls: "status-pendiente",
+										};
+										const isProcessing = processingId === cita._id;
+										const isPending = cita.status === "Pendiente";
+
+										return (
+											<tr
+												key={cita._id}
+												className={`cita-row ${isProcessing ? "processing" : ""}`}
+											>
+												<td className="col-pet">
+													<strong>{cita.pet?.name || "N/A"}</strong>
+													{cita.pet?.petType && (
+														<span className="pet-type">{cita.pet.petType}</span>
+													)}
+												</td>
+												<td className="col-owner">{getFullName(cita.owner)}</td>
+												<td className="col-service">
+													{cita.service?.name || "N/A"}
+												</td>
+												<td className="col-datetime">
+													{formatDateTime(cita.date, cita.time)}
+												</td>
+												<td className="col-status">
+													<span className={`cita-status-badge ${cfg.cls}`}>
+														{cfg.label}
+													</span>
+												</td>
+												<td className="col-actions">
+													{isPending && (
+														<>
+															<button
+																className="btn-action btn-aceptar"
+																onClick={() => handleAceptar(cita._id)}
+																disabled={isProcessing}
+																title="Aceptar cita"
+															>
+																{isProcessing ? "..." : "✓"}
+															</button>
+															<button
+																className="btn-action btn-rechazar"
+																onClick={() => openReasonModal(cita)}
+																disabled={isProcessing}
+																title="Rechazar cita"
+															>
+																{isProcessing ? "..." : "✕"}
+															</button>
+														</>
+													)}
+													{!isPending && <span className="no-actions">—</span>}
+												</td>
+											</tr>
+										);
+									})
+								)}
+							</tbody>
+						</table>
+					</div>
+				</main>
 			</PageTransition>
 
 			<FooterGuest />

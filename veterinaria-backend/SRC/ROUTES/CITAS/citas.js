@@ -6,6 +6,7 @@ const {
 	cancelAppointment,
 	acceptAppointment,
 	rejectAppointment,
+	getAppointmentsByVet,
 } = require("../../CONTROLLERS/CITAS/citas.js");
 const { verificarToken } = require("../../MIDDLEWARES/authToken.js");
 
@@ -17,9 +18,11 @@ citasRouter.get("/all", verificarToken, getAllAppointments);
 citasRouter.get("/user/me", verificarToken, getAppointmentsByUser);
 // Cancelar una cita
 citasRouter.patch("/cancel/:id", verificarToken, cancelAppointment);
-// ACEPTAR cita (nueva)
+// ACEPTAR cita
 citasRouter.patch("/accept/:id", verificarToken, acceptAppointment);
-// RECHAZAR cita (nueva)
+// RECHAZAR cita
 citasRouter.patch("/reject/:id", verificarToken, rejectAppointment);
+// Obtener citas del veterinario
+citasRouter.get("/vet/today", verificarToken, getAppointmentsByVet);
 
 module.exports = citasRouter;
