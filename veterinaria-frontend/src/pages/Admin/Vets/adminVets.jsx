@@ -20,12 +20,11 @@ export function AdminVets() {
 	const navigate = useNavigate();
 	const { checking, isActive, BlockedScreen } = useAdminGuard();
 
-	if (checking || !isActive) return <BlockedScreen />;
+	// Todos los hooks se declaran aquí, antes de cualquier retorno condicional
 	const [search, setSearch] = useState("");
 	const [vets, setVets] = useState([]);
 	const [loading, setLoading] = useState(true);
 
-	// Cargar veterinarios del backend
 	useEffect(() => {
 		const fetchVets = async () => {
 			try {
@@ -45,6 +44,9 @@ export function AdminVets() {
 		};
 		fetchVets();
 	}, []);
+
+	// Ahora sí, si el guard indica que estamos cargando o inactivos, mostramos la pantalla de bloqueo
+	if (checking || !isActive) return <BlockedScreen />;
 
 	const filtered = vets.filter((v) => {
 		const q = search.toLowerCase();
@@ -140,14 +142,18 @@ export function AdminVets() {
 											<td className="col-email">{vet.email}</td>
 											<td className="col-status">
 												<span
-													className={`vet-status-badge ${vet.isActive ? "badge-activo" : "badge-inactivo"}`}
+													className={`vet-status-badge ${
+														vet.isActive ? "badge-activo" : "badge-inactivo"
+													}`}
 												>
 													{vet.isActive ? "Activo" : "Inactivo"}
 												</span>
 											</td>
 											<td className="col-action">
 												<button
-													className={`toggle-switch ${vet.isActive ? "on" : "off"}`}
+													className={`toggle-switch ${
+														vet.isActive ? "on" : "off"
+													}`}
 													onClick={() => handleToggleActive(vet._id)}
 													title={vet.isActive ? "Desactivar" : "Activar"}
 												>

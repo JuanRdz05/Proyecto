@@ -31,7 +31,6 @@ function PencilIcon() {
 export function AdminServices() {
 	const { checking, isActive, BlockedScreen } = useAdminGuard();
 
-	if (checking || !isActive) return <BlockedScreen />;
 	const navigate = useNavigate();
 	const [services, setServices] = useState([]);
 	const [loading, setLoading] = useState(true);
@@ -183,7 +182,7 @@ export function AdminServices() {
 			</div>
 		);
 	}
-
+	if (checking || !isActive) return <BlockedScreen />;
 	return (
 		<div className="svc-container">
 			<NavbarAdmin />

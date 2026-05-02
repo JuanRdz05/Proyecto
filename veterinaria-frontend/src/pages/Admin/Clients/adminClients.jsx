@@ -21,7 +21,6 @@ function initials(name) {
 export function AdminClients() {
 	const { checking, isActive, BlockedScreen } = useAdminGuard();
 
-	if (checking || !isActive) return <BlockedScreen />;
 	const [clients, setClients] = useState([]);
 	const [search, setSearch] = useState("");
 	const [loading, setLoading] = useState(true);
@@ -109,6 +108,8 @@ export function AdminClients() {
 	// ── Nombre completo ────────────────────────────────────────────────────────
 	const fullName = (c) =>
 		[c.name, c.paternalLastName, c.maternalLastName].filter(Boolean).join(" ");
+
+	if (checking || !isActive) return <BlockedScreen />;
 
 	// ── Render ─────────────────────────────────────────────────────────────────
 	return (

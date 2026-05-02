@@ -22,7 +22,6 @@ export function AdminPets() {
 	const navigate = useNavigate();
 	const { checking, isActive, BlockedScreen } = useAdminGuard();
 
-	if (checking || !isActive) return <BlockedScreen />;
 	// Estados para la lista y paginación
 	const [pets, setPets] = useState([]);
 	const [loading, setLoading] = useState(true);
@@ -101,7 +100,7 @@ export function AdminPets() {
 			toast.error("No se pudo cambiar el estado de la mascota.");
 		}
 	};
-
+	if (checking || !isActive) return <BlockedScreen />;
 	// Filtrado local para la búsqueda por texto
 	const filtered = pets.filter((p) => {
 		const q = search.toLowerCase();

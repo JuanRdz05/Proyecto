@@ -10,8 +10,6 @@ export function RegisterVet() {
 	const navigate = useNavigate();
 	const { checking, isActive, BlockedScreen } = useAdminGuard();
 
-	if (checking || !isActive) return <BlockedScreen />;
-
 	const [username, setUsername] = useState("");
 	const [name, setName] = useState("");
 	const [paternalLastName, setPaternalLastName] = useState("");
@@ -25,6 +23,7 @@ export function RegisterVet() {
 	const [previewUrl, setPreviewUrl] = useState(null);
 	const [loading, setLoading] = useState(false);
 
+	if (checking || !isActive) return <BlockedScreen />;
 	const handleFileClick = () => fileInputRef.current.click();
 
 	const handleFileChange = (e) => {

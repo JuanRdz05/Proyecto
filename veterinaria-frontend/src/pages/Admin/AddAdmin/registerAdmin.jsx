@@ -10,8 +10,6 @@ export function RegisterAdmin() {
 	const navigate = useNavigate();
 	const { checking, isActive, BlockedScreen } = useAdminGuard();
 
-	if (checking || !isActive) return <BlockedScreen />;
-
 	const [username, setUsername] = useState("");
 	const [name, setName] = useState("");
 	const [paternalLastName, setPaternalLastName] = useState("");
@@ -24,6 +22,8 @@ export function RegisterAdmin() {
 	const [selectedFile, setSelectedFile] = useState(null);
 	const [previewUrl, setPreviewUrl] = useState(null);
 	const [loading, setLoading] = useState(false);
+
+	if (checking || !isActive) return <BlockedScreen />;
 
 	const handleFileClick = () => fileInputRef.current.click();
 

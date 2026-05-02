@@ -157,7 +157,7 @@ export function AdminCitas() {
 		if (!person) return "N/A";
 		return `${person.name || ""} ${person.paternalLastName || ""}`.trim();
 	};
-
+	if (checking || !isActive) return <BlockedScreen />;
 	return (
 		<div className="admin-citas-container">
 			<NavbarAdmin />

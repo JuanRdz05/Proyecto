@@ -10,7 +10,6 @@ import { useAdminGuard } from "../../../hooks/useAdminGuard.jsx";
 export function AddService() {
 	const { checking, isActive, BlockedScreen } = useAdminGuard();
 
-	if (checking || !isActive) return <BlockedScreen />;
 	const navigate = useNavigate();
 	const [loading, setLoading] = useState(false);
 	const [errors, setErrors] = useState({});
@@ -121,7 +120,7 @@ export function AddService() {
 		}
 		navigate(-1);
 	};
-
+	if (checking || !isActive) return <BlockedScreen />;
 	return (
 		<div className="addsvc-page-container">
 			<NavbarAdmin />

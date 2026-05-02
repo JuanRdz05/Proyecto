@@ -23,12 +23,10 @@ export function AdminManager() {
 	const navigate = useNavigate();
 	const { checking, isActive, BlockedScreen } = useAdminGuard();
 
-	if (checking || !isActive) return <BlockedScreen />;
 	const [search, setSearch] = useState("");
 	const [admins, setAdmins] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const currentUserId = localStorage.getItem("userId"); // ID del admin logueado
-
 	// Cargar administradores del backend
 	useEffect(() => {
 		const fetchAdmins = async () => {
@@ -89,6 +87,7 @@ export function AdminManager() {
 	};
 
 	const isCurrentUser = (id) => id === currentUserId;
+	if (checking || !isActive) return <BlockedScreen />;
 
 	return (
 		<div className="adminmgr-container">

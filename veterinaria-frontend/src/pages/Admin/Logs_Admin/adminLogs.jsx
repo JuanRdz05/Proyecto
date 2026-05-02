@@ -24,7 +24,6 @@ const ACTIONS = ["TODAS", "CREATE", "UPDATE", "DELETE", "LOGIN", "LOGOUT"];
 export function AdminLogs() {
 	const { checking, isActive, BlockedScreen } = useAdminGuard();
 
-	if (checking || !isActive) return <BlockedScreen />;
 	const [logs, setLogs] = useState([]);
 	const [filterAction, setFilterAction] = useState("TODAS");
 	const [searchQuery, setSearchQuery] = useState("");
@@ -194,7 +193,7 @@ export function AdminLogs() {
 			</tr>
 		);
 	};
-
+	if (checking || !isActive) return <BlockedScreen />;
 	return (
 		<div className="logs-container">
 			<NavbarAdmin />
