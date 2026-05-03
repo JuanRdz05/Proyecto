@@ -1,6 +1,7 @@
 const Appointments = require("../../MODELS/appointment.js");
 const Services = require("../../MODELS/services.js");
 const Users = require("../../MODELS/users.js");
+const Pets = require("../../MODELS/pets.js");
 const { createLog } = require("../../MIDDLEWARES/logs.js");
 
 const safeLog = async (action, resource, description, metadata, userId) => {
@@ -26,6 +27,19 @@ const createAppointments = async (req, res) => {
 			return res
 				.status(400)
 				.json({ message: "La fecha debe tener formato YYYY-MM-DD" });
+		}
+
+		// Validar que la mascota exista y esté activa
+		const mascotaDB = await Pets.findById(pet);
+
+		if (!mascotaDB) {
+			return res.status(404).json({ message: "Mascota no encontrada" });
+		}
+
+		if (!mascotaDB.isActive) {
+			return res.status(400).json({
+				message: "No se puede agendar una cita para una mascota inactiva",
+			});
 		}
 
 		const servicioDB = await Services.findById(serviceId);

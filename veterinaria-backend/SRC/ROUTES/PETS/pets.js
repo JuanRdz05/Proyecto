@@ -8,6 +8,7 @@ const {
 	modifyPet,
 	getPetById,
 	adminTogglePetStatus,
+	deletePet,
 } = require("../../CONTROLLERS/PETS/pets.js");
 const { verificarToken, authRole } = require("../../MIDDLEWARES/authToken.js");
 
@@ -36,6 +37,9 @@ mascotasRouter.patch(
 // Cliente: activar/desactivar su propia mascota (bloqueado si fue el admin quien desactivó)
 mascotasRouter.patch("/:id/toggleActive", verificarToken, changeStatus);
 
+// Eliminar mascota permanentemente (cliente su propia mascota, admin cualquiera)
+mascotasRouter.delete("/:id", verificarToken, deletePet);
+
 // Cliente: ver mascota por id
 mascotasRouter.get("/:id", verificarToken, getPetById);
 
@@ -48,3 +52,4 @@ mascotasRouter.patch(
 );
 
 module.exports = mascotasRouter;
+

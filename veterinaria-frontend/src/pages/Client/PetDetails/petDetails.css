@@ -368,6 +368,118 @@
 	animation: slideDown 0.3s ease;
 }
 
+.petdetails-danger-zone {
+	margin-top: 2rem;
+	padding-top: 1.5rem;
+	border-top: 1px solid #e9ecef;
+	display: flex;
+	justify-content: center;
+}
+
+.btn-delete-pet {
+	width: 100%;
+	padding: 0.8rem;
+	background-color: transparent;
+	color: #dc3545; /* Rojo de peligro, igual al de status-inactive */
+	border: 2px solid #dc3545;
+	border-radius: 7px;
+	font-size: 1rem;
+	font-weight: bold;
+	cursor: pointer;
+	transition: all 0.3s ease;
+}
+
+.btn-delete-pet:hover {
+	background-color: #dc3545;
+	color: white;
+	box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);
+	transform: translateY(-2px);
+}
+
+.btn-delete-pet:active {
+	transform: translateY(0);
+}
+
+/* ---------- Modal de Eliminación ---------- */
+.pet-modal-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(0, 0, 0, 0.5);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+	backdrop-filter: blur(4px);
+	animation: fadeIn 0.2s ease;
+}
+
+.pet-modal-content {
+	background: white;
+	padding: 2rem;
+	border-radius: 14px;
+	max-width: 400px;
+	width: 90%;
+	text-align: center;
+	box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.pet-modal-content h3 {
+	margin-top: 0;
+	color: #333;
+	font-size: 1.5rem;
+}
+
+.pet-modal-content p {
+	color: #666;
+	margin-bottom: 1.5rem;
+	line-height: 1.5;
+}
+
+.pet-modal-actions {
+	display: flex;
+	gap: 12px;
+}
+
+.btn-modal-cancel {
+	flex: 1;
+	padding: 0.7rem;
+	border: none;
+	background: #e9ecef;
+	color: #495057;
+	border-radius: 7px;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.btn-modal-confirm {
+	flex: 1;
+	padding: 0.7rem;
+	border: none;
+	background: #dc3545;
+	color: white;
+	border-radius: 7px;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.btn-modal-confirm:disabled,
+.btn-modal-cancel:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
 /* ---------- Responsive ---------- */
 @media (max-width: 640px) {
 	.petdetails-header {

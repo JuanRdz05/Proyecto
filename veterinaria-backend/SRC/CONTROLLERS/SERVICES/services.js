@@ -247,10 +247,56 @@ const updateService = async (req, res) => {
 	}
 };
 
+const deleteService = async (req, res) => {
+	try {
+		const user = req.user;
+		const serviceId = req.params.id;
+
+		if (!user || user.role !== "admin") {
+			return res.status(403).json({ message: "Acceso denegado" });
+		}
+
+		const service = await Services.findById(serviceId);
+
+		if (!service) {
+			return res.status(404).json({ message: "Servicio no encontrado" });
+		}
+
+		const serviceData = {
+			serviceId: service._id,
+			serviceName: service.name,
+			serviceDescription: service.description?.substring(0, 200),
+			servicePrice: service.price,
+			priceFormatted: formatoDinero(service.price),
+		};
+
+		await Services.findByIdAndDelete(serviceId);
+
+		await safeLog(
+			"DELETE",
+			"SERVICE",
+			`Eliminación permanente del servicio "${serviceData.serviceName}" (${serviceData.priceFormatted})`,
+			serviceData,
+			user._id || user.id,
+		);
+
+		res
+			.status(200)
+			.json({ message: "Servicio eliminado permanentemente" });
+	} catch (error) {
+		console.error("Error al eliminar el servicio:", error);
+		res
+			.status(500)
+			.json({ message: "Error al eliminar el servicio", error: error.message });
+	}
+};
+
 module.exports = {
 	createService,
 	getAllServices,
 	changeStatus,
 	getServiceById,
 	updateService,
+	deleteService,
 };
+

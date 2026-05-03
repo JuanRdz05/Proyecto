@@ -72,3 +72,20 @@ export const togglePetStatus = async (id) => {
 	}
 	return await response.json();
 };
+
+// Función para eliminar la mascota permanentemente
+export const deletePet = async (id) => {
+	const response = await fetch(`${BASE_URL}/pets/v1/${id}`, {
+		method: "DELETE",
+		credentials: "include",
+		headers: {
+			"Content-Type": "application/json",
+		},
+	});
+	if (!response.ok) {
+		const errorData = await response.json().catch(() => ({}));
+		throw new Error(errorData.message || "No se pudo eliminar la mascota");
+	}
+	return await response.json();
+};
+

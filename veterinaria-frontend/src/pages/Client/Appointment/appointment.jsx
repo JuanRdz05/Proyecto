@@ -34,7 +34,9 @@ export function Appointment() {
 					getAllServices(),
 				]);
 
-				setPets(petsData.pets || petsData || []);
+				setPets(
+					(petsData.pets || petsData || []).filter((p) => p.isActive !== false),
+				);
 				setServices(servicesData.services || servicesData || []);
 			} catch (error) {
 				console.error("Error al cargar datos:", error);

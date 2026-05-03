@@ -45,3 +45,25 @@ export const togglePetStatus = async (petId) => {
 		throw error;
 	}
 };
+
+export const deletePet = async (petId) => {
+	try {
+		const response = await fetch(`${BASE_URL}/pets/v1/${petId}`, {
+			method: "DELETE",
+			credentials: "include",
+		});
+
+		if (!response.ok) {
+			const errorData = await response.json().catch(() => ({}));
+			throw new Error(
+				errorData.message || "No se pudo eliminar la mascota",
+			);
+		}
+
+		const data = await response.json();
+		return data;
+	} catch (error) {
+		throw error;
+	}
+};
+

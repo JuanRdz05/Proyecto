@@ -264,6 +264,52 @@ const adminTogglePetStatus = async (req, res) => {
 	}
 };
 
+const deletePet = async (req, res) => {
+	try {
+		const petId = req.params.id;
+		const user = req.user;
+
+		const pet = await Pets.findById(petId);
+
+		if (!pet) {
+			return res.status(404).json({ message: "Mascota no encontrada" });
+		}
+
+		// Cliente solo puede eliminar sus propias mascotas, admin puede eliminar cualquiera
+		if (user.role !== "admin" && pet.owner.toString() !== user.id.toString()) {
+			return res
+				.status(403)
+				.json({ message: "No tienes permiso para eliminar esta mascota" });
+		}
+
+		const petData = {
+			petId: pet._id,
+			petName: pet.name,
+			petType: pet.petType,
+			ownerId: pet.owner,
+		};
+
+		await Pets.findByIdAndDelete(petId);
+
+		await safeLog(
+			"DELETE",
+			"PET",
+			`Eliminación permanente de la mascota "${petData.petName}" (${petData.petType})`,
+			petData,
+			user.id || user._id,
+		);
+
+		res
+			.status(200)
+			.json({ message: "Mascota eliminada permanentemente" });
+	} catch (error) {
+		console.error("Error al eliminar la mascota:", error);
+		res
+			.status(500)
+			.json({ message: "Error al eliminar la mascota", error: error.message });
+	}
+};
+
 module.exports = {
 	getAllPets,
 	addPet,
@@ -272,4 +318,6 @@ module.exports = {
 	modifyPet,
 	getPetById,
 	adminTogglePetStatus,
+	deletePet,
 };
+
