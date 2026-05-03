@@ -3,8 +3,9 @@ const mongoose = require("mongoose");
 const appointmentSchema = new mongoose.Schema(
 	{
 		date: {
-			type: Date,
+			type: String, // ← Cambiado de Date a String
 			required: true,
+			// Formato: YYYY-MM-DD
 		},
 		time: {
 			type: String,

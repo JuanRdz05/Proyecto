@@ -20,6 +20,14 @@ const createAppointments = async (req, res) => {
 		}
 
 		const { date, time, pet, service: serviceId, notes } = req.body;
+
+		// Validar formato de fecha
+		if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+			return res
+				.status(400)
+				.json({ message: "La fecha debe tener formato YYYY-MM-DD" });
+		}
+
 		const servicioDB = await Services.findById(serviceId);
 
 		if (!servicioDB) {
@@ -193,11 +201,7 @@ const acceptAppointment = async (req, res) => {
 			});
 		}
 
-		// 🔥 BUSCAR VETERINARIO DISPONIBLE AUTOMÁTICAMENTE
-		const appointmentDate = appointment.date;
-		const appointmentTime = appointment.time;
-
-		// 1. Obtener todos los veterinarios activos
+		// Buscar veterinarios disponibles
 		const allVets = await Users.find({ role: "vet", isActive: true }).select(
 			"_id name paternalLastName",
 		);
@@ -209,17 +213,15 @@ const acceptAppointment = async (req, res) => {
 			});
 		}
 
-		// 2. Obtener citas ya aceptadas o en progreso en la misma fecha/hora
+		// Buscar citas ocupadas en la MISMA fecha y hora (comparación exacta de strings)
 		const busyVets = await Appointments.find({
-			date: appointmentDate,
-			time: appointmentTime,
+			date: appointment.date, // ← String exacto
+			time: appointment.time,
 			status: { $in: ["Aceptada", "En progreso"] },
 			vet: { $exists: true, $ne: null },
 		}).select("vet");
 
 		const busyVetIds = busyVets.map((a) => a.vet.toString());
-
-		// 3. Filtrar veterinarios disponibles
 		const availableVets = allVets.filter(
 			(vet) => !busyVetIds.includes(vet._id.toString()),
 		);
@@ -231,7 +233,6 @@ const acceptAppointment = async (req, res) => {
 			});
 		}
 
-		// 4. Asignar aleatoriamente un veterinario disponible
 		const randomIndex = Math.floor(Math.random() * availableVets.length);
 		const assignedVet = availableVets[randomIndex];
 
@@ -240,7 +241,6 @@ const acceptAppointment = async (req, res) => {
 		appointment.vet = assignedVet._id;
 		await appointment.save();
 
-		// Volver a buscar con populate para devolver datos completos
 		const updatedAppointment = await Appointments.findById(id)
 			.populate("pet", "name petType breed")
 			.populate("owner", "name paternalLastName email username")
@@ -270,10 +270,9 @@ const acceptAppointment = async (req, res) => {
 		});
 	} catch (error) {
 		console.error("Error al aceptar la cita:", error);
-		res.status(500).json({
-			message: "Error al aceptar la cita",
-			error: error.message,
-		});
+		res
+			.status(500)
+			.json({ message: "Error al aceptar la cita", error: error.message });
 	}
 };
 
@@ -353,23 +352,21 @@ const getAppointmentsByVet = async (req, res) => {
 
 		const vetId = user._id || user.id;
 
-		// Obtener fecha de hoy en UTC (usando solo año, mes, día)
+		// Obtener fecha de hoy como string YYYY-MM-DD
 		const now = new Date();
-		const year = now.getFullYear();
-		const month = now.getMonth(); // 0-indexed
-		const day = now.getDate();
+		const todayStr = [
+			now.getFullYear(),
+			String(now.getMonth() + 1).padStart(2, "0"),
+			String(now.getDate()).padStart(2, "0"),
+		].join("-");
 
-		// Crear fechas en UTC para evitar problemas de zona horaria
-		const startOfDay = new Date(Date.UTC(year, month, day, 0, 0, 0));
-		const endOfDay = new Date(Date.UTC(year, month, day + 1, 0, 0, 0));
-
-		console.log("Buscando citas entre:", startOfDay, "y", endOfDay);
+		console.log("Buscando citas para fecha:", todayStr);
 		console.log("Vet ID:", vetId);
 
 		const appointments = await Appointments.find({
 			vet: vetId,
-			date: { $gte: startOfDay, $lt: endOfDay },
-			status: { $in: ["Aceptada", "En progreso", "Terminada"] }, // Incluir Terminada para stats
+			date: todayStr, // ← Comparación exacta de strings
+			status: { $in: ["Aceptada", "En progreso", "Terminada"] },
 		})
 			.populate("pet", "name petType breed")
 			.populate("owner", "name paternalLastName email phone")
