@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
+import { PageTransition } from "../../../components/PageTransition/PageTransition.jsx";
 import { NavbarClient } from "../../../components/NavbarClient/navbarClient.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
 import { getUserAppointments } from "../../../services/Client/appointment.js";
 import "./history.css";
-
 const ITEMS_PER_PAGE = 6;
 
 function StatusBadge({ status }) {
@@ -15,37 +15,128 @@ function StatusBadge({ status }) {
 		Cancelada: { class: "status-cancelada", label: "Cancelada" },
 		Rechazada: { class: "status-rechazada", label: "Rechazada" },
 	};
-
 	const config = statusConfig[status] || {
 		class: "status-default",
 		label: status,
 	};
-
 	return <span className={`status-badge ${config.class}`}>{config.label}</span>;
 }
 
+// ── Modal de detalles ────────────────────────────────────────────────────────
+function AppointmentModal({ appointment, onClose, formatDate }) {
+	if (!appointment) return null;
+
+	const { status, pet, service, date, time, price, rejectionReason } =
+		appointment;
+
+	// Qué secciones mostrar según el estado
+	const showDateTime = status !== "Rechazada" && status !== "Cancelada";
+	const showPrice = service?.price != null || price != null;
+	const servicePrice = service?.price ?? price ?? null;
+
+	return (
+		<div className="history-modal-overlay" onClick={onClose}>
+			<div
+				className="history-modal-content"
+				onClick={(e) => e.stopPropagation()}
+			>
+				{/* Header */}
+				<div className="history-modal-header">
+					<h3>Detalles de la cita</h3>
+					<button className="history-modal-close" onClick={onClose}>
+						✕
+					</button>
+				</div>
+
+				{/* Body */}
+				<div className="history-modal-body">
+					{/* Estado siempre visible */}
+					<div className="history-modal-status">
+						<span>Estado actual:</span>
+						<StatusBadge status={status} />
+					</div>
+
+					<div className="history-modal-details">
+						{/* Mascota */}
+						<div className="detail-row">
+							<span className="detail-label">Mascota:</span>
+							<span className="detail-value">
+								{pet?.name || "N/A"}
+								{pet?.petType ? ` (${pet.petType})` : ""}
+							</span>
+						</div>
+
+						{/* Servicio */}
+						<div className="detail-row">
+							<span className="detail-label">Servicio:</span>
+							<span className="detail-value">
+								{service?.name || service || "N/A"}
+							</span>
+						</div>
+
+						{/* Precio — visible en todos los estados si existe */}
+						{showPrice && (
+							<div className="detail-row">
+								<span className="detail-label">Precio:</span>
+								<span className="detail-value">
+									${Number(servicePrice).toFixed(2)} MXN
+								</span>
+							</div>
+						)}
+
+						{/* Fecha y hora — solo si no está rechazada/cancelada */}
+						{showDateTime && (
+							<div className="detail-row">
+								<span className="detail-label">Fecha y hora:</span>
+								<span className="detail-value">
+									{formatDate(date)} · {time || "N/A"}
+								</span>
+							</div>
+						)}
+
+						{/* Motivo de rechazo */}
+						{status === "Rechazada" && (
+							<div className="history-modal-reason">
+								<span className="reason-title">Motivo de rechazo:</span>
+								<p className="reason-text">
+									{rejectionReason || "No se especificó un motivo."}
+								</p>
+							</div>
+						)}
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+}
+
+// ── Componente principal ─────────────────────────────────────────────────────
 export function History() {
-	const [appointments, setAppointments] = useState([]);
+const [appointments, setAppointments] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 	const [currentPage, setCurrentPage] = useState(1);
+	const [selectedAppointment, setSelectedAppointment] = useState(null);
 
 	useEffect(() => {
 		const fetchAppointments = async () => {
 			try {
 				setLoading(true);
 				const data = await getUserAppointments();
-
-				const rawAppointments = data.appointments || [];
-
-				// ORDENAMIENTO ASCENDENTE:
-				// La cita más próxima a la fecha actual aparece primero.
-				const sorted = [...rawAppointments].sort((a, b) => {
-					const dateTimeA = new Date(`${a.date}T${a.time || "00:00"}`);
-					const dateTimeB = new Date(`${b.date}T${b.time || "00:00"}`);
-					return dateTimeA - dateTimeB;
+				const raw = data.appointments || [];
+				const sorted = [...raw].sort((a, b) => {
+					const cleanA = a.date ? a.date.split("T")[0] : null;
+					const cleanB = b.date ? b.date.split("T")[0] : null;
+					const dtA = cleanA
+						? new Date(`${cleanA}T${a.time || "00:00"}`)
+						: new Date(0);
+					const dtB = cleanB
+						? new Date(`${cleanB}T${b.time || "00:00"}`)
+						: new Date(0);
+					if (isNaN(dtA)) return 1;
+					if (isNaN(dtB)) return -1;
+					return dtA - dtB;
 				});
-
 				setAppointments(sorted);
 			} catch (err) {
 				console.error("Error al cargar citas:", err);
@@ -54,7 +145,6 @@ export function History() {
 				setLoading(false);
 			}
 		};
-
 		fetchAppointments();
 	}, []);
 
@@ -79,7 +169,6 @@ export function History() {
 			: dateString;
 		const [year, month, day] = cleanDate.split("-").map(Number);
 		const date = new Date(year, month - 1, day);
-
 		return date.toLocaleDateString("es-MX", {
 			day: "2-digit",
 			month: "2-digit",
@@ -91,12 +180,14 @@ export function History() {
 		return (
 			<div className="history-page-container">
 				<NavbarClient />
-				<main className="history-main">
+				<PageTransition>
+<main className="history-main">
 					<div className="history-card">
 						<h2 className="history-title">Historial de citas</h2>
 						<p className="history-loading">Cargando tu historial...</p>
 					</div>
 				</main>
+			</PageTransition>
 				<FooterGuest />
 			</div>
 		);
@@ -106,22 +197,24 @@ export function History() {
 		return (
 			<div className="history-page-container">
 				<NavbarClient />
-				<main className="history-main">
+				<PageTransition>
+<main className="history-main">
 					<div className="history-card">
 						<h2 className="history-title">Historial de citas</h2>
 						<p className="history-error">❌ Hubo un problema: {error}</p>
 					</div>
 				</main>
+			</PageTransition>
 				<FooterGuest />
 			</div>
 		);
 	}
-
-	return (
+return (
 		<div className="history-page-container">
 			<NavbarClient />
 
-			<main className="history-main">
+			<PageTransition>
+<main className="history-main">
 				<div className="history-card">
 					<div className="history-header">
 						<h2 className="history-title">Historial de citas</h2>
@@ -144,7 +237,8 @@ export function History() {
 								{paginatedAppointments.map((item, index) => (
 									<li
 										key={item._id || item.id}
-										className={`history-item ${index < paginatedAppointments.length - 1 ? "with-divider" : ""}`}
+										className={`history-item clickable ${index < paginatedAppointments.length - 1 ? "with-divider" : ""}`}
+										onClick={() => setSelectedAppointment(item)}
 									>
 										<div className="history-info">
 											<span className="history-pet-label">
@@ -170,7 +264,6 @@ export function History() {
 									>
 										← Anterior
 									</button>
-
 									<div className="pagination-pages">
 										{Array.from({ length: totalPages }, (_, i) => i + 1).map(
 											(page) => (
@@ -184,7 +277,6 @@ export function History() {
 											),
 										)}
 									</div>
-
 									<button
 										className="pagination-btn"
 										onClick={() => goToPage(currentPage + 1)}
@@ -202,8 +294,18 @@ export function History() {
 					)}
 				</div>
 			</main>
+			</PageTransition>
 
 			<FooterGuest />
+
+			{/* Modal de detalles */}
+			{selectedAppointment && (
+				<AppointmentModal
+					appointment={selectedAppointment}
+					onClose={() => setSelectedAppointment(null)}
+					formatDate={formatDate}
+				/>
+			)}
 		</div>
 	);
 }

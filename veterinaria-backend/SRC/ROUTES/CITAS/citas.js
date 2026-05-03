@@ -4,17 +4,28 @@ const {
 	getAllAppointments,
 	getAppointmentsByUser,
 	cancelAppointment,
+	acceptAppointment,
+	rejectAppointment,
+	getAppointmentsByVet,
+	getVetHistory,
 } = require("../../CONTROLLERS/CITAS/citas.js");
 const { verificarToken } = require("../../MIDDLEWARES/authToken.js");
 
-//Ruta para crear una cita
+// Crear una cita
 citasRouter.post("/create", verificarToken, createAppointments);
-//Rutas para obtener todas las citas en general
+// Obtener todas las citas (admin)
 citasRouter.get("/all", verificarToken, getAllAppointments);
-// //Rutas para obtener las citas por usuario
+// Obtener citas del usuario logueado
 citasRouter.get("/user/me", verificarToken, getAppointmentsByUser);
-// citasRouter.get("/user/:id", verificarToken, getAppointmentsByUser);
-//Ruta para cancelar una cita
+// Cancelar una cita
 citasRouter.patch("/cancel/:id", verificarToken, cancelAppointment);
+// ACEPTAR cita
+citasRouter.patch("/accept/:id", verificarToken, acceptAppointment);
+// RECHAZAR cita
+citasRouter.patch("/reject/:id", verificarToken, rejectAppointment);
+// Obtener citas del veterinario
+citasRouter.get("/vet/today", verificarToken, getAppointmentsByVet);
+// Obtener historial completo de citas del veterinario
+citasRouter.get("/vet/history", verificarToken, getVetHistory);
 
 module.exports = citasRouter;

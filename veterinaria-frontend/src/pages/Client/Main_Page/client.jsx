@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { PageTransition } from "../../../components/PageTransition/PageTransition.jsx";
 import { toast } from "react-toastify";
 import { NavbarClient } from "../../../components/NavbarClient/navbarClient.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
@@ -11,20 +12,36 @@ export function ClientHome() {
 	const navigate = useNavigate();
 	const userName = localStorage.getItem("userName") || "User";
 
-	const [pets, setPets] = useState([]);
+	// ── Guard: verifica si el cliente está activo ──────────────────────────
+const [pets, setPets] = useState([]);
 	const [appointments, setAppointments] = useState([]);
 	const [loadingPets, setLoadingPets] = useState(true);
 	const [loadingAppointments, setLoadingAppointments] = useState(true);
+	const [petsError, setPetsError] = useState(false);
+	const [appointmentsError, setAppointmentsError] = useState(false);
 
 	useEffect(() => {
 		const fetchPets = async () => {
 			try {
 				setLoadingPets(true);
+				setPetsError(false);
 				const data = await getPets();
-				setPets(Array.isArray(data) ? data : []);
+				if (Array.isArray(data)) {
+					setPets(data);
+				} else if (data && Array.isArray(data.pets)) {
+					setPets(data.pets);
+				} else {
+					setPets([]);
+				}
 			} catch (error) {
-				console.error("Error al obtener las mascotas:", error);
-				toast.error("No se pudieron cargar las mascotas");
+				if (
+					error.message &&
+					!error.message.includes("No hay") &&
+					!error.message.includes("no encontrado")
+				) {
+					toast.error("No se pudieron cargar las mascotas");
+				}
+				setPetsError(true);
 				setPets([]);
 			} finally {
 				setLoadingPets(false);
@@ -34,10 +51,24 @@ export function ClientHome() {
 		const fetchAppointments = async () => {
 			try {
 				setLoadingAppointments(true);
+				setAppointmentsError(false);
 				const data = await getUserAppointments();
-				setAppointments(data.appointments || []);
+				if (data && Array.isArray(data.appointments)) {
+					setAppointments(data.appointments);
+				} else if (Array.isArray(data)) {
+					setAppointments(data);
+				} else {
+					setAppointments([]);
+				}
 			} catch (error) {
-				console.error("Error al obtener las citas:", error);
+				if (
+					error.message &&
+					!error.message.includes("No hay") &&
+					!error.message.includes("no encontrado")
+				) {
+					toast.error("No se pudieron cargar las citas");
+				}
+				setAppointmentsError(true);
 				setAppointments([]);
 			} finally {
 				setLoadingAppointments(false);
@@ -48,41 +79,27 @@ export function ClientHome() {
 		fetchAppointments();
 	}, []);
 
+	// ── Bloquear si está verificando o inactivo ────────────────────────────
+// ── Lógica de vista ────────────────────────────────────────────────────
 	const petsToShow = pets.slice(0, 3);
-
-	// Comparar fechas como strings YYYY-MM-DD (sin timezone)
 	const todayStr = new Date().toISOString().split("T")[0];
 
 	const upcomingAppointments = appointments
-		.filter((apt) => {
-			// Solo comparar la parte de fecha (YYYY-MM-DD)
-			return apt.date >= todayStr && apt.status !== "Cancelada";
-		})
+		.filter((apt) => apt.date >= todayStr && apt.status !== "Cancelada")
 		.sort((a, b) => {
-			// Ordenar por fecha + hora como strings
 			const dateTimeA = `${a.date}T${a.time}`;
 			const dateTimeB = `${b.date}T${b.time}`;
 			return dateTimeA.localeCompare(dateTimeB);
 		})
 		.slice(0, 3);
 
-	// Formatear fecha con validación
 	const formatDateTime = (dateStr, timeStr) => {
 		if (!dateStr || !timeStr) return "Fecha no disponible";
-
-		// Si viene con formato ISO (2026-04-29T00:00:00.000Z), extraer solo YYYY-MM-DD
 		const cleanDate = dateStr.includes("T") ? dateStr.split("T")[0] : dateStr;
-
 		const [year, month, day] = cleanDate.split("-").map(Number);
-
-		// Validar que los valores sean números válidos
 		if (!year || !month || !day) return "Fecha no disponible";
-
 		const date = new Date(year, month - 1, day);
-
-		// Validar que la fecha sea válida
 		if (isNaN(date.getTime())) return "Fecha no disponible";
-
 		return (
 			date.toLocaleDateString("es-MX", {
 				day: "2-digit",
@@ -92,7 +109,6 @@ export function ClientHome() {
 		);
 	};
 
-	// NUEVO: StatusBadge reemplaza a StatusDot para incluir el texto
 	const StatusBadge = ({ status }) => {
 		const colors = {
 			Pendiente: "#ffc107",
@@ -102,16 +118,13 @@ export function ClientHome() {
 			Cancelada: "#dc3545",
 			Rechazada: "#dc3545",
 		};
-
 		const currentColor = colors[status] || "#6c757d";
-
 		return (
 			<div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
 				<span
 					className="status-dot-home"
 					style={{
 						backgroundColor: currentColor,
-						// Agrego estas propiedades por si el CSS original asumía que estaba solo
 						display: "inline-block",
 						width: "12px",
 						height: "12px",
@@ -137,7 +150,8 @@ export function ClientHome() {
 		<div className="client-page-container">
 			<NavbarClient />
 
-			<main className="client-main">
+			<PageTransition>
+<main className="client-main">
 				<h1 className="welcome-text">¡Bienvenido, {userName}!</h1>
 
 				<div className="dashboard-grid">
@@ -158,6 +172,10 @@ export function ClientHome() {
 								<div className="item-card item-card-empty">
 									<p>Cargando citas...</p>
 								</div>
+							) : appointmentsError ? (
+								<div className="item-card item-card-empty">
+									<p>Error al cargar citas. Intenta de nuevo.</p>
+								</div>
 							) : upcomingAppointments.length === 0 ? (
 								<div className="item-card item-card-empty">
 									<p>No tienes citas próximas</p>
@@ -169,7 +187,6 @@ export function ClientHome() {
 										className="item-card item-card-appointment"
 									>
 										<div className="appointment-status">
-											{/* Usamos el nuevo componente aquí */}
 											<StatusBadge status={apt.status} />
 										</div>
 										<div className="item-info">
@@ -177,7 +194,7 @@ export function ClientHome() {
 												{apt.service?.name || "Servicio"}
 											</p>
 											<p className="item-date">
-												{formatDateTime(apt.date, apt.time)} -{" "}
+												{formatDateTime(apt.date, apt.time)} —{" "}
 												{apt.pet?.name || "Mascota"}
 											</p>
 										</div>
@@ -214,6 +231,10 @@ export function ClientHome() {
 							{loadingPets ? (
 								<div className="item-card item-card-empty">
 									<p>Cargando mascotas...</p>
+								</div>
+							) : petsError ? (
+								<div className="item-card item-card-empty">
+									<p>Error al cargar mascotas. Intenta de nuevo.</p>
 								</div>
 							) : petsToShow.length === 0 ? (
 								<div className="item-card item-card-empty">
@@ -253,6 +274,7 @@ export function ClientHome() {
 					</section>
 				</div>
 			</main>
+			</PageTransition>
 
 			<FooterGuest />
 		</div>

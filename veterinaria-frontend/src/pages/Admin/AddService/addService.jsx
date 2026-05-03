@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { PageTransition } from "../../../components/PageTransition/PageTransition.jsx";
 import { toast } from "react-toastify";
 import { NavbarAdmin } from "../../../components/NavbarAdmin/navbarAdmin.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
@@ -7,7 +8,7 @@ import { addService } from "../../../services/Admin/services.js";
 import "./addService.css";
 
 export function AddService() {
-	const navigate = useNavigate();
+const navigate = useNavigate();
 	const [loading, setLoading] = useState(false);
 	const [errors, setErrors] = useState({});
 	const [form, setForm] = useState({
@@ -117,12 +118,12 @@ export function AddService() {
 		}
 		navigate(-1);
 	};
-
-	return (
+return (
 		<div className="addsvc-page-container">
 			<NavbarAdmin />
 
-			<main className="addsvc-main">
+			<PageTransition>
+<main className="addsvc-main">
 				<div className="addsvc-card">
 					<h2 className="addsvc-title">Nuevo servicio</h2>
 
@@ -222,6 +223,7 @@ export function AddService() {
 					</form>
 				</div>
 			</main>
+			</PageTransition>
 
 			<FooterGuest />
 		</div>

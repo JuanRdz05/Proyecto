@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { PageTransition } from "../../../components/PageTransition/PageTransition.jsx";
 import { toast } from "react-toastify";
 import { NavbarAdmin } from "../../../components/NavbarAdmin/navbarAdmin.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
@@ -28,7 +29,7 @@ function PencilIcon() {
 }
 
 export function AdminServices() {
-	const navigate = useNavigate();
+const navigate = useNavigate();
 	const [services, setServices] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [editingId, setEditingId] = useState(null);
@@ -112,6 +113,11 @@ export function AdminServices() {
 			toast.warning("El precio debe ser un número válido");
 			return;
 		}
+		// ← NUEVO: Límite de precio igual que en AddService
+		if (priceNum > 999999.99) {
+			toast.warning("El precio no puede exceder $999,999.99");
+			return;
+		}
 
 		try {
 			setSavingId(id);
@@ -164,22 +170,24 @@ export function AdminServices() {
 		return (
 			<div className="svc-container">
 				<NavbarAdmin />
-				<main className="svc-main">
+				<PageTransition>
+<main className="svc-main">
 					<div className="svc-header">
 						<h1 className="svc-title">Servicios</h1>
 					</div>
 					<div className="svc-loading">Cargando servicios...</div>
 				</main>
+			</PageTransition>
 				<FooterGuest />
 			</div>
 		);
 	}
-
-	return (
+return (
 		<div className="svc-container">
 			<NavbarAdmin />
 
-			<main className="svc-main">
+			<PageTransition>
+<main className="svc-main">
 				{/* Encabezado */}
 				<div className="svc-header">
 					<h1 className="svc-title">Servicios</h1>
@@ -275,6 +283,8 @@ export function AdminServices() {
 													type="number"
 													step="0.01"
 													min="0"
+													// ← NUEVO: max igual que en AddService
+													max="999999.99"
 													value={editDraft.price}
 													onChange={(e) =>
 														handleEditChange("price", e.target.value)
@@ -343,6 +353,7 @@ export function AdminServices() {
 					)}
 				</div>
 			</main>
+			</PageTransition>
 
 			<FooterGuest />
 		</div>

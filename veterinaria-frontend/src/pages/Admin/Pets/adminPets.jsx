@@ -1,124 +1,250 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { PageTransition } from "../../../components/PageTransition/PageTransition.jsx";
+import { toast } from "react-toastify";
 import { NavbarAdmin } from "../../../components/NavbarAdmin/navbarAdmin.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
+import { getAllPets, togglePetStatus } from "../../../services/Admin/pets.js";
 import "./adminPets.css";
 
-// Datos placeholder — se conectará al backend más adelante
-const MOCK_PETS = [
-    { id: 1, name: "Max",     species: "Perro",   owner: "Juan Pérez",    active: true  },
-    { id: 2, name: "Charlie", species: "Perro",   owner: "María López",   active: true  },
-    { id: 3, name: "Bella",   species: "Gato",    owner: "Ana Martínez",  active: false },
-    { id: 4, name: "Luna",    species: "Conejo",  owner: "Roberto Silva", active: true  },
-    { id: 5, name: "Toby",    species: "Perro",   owner: "Laura Vega",    active: true  },
-    { id: 6, name: "Rocky",   species: "Perro",   owner: "Carlos Ruiz",   active: true  },
-    { id: 7, name: "Mia",     species: "Gato",    owner: "Sofía Herrera", active: false },
-];
-
 function initials(name) {
-    return name
-        .split(" ")
-        .filter((w) => w.length > 0)
-        .slice(0, 2)
-        .map((w) => w[0].toUpperCase())
-        .join("");
+	if (!name) return "??";
+	return name
+		.split(" ")
+		.filter((w) => w.length > 0)
+		.slice(0, 2)
+		.map((w) => w[0].toUpperCase())
+		.join("");
 }
 
 export function AdminPets() {
-    const [pets, setPets] = useState(MOCK_PETS);
-    const [search, setSearch] = useState("");
+	const navigate = useNavigate();
+// Estados para la lista y paginación
+	const [pets, setPets] = useState([]);
+	const [loading, setLoading] = useState(true);
+	const [search, setSearch] = useState("");
+	const [pagination, setPagination] = useState({
+		page: 1,
+		totalPages: 1,
+		total: 0,
+	});
 
-    const filtered = pets.filter((p) => {
-        const q = search.toLowerCase();
-        return (
-            p.name.toLowerCase().includes(q) ||
-            p.species.toLowerCase().includes(q) ||
-            p.owner.toLowerCase().includes(q)
-        );
-    });
+	// Estados para la validación de seguridad (Admin activo)[cite: 1]
+	const [isActiveAdmin, setIsActiveAdmin] = useState(true);
+	const [checkingAdmin, setCheckingAdmin] = useState(true);
 
-    const toggleActive = (id) =>
-        setPets((prev) =>
-            prev.map((p) => (p.id === id ? { ...p, active: !p.active } : p))
-        );
+	// 1. Verificar estado del administrador al cargar[cite: 1]
+	useEffect(() => {
+		const verifyAdmin = async () => {
+			try {
+				const data = await getProfile();
+				if (data.isActive === false) {
+					setIsActiveAdmin(false);
+				}
+			} catch (error) {
+				console.error("Error de verificación:", error);
+			} finally {
+				setCheckingAdmin(false);
+			}
+		};
+		verifyAdmin();
+	}, []);
 
-    return (
-        <div className="adminpets-container">
-            <NavbarAdmin />
+	// 2. Cargar mascotas desde el backend (Paginadas)
+	const fetchPets = async (page = 1) => {
+		try {
+			setLoading(true);
+			const data = await getAllPets(page, 5); // Límite de 5 según tu controlador
+			setPets(data.pets);
+			setPagination(data.pagination);
+		} catch (error) {
+			toast.error("Error al cargar las mascotas.");
+		} finally {
+			setLoading(false);
+		}
+	};
 
-            <main className="adminpets-main">
-                <h1 className="adminpets-title">Mascotas</h1>
+	useEffect(() => { fetchPets(); }, []);
 
-                {/* Barra de búsqueda — sin botón de crear */}
-                <div className="adminpets-toolbar">
-                    <div className="adminpets-search">
-                        <span className="search-icon">
-                            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8">
-                                <circle cx="8.5" cy="8.5" r="5.5" />
-                                <line x1="13" y1="13" x2="18" y2="18" />
-                            </svg>
-                        </span>
-                        <input
-                            type="text"
-                            placeholder="Buscar por nombre, especie o dueño..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
-                    </div>
-                </div>
+	// Lógica de Logout para cuenta bloqueada[cite: 1]
+	const handleLogout = async () => {
+		try {
+			await fetch("http://localhost:3050/users/v1/logout", {
+				method: "POST",
+				credentials: "include",
+			});
+			localStorage.clear();
+			navigate("/inicio-sesion");
+		} catch (e) {
+			toast.error("Error al cerrar sesión.");
+		}
+	};
 
-                {/* Tabla */}
-                <div className="adminpets-table-wrapper">
-                    <table className="adminpets-table">
-                        <thead>
-                            <tr>
-                                <th>Mascota</th>
-                                <th>Especie</th>
-                                <th>Dueño</th>
-                                <th>Estado</th>
-                                <th>Activo</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filtered.length === 0 ? (
-                                <tr>
-                                    <td colSpan={5} className="empty-row">
-                                        No se encontraron mascotas.
-                                    </td>
-                                </tr>
-                            ) : (
-                                filtered.map((pet) => (
-                                    <tr key={pet.id}>
-                                        <td className="col-pet">
-                                            <div className="pet-avatar">
-                                                {initials(pet.name)}
-                                            </div>
-                                            <strong>{pet.name}</strong>
-                                        </td>
-                                        <td className="col-species">{pet.species}</td>
-                                        <td className="col-owner">{pet.owner}</td>
-                                        <td className="col-status">
-                                            <span className={`pet-badge ${pet.active ? "badge-activo" : "badge-inactivo"}`}>
-                                                {pet.active ? "Activo" : "Inactivo"}
-                                            </span>
-                                        </td>
-                                        <td className="col-action">
-                                            <button
-                                                className={`toggle-switch ${pet.active ? "on" : "off"}`}
-                                                onClick={() => toggleActive(pet.id)}
-                                                title={pet.active ? "Desactivar" : "Activar"}
-                                            >
-                                                <span className="toggle-knob" />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </main>
+	// Cambio de estado (Toggle) exclusivo del Admin[cite: 4, 6]
+	const handleToggle = async (id) => {
+		try {
+			const response = await togglePetStatus(id);
+			// Actualización optimista del estado local
+			setPets((prev) =>
+				prev.map((p) =>
+					p._id === id ? { ...p, isActive: response.pet.isActive } : p,
+				),
+			);
+			toast.success(response.message);
+		} catch (error) {
+			toast.error("No se pudo cambiar el estado de la mascota.");
+		}
+	};
+// Filtrado local para la búsqueda por texto
+	const filtered = pets.filter((p) => {
+		const q = search.toLowerCase();
+		const ownerFull =
+			`${p.owner?.name || ""} ${p.owner?.paternalLastName || ""}`.toLowerCase();
+		return (
+			p.name.toLowerCase().includes(q) ||
+			p.petType.toLowerCase().includes(q) || // Usamos petType del modelo[cite: 4]
+			ownerFull.includes(q)
+		);
+	});
 
-            <FooterGuest />
-        </div>
-    );
+	// --- RENDERIZADO PRINCIPAL ---
+
+	return (
+		<div className="adminpets-container">
+			<NavbarAdmin />
+
+			<PageTransition>
+<main className="adminpets-main">
+				<h1 className="adminpets-title">Gestión de Mascotas</h1>
+
+				<div className="adminpets-toolbar">
+					<div className="adminpets-search">
+						<span className="search-icon">
+							<svg
+								viewBox="0 0 20 20"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="1.8"
+							>
+								<circle cx="8.5" cy="8.5" r="5.5" />
+								<line x1="13" y1="13" x2="18" y2="18" />
+							</svg>
+						</span>
+						<input
+							type="text"
+							placeholder="Buscar por nombre, especie o dueño..."
+							value={search}
+							onChange={(e) => setSearch(e.target.value)}
+						/>
+					</div>
+				</div>
+
+				<div className="adminpets-table-wrapper">
+					<table className="adminpets-table">
+						<thead>
+							<tr>
+								<th>Mascota</th>
+								<th>Especie</th>
+								<th>Dueño</th>
+								<th>Estado Actual</th>
+								<th>Acción Admin</th>
+							</tr>
+						</thead>
+						<tbody>
+							{loading ? (
+								<tr>
+									<td colSpan={5} className="empty-row">
+										Cargando datos...
+									</td>
+								</tr>
+							) : filtered.length === 0 ? (
+								<tr>
+									<td colSpan={5} className="empty-row">
+										No hay registros que mostrar.
+									</td>
+								</tr>
+							) : (
+								filtered.map((pet) => (
+									<tr key={pet._id}>
+										<td className="col-pet">
+											<div className="pet-avatar">{initials(pet.name)}</div>
+											<strong>{pet.name}</strong>
+										</td>
+										<td className="col-species">{pet.petType}</td>
+										<td className="col-owner">
+											{pet.owner
+												? `${pet.owner.name} ${pet.owner.paternalLastName}`
+												: "N/A"}
+										</td>
+										<td className="col-status">
+											<span
+												className={`pet-badge ${pet.isActive ? "badge-activo" : "badge-inactivo"}`}
+											>
+												{pet.isActive ? "Activa" : "Desactivada"}
+											</span>
+										</td>
+										<td className="col-action">
+											<button
+												className={`toggle-switch ${pet.isActive ? "on" : "off"}`}
+												onClick={() => handleToggle(pet._id)}
+												title={
+													pet.isActive
+														? "Desactivar mascota"
+														: "Activar mascota"
+												}
+											>
+												<span className="toggle-knob" />
+											</button>
+										</td>
+									</tr>
+								))
+							)}
+						</tbody>
+					</table>
+				</div>
+
+				{/* PAGINACIÓN ESTILO HISTORY[cite: 8] */}
+				{pagination.totalPages > 1 && (
+					<div className="pagination-container">
+						<div className="pagination">
+							<button
+								className="pagination-btn"
+								disabled={pagination.page === 1}
+								onClick={() => fetchPets(pagination.page - 1)}
+							>
+								Anterior
+							</button>
+
+							<div className="pagination-pages">
+								{[...Array(pagination.totalPages)].map((_, i) => (
+									<button
+										key={i + 1}
+										className={`pagination-page ${pagination.page === i + 1 ? "active" : ""}`}
+										onClick={() => fetchPets(i + 1)}
+									>
+										{i + 1}
+									</button>
+								))}
+							</div>
+
+							<button
+								className="pagination-btn"
+								disabled={pagination.page === pagination.totalPages}
+								onClick={() => fetchPets(pagination.page + 1)}
+							>
+								Siguiente
+							</button>
+						</div>
+						<div className="pagination-info">
+							Página {pagination.page} de {pagination.totalPages} (
+							{pagination.total} mascotas en total)
+						</div>
+					</div>
+				)}
+			</main>
+			</PageTransition>
+
+			<FooterGuest />
+		</div>
+	);
 }

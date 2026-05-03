@@ -7,8 +7,7 @@ import "./registerVet.css";
 
 export function RegisterVet() {
 	const navigate = useNavigate();
-
-	const [username, setUsername] = useState("");
+const [username, setUsername] = useState("");
 	const [name, setName] = useState("");
 	const [paternalLastName, setPaternalLastName] = useState("");
 	const [maternalLastName, setMaternalLastName] = useState("");
@@ -20,8 +19,7 @@ export function RegisterVet() {
 	const [selectedFile, setSelectedFile] = useState(null);
 	const [previewUrl, setPreviewUrl] = useState(null);
 	const [loading, setLoading] = useState(false);
-
-	const handleFileClick = () => fileInputRef.current.click();
+const handleFileClick = () => fileInputRef.current.click();
 
 	const handleFileChange = (e) => {
 		const file = e.target.files[0];

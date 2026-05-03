@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { PageTransition } from "../../../components/PageTransition/PageTransition.jsx";
 import { toast } from "react-toastify";
 import { NavbarClient } from "../../../components/NavbarClient/navbarClient.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
@@ -10,7 +11,6 @@ import "./appointment.css";
 
 export function Appointment() {
 	const navigate = useNavigate();
-
 	const [formData, setFormData] = useState({
 		pet: "",
 		service: "",
@@ -34,7 +34,9 @@ export function Appointment() {
 					getAllServices(),
 				]);
 
-				setPets(petsData.pets || petsData || []);
+				setPets(
+					(petsData.pets || petsData || []).filter((p) => p.isActive !== false),
+				);
 				setServices(servicesData.services || servicesData || []);
 			} catch (error) {
 				console.error("Error al cargar datos:", error);
@@ -57,34 +59,33 @@ export function Appointment() {
 	const selectedService = services.find((svc) => svc._id === formData.service);
 	const servicePrice = selectedService ? selectedService.price : null;
 
-	// Calcular fechas límite
-	const getToday = () => {
+	// Calcular fechas límite como strings YYYY-MM-DD
+	const getTodayStr = () => {
 		const today = new Date();
-		today.setHours(0, 0, 0, 0);
-		return today.toISOString().split("T")[0];
+		const year = today.getFullYear();
+		const month = String(today.getMonth() + 1).padStart(2, "0");
+		const day = String(today.getDate()).padStart(2, "0");
+		return `${year}-${month}-${day}`;
 	};
 
-	const getMaxDate = () => {
+	const getMaxDateStr = () => {
 		const maxDate = new Date();
 		maxDate.setMonth(maxDate.getMonth() + 2);
-		maxDate.setHours(0, 0, 0, 0);
-		return maxDate.toISOString().split("T")[0];
+		const year = maxDate.getFullYear();
+		const month = String(maxDate.getMonth() + 1).padStart(2, "0");
+		const day = String(maxDate.getDate()).padStart(2, "0");
+		return `${year}-${month}-${day}`;
 	};
 
-	// Validar fecha
+	// Validar fecha (comparando strings YYYY-MM-DD)
 	const validateDate = (dateString) => {
-		const selected = new Date(dateString);
-		const today = new Date();
-		today.setHours(0, 0, 0, 0);
+		const todayStr = getTodayStr();
+		const maxDateStr = getMaxDateStr();
 
-		const maxDate = new Date();
-		maxDate.setMonth(maxDate.getMonth() + 2);
-		maxDate.setHours(0, 0, 0, 0);
-
-		if (selected < today) {
+		if (dateString < todayStr) {
 			return { valid: false, message: "La fecha no puede ser en el pasado" };
 		}
-		if (selected > maxDate) {
+		if (dateString > maxDateStr) {
 			return {
 				valid: false,
 				message: "Solo puedes agendar hasta 2 meses en adelante",
@@ -123,8 +124,9 @@ export function Appointment() {
 
 		if (!validateForm()) return;
 
+		// La fecha ya viene como string YYYY-MM-DD del input type="date"
 		const appointmentData = {
-			date: formData.date,
+			date: formData.date, // ← "2026-05-03"
 			time: formData.time,
 			pet: formData.pet,
 			service: formData.service,
@@ -135,7 +137,7 @@ export function Appointment() {
 			setIsSubmitting(true);
 			await createAppointment(appointmentData);
 
-			toast.success("✅ Cita agendada exitosamente", {
+			toast.success("Cita agendada exitosamente", {
 				position: "top-right",
 				autoClose: 2000,
 				onClose: () => navigate("/historial"),
@@ -170,12 +172,14 @@ export function Appointment() {
 		return (
 			<div className="appointment-page-container">
 				<NavbarClient />
-				<main className="appointment-main">
-					<div className="appointment-card">
-						<h2 className="appointment-title">Información de la cita</h2>
-						<p>Cargando datos...</p>
-					</div>
-				</main>
+				<PageTransition>
+					<main className="appointment-main">
+						<div className="appointment-card">
+							<h2 className="appointment-title">Información de la cita</h2>
+							<p>Cargando datos...</p>
+						</div>
+					</main>
+				</PageTransition>
 				<FooterGuest />
 			</div>
 		);
@@ -185,169 +189,171 @@ export function Appointment() {
 		<div className="appointment-page-container">
 			<NavbarClient />
 
-			<main className="appointment-main">
-				<div className="appointment-card">
-					<h2 className="appointment-title">Información de la cita</h2>
+			<PageTransition>
+				<main className="appointment-main">
+					<div className="appointment-card">
+						<h2 className="appointment-title">Información de la cita</h2>
 
-					<form onSubmit={handleSubmit} className="appointment-form">
-						{/* Fila: Mascota + Servicio */}
-						<div className="appointment-row">
-							{/* Mascota */}
-							<div className="appointment-field">
-								<label htmlFor="pet">
-									Mascota <span className="required-asterisk">*</span>
+						<form onSubmit={handleSubmit} className="appointment-form">
+							{/* Fila: Mascota + Servicio */}
+							<div className="appointment-row">
+								{/* Mascota */}
+								<div className="appointment-field">
+									<label htmlFor="pet">
+										Mascota <span className="required-asterisk">*</span>
+									</label>
+									<div className="select-wrapper">
+										<select
+											id="pet"
+											name="pet"
+											value={formData.pet}
+											onChange={handleChange}
+											required
+										>
+											<option value="" disabled>
+												Selecciona una mascota
+											</option>
+											{pets.length === 0 ? (
+												<option value="" disabled>
+													No tienes mascotas registradas
+												</option>
+											) : (
+												pets.map((pet) => (
+													<option key={pet._id} value={pet._id}>
+														{pet.name}
+													</option>
+												))
+											)}
+										</select>
+										<span className="select-arrow">&#8964;</span>
+									</div>
+								</div>
+
+								{/* Servicio */}
+								<div className="appointment-field">
+									<label htmlFor="service">
+										Servicio <span className="required-asterisk">*</span>
+									</label>
+									<div className="select-wrapper">
+										<select
+											id="service"
+											name="service"
+											value={formData.service}
+											onChange={handleChange}
+											required
+										>
+											<option value="" disabled>
+												Selecciona un servicio
+											</option>
+											{services.length === 0 ? (
+												<option value="" disabled>
+													No hay servicios disponibles
+												</option>
+											) : (
+												services.map((svc) => (
+													<option key={svc._id} value={svc._id}>
+														{svc.name}
+													</option>
+												))
+											)}
+										</select>
+										<span className="select-arrow">&#8964;</span>
+									</div>
+								</div>
+							</div>
+
+							{/* Precio del servicio seleccionado */}
+							{servicePrice !== null && (
+								<div className="appointment-price-box">
+									<span className="price-label">Precio del servicio:</span>
+									<span className="price-value">
+										${servicePrice.toFixed(2)} MXN
+									</span>
+								</div>
+							)}
+
+							{/* Fecha */}
+							<div className="appointment-field full-width">
+								<label htmlFor="date">
+									Fecha <span className="required-asterisk">*</span>
+								</label>
+								<div className="input-icon-wrapper">
+									<input
+										type="date"
+										id="date"
+										name="date"
+										value={formData.date}
+										onChange={handleChange}
+										min={getTodayStr()}
+										max={getMaxDateStr()}
+										required
+									/>
+								</div>
+							</div>
+
+							{/* Horarios disponibles */}
+							<div className="appointment-field full-width">
+								<label htmlFor="time">
+									Horarios disponibles{" "}
+									<span className="required-asterisk">*</span>
 								</label>
 								<div className="select-wrapper">
 									<select
-										id="pet"
-										name="pet"
-										value={formData.pet}
+										id="time"
+										name="time"
+										value={formData.time}
 										onChange={handleChange}
 										required
 									>
 										<option value="" disabled>
-											Selecciona una mascota
+											Selecciona un horario
 										</option>
-										{pets.length === 0 ? (
-											<option value="" disabled>
-												No tienes mascotas registradas
-											</option>
-										) : (
-											pets.map((pet) => (
-												<option key={pet._id} value={pet._id}>
-													{pet.name}
-												</option>
-											))
-										)}
+										<option value="09:00">09:00 AM</option>
+										<option value="10:00">10:00 AM</option>
+										<option value="11:00">11:00 AM</option>
+										<option value="12:00">12:00 PM</option>
+										<option value="15:00">03:00 PM</option>
+										<option value="16:00">04:00 PM</option>
 									</select>
 									<span className="select-arrow">&#8964;</span>
 								</div>
 							</div>
 
-							{/* Servicio */}
-							<div className="appointment-field">
-								<label htmlFor="service">
-									Servicio <span className="required-asterisk">*</span>
-								</label>
-								<div className="select-wrapper">
-									<select
-										id="service"
-										name="service"
-										value={formData.service}
-										onChange={handleChange}
-										required
-									>
-										<option value="" disabled>
-											Selecciona un servicio
-										</option>
-										{services.length === 0 ? (
-											<option value="" disabled>
-												No hay servicios disponibles
-											</option>
-										) : (
-											services.map((svc) => (
-												<option key={svc._id} value={svc._id}>
-													{svc.name}
-												</option>
-											))
-										)}
-									</select>
-									<span className="select-arrow">&#8964;</span>
-								</div>
-							</div>
-						</div>
-
-						{/* Precio del servicio seleccionado */}
-						{servicePrice !== null && (
-							<div className="appointment-price-box">
-								<span className="price-label">Precio del servicio:</span>
-								<span className="price-value">
-									${servicePrice.toFixed(2)} MXN
-								</span>
-							</div>
-						)}
-
-						{/* Fecha */}
-						<div className="appointment-field full-width">
-							<label htmlFor="date">
-								Fecha <span className="required-asterisk">*</span>
-							</label>
-							<div className="input-icon-wrapper">
-								<input
-									type="date"
-									id="date"
-									name="date"
-									value={formData.date}
+							{/* Comentarios */}
+							<div className="appointment-field full-width">
+								<label htmlFor="notes">Comentarios</label>
+								<textarea
+									id="notes"
+									name="notes"
+									placeholder="Describe los síntomas o motivo de la consulta"
+									value={formData.notes}
 									onChange={handleChange}
-									min={getToday()}
-									max={getMaxDate()}
-									required
+									rows={4}
 								/>
 							</div>
-						</div>
 
-						{/* Horarios disponibles */}
-						<div className="appointment-field full-width">
-							<label htmlFor="time">
-								Horarios disponibles{" "}
-								<span className="required-asterisk">*</span>
-							</label>
-							<div className="select-wrapper">
-								<select
-									id="time"
-									name="time"
-									value={formData.time}
-									onChange={handleChange}
-									required
+							{/* Botones */}
+							<div className="appointment-actions">
+								<button
+									type="button"
+									className="btn-cancel-appointment"
+									onClick={handleCancel}
+									disabled={isSubmitting}
 								>
-									<option value="" disabled>
-										Selecciona un horario
-									</option>
-									<option value="09:00">09:00 AM</option>
-									<option value="10:00">10:00 AM</option>
-									<option value="11:00">11:00 AM</option>
-									<option value="12:00">12:00 PM</option>
-									<option value="15:00">03:00 PM</option>
-									<option value="16:00">04:00 PM</option>
-								</select>
-								<span className="select-arrow">&#8964;</span>
+									Cancelar
+								</button>
+								<button
+									type="submit"
+									className="btn-submit-appointment"
+									disabled={isSubmitting}
+								>
+									{isSubmitting ? "⏳ Agendando..." : "Agendar cita"}
+								</button>
 							</div>
-						</div>
-
-						{/* Comentarios */}
-						<div className="appointment-field full-width">
-							<label htmlFor="notes">Comentarios</label>
-							<textarea
-								id="notes"
-								name="notes"
-								placeholder="Describe los síntomas o motivo de la consulta"
-								value={formData.notes}
-								onChange={handleChange}
-								rows={4}
-							/>
-						</div>
-
-						{/* Botones */}
-						<div className="appointment-actions">
-							<button
-								type="button"
-								className="btn-cancel-appointment"
-								onClick={handleCancel}
-								disabled={isSubmitting}
-							>
-								Cancelar
-							</button>
-							<button
-								type="submit"
-								className="btn-submit-appointment"
-								disabled={isSubmitting}
-							>
-								{isSubmitting ? "⏳ Agendando..." : "Agendar cita"}
-							</button>
-						</div>
-					</form>
-				</div>
-			</main>
+						</form>
+					</div>
+				</main>
+			</PageTransition>
 
 			<FooterGuest />
 		</div>

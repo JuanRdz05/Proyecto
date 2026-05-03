@@ -86,3 +86,24 @@ export async function updateService(id, serviceData) {
 	}
 	return await response.json();
 }
+
+export async function deleteService(id) {
+	const token = localStorage.getItem("token");
+	const response = await fetch(`${BASE_URL}/services/v1/${id}/delete`, {
+		method: "DELETE",
+		credentials: "include",
+		headers: {
+			"Content-Type": "application/json",
+			Authorization: token ? `Bearer ${token}` : "",
+		},
+	});
+
+	if (!response.ok) {
+		const errorData = await response
+			.json()
+			.catch(() => ({ message: "Error desconocido" }));
+		throw new Error(errorData.message || "No se pudo eliminar el servicio");
+	}
+	return await response.json();
+}
+

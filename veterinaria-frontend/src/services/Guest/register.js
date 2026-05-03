@@ -56,10 +56,7 @@ export const registerUser = async (formData) => {
 		throw error;
 	}
 };
-/**
- * Obtiene el perfil del usuario autenticado.
- * Requiere el token guardado en el login.
- */
+
 export const getUserProfile = async (token) => {
 	try {
 		const response = await fetch(`${BASE_URL}/profile`, {

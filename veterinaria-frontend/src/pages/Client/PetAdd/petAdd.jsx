@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { PageTransition } from "../../../components/PageTransition/PageTransition.jsx";
 import { toast } from "react-toastify";
 import { NavbarClient } from "../../../components/NavbarClient/navbarClient.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
@@ -8,8 +9,7 @@ import { addPet } from "../../../services/Client/pet.js";
 
 export function PetAdd() {
 	const navigate = useNavigate();
-
-	const [formData, setFormData] = useState({
+const [formData, setFormData] = useState({
 		name: "",
 		fechaNacimiento: "",
 		petType: "",
@@ -158,11 +158,11 @@ export function PetAdd() {
 			setIsSubmitting(false);
 		}
 	};
-
-	return (
+return (
 		<div className="petadd-page-container">
 			<NavbarClient />
-			<main className="petadd-main">
+			<PageTransition>
+<main className="petadd-main">
 				<div className="petadd-card">
 					<h2 className="petadd-title">Agregar nueva mascota</h2>
 					<p className="petadd-subtitle">
@@ -306,6 +306,7 @@ export function PetAdd() {
 					</form>
 				</div>
 			</main>
+			</PageTransition>
 			<FooterGuest />
 		</div>
 	);

@@ -1,0 +1,90 @@
+.blocked-screen-container {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 100vh;
+	width: 100%;
+	background-color: #f8fafc;
+	font-family: "Outfit", sans-serif;
+}
+
+.blocked-screen-overlay {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 2rem;
+}
+
+.blocked-card {
+	background: white;
+	padding: 3rem;
+	border-radius: 16px;
+	box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+	text-align: center;
+	max-width: 400px;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1.5rem;
+}
+
+.blocked-icon {
+	font-size: 4rem;
+	color: #ef4444;
+	animation: pulseBlocked 2s infinite ease-in-out;
+}
+
+@keyframes pulseBlocked {
+	0% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.1);
+	}
+	100% {
+		transform: scale(1);
+	}
+}
+
+.blocked-card h2 {
+	color: #1e293b;
+	font-size: 1.5rem;
+	font-weight: 700;
+	margin: 0;
+}
+
+.blocked-card p {
+	color: #64748b;
+	font-size: 0.95rem;
+	line-height: 1.5;
+	margin: 0;
+}
+
+.blocked-contact {
+	font-size: 0.85rem !important;
+	color: #94a3b8 !important;
+	margin-top: 0.5rem !important;
+}
+
+.btn-logout-blocked {
+	margin-top: 1rem;
+	padding: 0.75rem 1.5rem;
+	background-color: #ef4444;
+	color: white;
+	border: none;
+	border-radius: 8px;
+	font-weight: 600;
+	font-size: 0.95rem;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	width: 100%;
+}
+
+.btn-logout-blocked:hover {
+	background-color: #dc2626;
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}

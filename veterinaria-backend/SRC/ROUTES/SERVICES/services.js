@@ -5,9 +5,10 @@ const {
 	changeStatus,
 	getServiceById,
 	updateService,
+	deleteService,
 } = require("../../CONTROLLERS/SERVICES/services.js");
 const { noNumbers } = require("../../MIDDLEWARES/noNumbers.js");
-const { verificarToken } = require("../../MIDDLEWARES/authToken.js");
+const { verificarToken, authRole } = require("../../MIDDLEWARES/authToken.js");
 
 //Ruta para crear un servicio
 servicesRouter.post(
@@ -29,5 +30,8 @@ servicesRouter.patch(
 	noNumbers(["name"]),
 	updateService,
 );
+//Ruta para eliminar un servicio permanentemente
+servicesRouter.delete("/:id/delete", verificarToken, authRole("admin"), deleteService);
 
 module.exports = servicesRouter;
+

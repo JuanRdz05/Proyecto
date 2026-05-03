@@ -24,6 +24,10 @@ const petSchema = new mongoose.Schema(
 			type: Boolean,
 			default: true,
 		},
+		disabledByAdmin: {
+			type: Boolean,
+			default: false,
+		},
 	},
 	{
 		timestamps: true,
