@@ -1,208 +1,697 @@
-/* adminLogs.css */
+/* ============================================
+   adminLogs.css — UNIFICADO
+   Combina estilos originales + toolbar/búsqueda/paginación
+   ============================================ */
 
+/* ---- CONTENEDOR PRINCIPAL ---- */
 .logs-container {
-    background-color: #f8f9fa;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+	background-color: #f8f9fa;
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
 }
 
 .logs-main {
-    flex: 1;
-    max-width: 1100px;
-    width: 100%;
-    margin: 0 auto;
-    padding: 100px 20px 60px;
+	flex: 1;
+	max-width: 1100px;
+	width: 100%;
+	margin: 0 auto;
+	padding: 100px 20px 60px;
 }
 
-/* ---- ENCABEZADO ---- **/
+/* ---- ENCABEZADO ---- */
 .logs-header {
-    margin-bottom: 1.2rem;
+	margin-bottom: 1.2rem;
 }
 
 .logs-title {
-    font-size: 1.8rem;
-    font-weight: 800;
-    color: #1a1a2e;
-    margin: 0 0 0.2rem 0;
+	font-size: 1.8rem;
+	font-weight: 800;
+	color: #1a1a2e;
+	margin: 0 0 0.2rem 0;
 }
 
 .logs-subtitle {
-    font-size: 0.88rem;
-    color: #6b7280;
-    margin: 0;
+	font-size: 0.88rem;
+	color: #6b7280;
+	margin: 0;
 }
 
-/* ---- FILTROS ---- */
+/* ============================================
+   TOOLBAR: Búsqueda + Contador (igual que adminVets)
+   ============================================ */
+.logs-toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-bottom: 1.2rem;
+}
+
+/* Barra de búsqueda */
+.logs-search {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	background: #ffffff;
+	border: 1.5px solid #d1d5db;
+	border-radius: 8px;
+	padding: 0.4rem 0.8rem;
+	width: 340px;
+	transition: border-color 0.2s;
+}
+
+.logs-search:focus-within {
+	border-color: #007bff;
+}
+
+.search-icon {
+	display: flex;
+	align-items: center;
+	color: #9ca3af;
+	flex-shrink: 0;
+}
+
+.search-icon svg {
+	width: 16px;
+	height: 16px;
+}
+
+.logs-search input {
+	border: none;
+	outline: none;
+	font-size: 0.88rem;
+	color: #374151;
+	width: 100%;
+	font-family: inherit;
+	background: transparent;
+}
+
+.logs-search input::placeholder {
+	color: #9ca3af;
+}
+
+/* Contador de registros */
+.logs-count {
+	font-size: 0.9rem;
+	color: #6b7280;
+	font-weight: 500;
+	background: #f3f4f6;
+	padding: 0.35rem 0.9rem;
+	border-radius: 20px;
+	white-space: nowrap;
+}
+
+/* ============================================
+   FILTROS POR ACCIÓN
+   ============================================ */
 .logs-filters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 1.2rem;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin-bottom: 1.2rem;
 }
 
 .btn-log-filter {
-    padding: 0.38rem 1rem;
-    border-radius: 20px;
-    border: 1.5px solid #d1d5db;
-    background: #ffffff;
-    color: #374151;
-    font-size: 0.82rem;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: inherit;
-    transition: all 0.18s;
+	padding: 0.38rem 1rem;
+	border-radius: 20px;
+	border: 1.5px solid #d1d5db;
+	background: #ffffff;
+	color: #374151;
+	font-size: 0.82rem;
+	font-weight: 600;
+	cursor: pointer;
+	font-family: inherit;
+	transition: all 0.18s;
 }
 
 .btn-log-filter:hover {
-    border-color: #007bff;
-    color: #007bff;
+	border-color: #007bff;
+	color: #007bff;
 }
 
 .btn-log-filter.active {
-    background-color: #007bff;
-    border-color: #007bff;
-    color: #ffffff;
+	background-color: #007bff;
+	border-color: #007bff;
+	color: #ffffff;
 }
 
-/* ---- TABLA ---- */
+.btn-log-filter:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+/* ============================================
+   TABLA
+   ============================================ */
 .logs-table-wrapper {
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
-    overflow: hidden;
-    overflow-x: auto;
+	background: #ffffff;
+	border-radius: 12px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+	overflow: hidden;
+	overflow-x: auto;
 }
 
 .logs-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-family: "Outfit", sans-serif;
+	width: 100%;
+	border-collapse: collapse;
+	font-family: "Outfit", sans-serif;
 }
 
 .logs-table thead tr {
-    border-bottom: 1px solid #e5e7eb;
-    background: #f9fafb;
+	border-bottom: 1px solid #e5e7eb;
+	background: #f9fafb;
 }
 
 .logs-table th {
-    text-align: left;
-    padding: 0.85rem 1.1rem;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: #6b7280;
-    white-space: nowrap;
+	text-align: left;
+	padding: 0.85rem 1.1rem;
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: #6b7280;
+	white-space: nowrap;
 }
 
 .logs-table tbody tr {
-    border-bottom: 1px solid #f0f0f0;
-    transition: background-color 0.15s;
+	border-bottom: 1px solid #f0f0f0;
+	transition: background-color 0.15s;
 }
 
 .logs-table tbody tr:last-child {
-    border-bottom: none;
+	border-bottom: none;
 }
 
 .logs-table tbody tr:hover {
-    background-color: #f8f9ff;
+	background-color: #f8f9ff;
 }
 
 .logs-table td {
-    padding: 0.9rem 1.1rem;
-    font-size: 0.92rem;
-    color: #374151;
-    vertical-align: middle;
+	padding: 0.9rem 1.1rem;
+	font-size: 0.92rem;
+	color: #374151;
+	vertical-align: middle;
 }
 
+/* ---- COLUMNAS ESPECÍFICAS ---- */
 .col-date {
-    white-space: nowrap;
-    color: #6b7280 !important;
-    font-size: 0.87rem !important;
-    min-width: 130px;
+	white-space: nowrap;
+	color: #6b7280 !important;
+	font-size: 0.87rem !important;
+	min-width: 130px;
+}
+
+.col-action {
+	white-space: nowrap;
+}
+
+.col-resource {
+	font-size: 0.85rem;
+	color: #6b7280;
+	font-weight: 500;
+	text-transform: uppercase;
+	letter-spacing: 0.3px;
+	white-space: nowrap;
 }
 
 .col-desc {
-    color: #374151;
+	color: #374151;
+	min-width: 200px;
 }
 
-.logs-empty {
-    text-align: center;
-    color: #9ca3af;
-    padding: 2.5rem !important;
-    font-size: 0.95rem;
+.col-user {
+	display: flex;
+	flex-direction: column;
+	gap: 0.1rem;
+	white-space: nowrap;
 }
 
-/* ---- BADGES DE ACCIÓN (solo azul, negro, blanco) ---- */
+.user-name {
+	font-weight: 600;
+	color: #1a1a2e;
+	font-size: 0.9rem;
+}
+
+.user-role {
+	font-size: 0.75rem;
+	color: #6b7280;
+	font-weight: 500;
+}
+
+/* ============================================
+   BADGES DE ACCIÓN (solo azul, negro, blanco)
+   ============================================ */
 .action-badge {
-    display: inline-block;
-    padding: 0.28rem 0.85rem;
-    border-radius: 20px;
-    font-size: 0.78rem;
-    font-weight: 700;
-    white-space: nowrap;
+	display: inline-block;
+	padding: 0.28rem 0.85rem;
+	border-radius: 20px;
+	font-size: 0.78rem;
+	font-weight: 700;
+	white-space: nowrap;
 }
 
 /* CREATE — azul #007bff, letras blancas */
 .action-create {
-    background-color: #007bff;
-    color: #ffffff;
+	background-color: #007bff;
+	color: #ffffff;
 }
 
 /* UPDATE — blanco, borde negro, letras negras */
 .action-update {
-    background-color: #ffffff;
-    color: #111111;
-    border: 1.5px solid #111111;
+	background-color: #ffffff;
+	color: #111111;
+	border: 1.5px solid #111111;
 }
 
 /* DELETE — negro #1a1a2e, letras blancas */
 .action-delete {
-    background-color: #1a1a2e;
-    color: #ffffff;
+	background-color: #1a1a2e;
+	color: #ffffff;
 }
 
-/* LOGIN — azul claro (variante más suave del azul) */
+/* LOGIN — azul claro */
 .action-login {
-    background-color: #e0ecff;
-    color: #007bff;
-    border: 1.5px solid #007bff;
+	background-color: #e0ecff;
+	color: #007bff;
+	border: 1.5px solid #007bff;
 }
 
-/* LOGOUT — gris claro, borde gris, letras grises */
+/* LOGOUT — gris claro */
 .action-logout {
-    background-color: #f3f4f6;
-    color: #374151;
-    border: 1.5px solid #d1d5db;
+	background-color: #f3f4f6;
+	color: #374151;
+	border: 1.5px solid #d1d5db;
 }
 
-/* ---- COLUMNA USUARIO ---- */
-.col-user {
-    display: flex;
-    flex-direction: column;
-    gap: 0.1rem;
+/* ============================================
+   ESTADOS DE CARGA, ERROR Y VACÍO
+   ============================================ */
+.logs-loading,
+.logs-error {
+	text-align: center;
+	padding: 3rem 1rem;
+	color: #6b7280;
+	font-size: 1rem;
 }
 
-.user-name {
-    font-weight: 600;
-    color: #1a1a2e;
-    font-size: 0.9rem;
+.logs-error {
+	color: #dc3545;
 }
 
-.user-role {
-    font-size: 0.75rem;
-    color: #6b7280;
-    font-weight: 500;
+.btn-retry {
+	margin-top: 1rem;
+	padding: 0.5rem 1.5rem;
+	background: #007bff;
+	color: #ffffff;
+	border: none;
+	border-radius: 6px;
+	cursor: pointer;
+	font-weight: 600;
+	font-family: inherit;
 }
 
-/* ---- RESPONSIVE ---- */
+.btn-retry:hover {
+	background: #0056b3;
+}
+
+.spinner {
+	width: 40px;
+	height: 40px;
+	border: 3px solid #e5e7eb;
+	border-top-color: #007bff;
+	border-radius: 50%;
+	animation: spin 1s linear infinite;
+	margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/* Estado vacío */
+.logs-empty {
+	text-align: center;
+	color: #9ca3af;
+	padding: 2.5rem !important;
+	font-size: 0.95rem;
+}
+
+.empty-content {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 2rem;
+}
+
+.empty-icon {
+	font-size: 2.5rem;
+	margin-bottom: 0.5rem;
+	opacity: 0.6;
+}
+
+.logs-empty p {
+	font-size: 1rem;
+	font-weight: 600;
+	margin: 0 0 0.3rem;
+	color: #374151;
+}
+
+.logs-empty span {
+	font-size: 0.85rem;
+	color: #9ca3af;
+}
+
+/* ============================================
+   PAGINACIÓN (igual que history.css)
+   ============================================ */
+.logs-pagination {
+	margin-top: 1.5rem;
+}
+
+.pagination {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 1rem;
+	margin-top: 2rem;
+	padding-top: 1.5rem;
+	border-top: 1px solid #e5e7eb;
+}
+
+.pagination-btn {
+	padding: 0.5rem 1rem;
+	background: #fff;
+	border: 1.5px solid #d1d5db;
+	border-radius: 7px;
+	color: #374151;
+	font-size: 0.9rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s;
+	font-family: inherit;
+}
+
+.pagination-btn:hover:not(:disabled) {
+	background: #f3f4f6;
+	border-color: #9ca3af;
+}
+
+.pagination-btn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.pagination-pages {
+	display: flex;
+	gap: 0.4rem;
+}
+
+.pagination-page {
+	width: 36px;
+	height: 36px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: #fff;
+	border: 1.5px solid #d1d5db;
+	border-radius: 7px;
+	color: #374151;
+	font-size: 0.9rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s;
+	font-family: inherit;
+}
+
+.pagination-page:hover:not(.active) {
+	background: #f3f4f6;
+	border-color: #9ca3af;
+}
+
+.pagination-page.active {
+	background: #007bff;
+	border-color: #007bff;
+	color: #fff;
+}
+
+.pagination-info {
+	text-align: center;
+	margin-top: 0.75rem;
+	font-size: 0.85rem;
+	color: #9ca3af;
+}
+
+/* ---- SKELETON LOADING ---- */
+.skeleton-row td {
+	padding: 0.9rem 1.1rem;
+	vertical-align: middle;
+}
+
+.skeleton {
+	background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+	background-size: 200% 100%;
+	animation: skeleton-shimmer 1.5s infinite;
+	border-radius: 4px;
+}
+
+@keyframes skeleton-shimmer {
+	0% {
+		background-position: 200% 0;
+	}
+	100% {
+		background-position: -200% 0;
+	}
+}
+
+.skeleton-date {
+	width: 100px;
+	height: 14px;
+}
+
+.skeleton-badge {
+	width: 60px;
+	height: 24px;
+	border-radius: 20px;
+}
+
+.skeleton-resource {
+	width: 80px;
+	height: 14px;
+}
+
+.skeleton-desc {
+	width: 100%;
+	height: 14px;
+	max-width: 300px;
+}
+
+.skeleton-user-name {
+	width: 100px;
+	height: 14px;
+	margin-bottom: 4px;
+}
+
+.skeleton-user-role {
+	width: 60px;
+	height: 10px;
+}
+
+/* ---- REFRESH OVERLAY (no bloquea, solo indica) ---- */
+.refresh-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 3px;
+	background: linear-gradient(90deg, transparent, #007bff, transparent);
+	animation: refresh-slide 1s infinite;
+	z-index: 10;
+	pointer-events: none;
+}
+
+@keyframes refresh-slide {
+	0% {
+		transform: translateX(-100%);
+	}
+	100% {
+		transform: translateX(100%);
+	}
+}
+
+.refresh-spinner {
+	position: absolute;
+	top: 12px;
+	right: 12px;
+	width: 16px;
+	height: 16px;
+	border: 2px solid #e5e7eb;
+	border-top-color: #007bff;
+	border-radius: 50%;
+	animation: spin 0.6s linear infinite;
+}
+
+.logs-table-wrapper {
+	position: relative; /* Para el overlay */
+}
+
+/* ---- INDICADORES DE CARGA EN FILTROS ---- */
+.btn-log-filter {
+	position: relative;
+}
+
+.btn-log-filter.loading {
+	padding-right: 1.8rem;
+}
+
+.filter-loading-dot {
+	position: absolute;
+	right: 0.5rem;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 6px;
+	height: 6px;
+	background: #007bff;
+	border-radius: 50%;
+	animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.3;
+	}
+}
+
+/* ---- INDICADOR EN BÚSQUEDA ---- */
+.search-loading-dot {
+	position: absolute;
+	right: 0.8rem;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 6px;
+	height: 6px;
+	background: #007bff;
+	border-radius: 50%;
+	animation: pulse 1s infinite;
+}
+
+.logs-search {
+	position: relative;
+}
+
+/* ---- FILAS CON TRANSICIÓN SUAVE ---- */
+.log-row {
+	animation: fade-in 0.2s ease-out;
+}
+
+@keyframes fade-in {
+	from {
+		opacity: 0;
+		transform: translateY(4px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* ---- PAGINACIÓN REFRESCANDO ---- */
+.logs-pagination.refreshing {
+	opacity: 0.7;
+	pointer-events: none;
+	transition: opacity 0.2s;
+}
+
+/* ---- CELDA DE ERROR MEJORADA ---- */
+.logs-error-cell {
+	text-align: center;
+	padding: 3rem 1rem !important;
+}
+
+.error-content {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.error-content p {
+	color: #dc3545;
+	font-weight: 600;
+	margin: 0;
+}
+
+.error-content span {
+	color: #6b7280;
+	font-size: 0.85rem;
+}
+
+/* ---- SPINNER PEQUEÑO ---- */
+.spinner-small {
+	width: 16px;
+	height: 16px;
+	border: 2px solid #e5e7eb;
+	border-top-color: #007bff;
+	border-radius: 50%;
+	animation: spin 0.6s linear infinite;
+	display: inline-block;
+	vertical-align: middle;
+	margin-left: 0.5rem;
+}
+
+/* Asegurar que la tabla no salte durante carga */
+.logs-table {
+	min-height: 300px;
+}
+
+/* ============================================
+    RESPONSIVE
+   ============================================ */
 @media (max-width: 768px) {
-    .logs-table th,
-    .logs-table td {
-        padding: 0.7rem 0.8rem;
-        font-size: 0.82rem;
-    }
+	.logs-toolbar {
+		flex-direction: column;
+		align-items: flex-start;
+	}
 
-    .logs-filters {
-        gap: 0.4rem;
-    }
+	.logs-search {
+		width: 100%;
+	}
+
+	.logs-count {
+		align-self: flex-end;
+	}
+
+	.logs-table th,
+	.logs-table td {
+		padding: 0.7rem 0.8rem;
+		font-size: 0.82rem;
+	}
+
+	.logs-filters {
+		gap: 0.4rem;
+	}
+
+	.btn-log-filter {
+		padding: 0.3rem 0.8rem;
+		font-size: 0.75rem;
+	}
+
+	.pagination {
+		gap: 0.5rem;
+	}
+
+	.pagination-btn {
+		padding: 0.4rem 0.8rem;
+		font-size: 0.82rem;
+	}
+
+	.pagination-page {
+		width: 32px;
+		height: 32px;
+		font-size: 0.82rem;
+	}
 }

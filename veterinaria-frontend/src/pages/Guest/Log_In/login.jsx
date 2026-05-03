@@ -2,6 +2,7 @@ import { useState } from "react";
 import { InputField } from "../../../components/Inputfield/inputfield.jsx";
 import { loginUser } from "../../../services/Guest/auth.js";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import "./login.css";
 
 export function Login() {
@@ -13,7 +14,7 @@ export function Login() {
 		e.preventDefault();
 		try {
 			const data = await loginUser(email, password);
-			console.log("Login exitoso: ", data);
+			toast.success(`¡Bienvenido ${data.name}!`);
 			localStorage.setItem("userName", data.name);
 
             // Redirección por rol
@@ -26,7 +27,7 @@ export function Login() {
             }
 		} catch (error) {
 			console.error("Error al iniciar sesión: ", error);
-			alert("Usuario o contraseña incorrectos");
+			toast.error(error.message || "Usuario o contraseña incorrectos");
 		}
 	};
 

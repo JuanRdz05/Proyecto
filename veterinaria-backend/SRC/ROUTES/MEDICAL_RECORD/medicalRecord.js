@@ -3,16 +3,22 @@ const {
 	getAllRecords,
 	createRecord,
 	getRecordsByUser,
+	startAppointment,
+	revertAppointment,
+	getAppointmentById,
 } = require("../../CONTROLLERS/MEDICAL_RECORD/records.js");
 const { verificarToken } = require("../../MIDDLEWARES/authToken.js");
 
-//Ruta para obtewner todos los registros medicos
 recordsRouter.get("/all", verificarToken, getAllRecords);
-//Ruta para obtener todos los registros por usuario
 recordsRouter.get("/mis-registros", verificarToken, getRecordsByUser);
-//Ruta para el administrador para ver los registros por usuario
 recordsRouter.get("/admin/registros/:id", verificarToken, getRecordsByUser);
-//Ruta para crear un registro medico
-recordsRouter.post("/create/:id", verificarToken, createRecord);
+recordsRouter.get("/appointment/:id", verificarToken, getAppointmentById);
+recordsRouter.patch("/appointment/:id/start", verificarToken, startAppointment);
+recordsRouter.patch(
+	"/appointment/:id/revert",
+	verificarToken,
+	revertAppointment,
+);
+recordsRouter.post("/create", verificarToken, createRecord);
 
 module.exports = recordsRouter;

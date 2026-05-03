@@ -1,90 +1,256 @@
 .client-page-container {
-    background-color: #f8f9fa;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+	background-color: #f8f9fa;
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
 }
 
 .client-main {
-    flex: 1;
-    max-width: 1100px;
-    width: 100%;
-    margin: 0 auto;
-    padding: 100px 20px 40px; /* Espacio para el navbar fijo */
+	flex: 1;
+	max-width: 1100px;
+	width: 100%;
+	margin: 0 auto;
+	padding: 100px 20px 40px;
 }
 
 .welcome-text {
-    font-size: 2.5rem;
-    font-weight: 800;
-    margin-bottom: 3rem;
+	font-size: 2.5rem;
+	font-weight: 800;
+	margin-bottom: 3rem;
 }
 
 .dashboard-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* Dos columnas como el mockup */
-    gap: 40px;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 40px;
 }
 
 .section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
 }
 
+/* --- Tarjetas de items --- */
 .item-card {
-    background: white;
-    padding: 15px 20px;
-    border-radius: 12px;
-    margin-bottom: 15px;
-    display: flex;
-    align-items: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+	background: white;
+	padding: 15px 20px;
+	border-radius: 12px;
+	margin-bottom: 15px;
+	display: flex;
+	align-items: center;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+	gap: 15px; /* Espacio entre todos los elementos hijos */
 }
 
+/* Icono de mascota */
+.pet-icon {
+	font-size: 1.5rem;
+	flex-shrink: 0;
+}
+
+/* Info de la mascota */
 .item-info {
-    flex: 1; /* Empuja los botones al lado derecho */
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 4px; /* Espacio entre nombre y tipo */
 }
 
-.btn-add {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
+.pet-name {
+	font-size: 1rem;
+	font-weight: 600;
+	color: #1a1a2e;
+	margin: 0;
 }
 
+.pet-type {
+	font-size: 0.85rem;
+	color: #666;
+	margin: 0;
+}
+
+/* --- Estados vacíos / carga --- */
+.item-card-empty {
+	justify-content: center;
+	color: #888;
+	font-style: italic;
+	gap: 0; /* Sin gap cuando está centrado */
+}
+
+/* --- Botones --- */
+.btn-add,
 .btn-view-all {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
+	background-color: #007bff;
+	color: white;
+	border: none;
+	padding: 8px 15px;
+	border-radius: 8px;
+	font-weight: bold;
+	cursor: pointer;
+	transition: background-color 0.2s ease;
 }
 
+.btn-add:hover,
 .btn-view-all:hover {
-    background-color: #0069d9;
-}
-
-.btn-add:hover {
-    background-color: #0069d9;
+	background-color: #0069d9;
 }
 
 .btn-edit {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 5px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    flex-shrink: 0;
-    font-weight: bold;
+	background-color: #007bff;
+	color: white;
+	border: none;
+	padding: 6px 16px;
+	border-radius: 6px;
+	cursor: pointer;
+	font-weight: 600;
+	font-size: 0.9rem;
+	transition: background-color 0.2s ease;
+	flex-shrink: 0;
 }
 
 .btn-edit:hover {
-    background-color: #0069d9;
+	background-color: #0069d9;
+}
+
+/* --- Ver más --- */
+.view-more-container {
+	margin-top: 1rem;
+	text-align: center;
+}
+
+.view-more-container .btn-view-all {
+	padding: 10px 20px;
+	font-size: 0.95rem;
+}
+
+/* === TARJETAS DE CITAS === */
+.item-card-appointment {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 14px 18px;
+}
+
+.appointment-status {
+	flex-shrink: 0;
+}
+
+.status-dot-home {
+	display: inline-block;
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+}
+
+.appointment-service {
+	font-size: 0.95rem;
+	font-weight: 600;
+	color: #1a1a2e;
+	margin: 0 0 3px 0;
+}
+
+.item-date {
+	font-size: 0.85rem;
+	color: #6b7280;
+	margin: 0;
+}
+
+/* === ESTADO VACÍO MEJORADO === */
+.empty-subtext {
+	font-size: 0.8rem;
+	color: #9ca3af;
+	margin-top: 4px;
+	display: block;
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+	.dashboard-grid {
+		grid-template-columns: 1fr;
+		gap: 30px;
+	}
+
+	.item-card {
+		padding: 12px 16px;
+		gap: 12px;
+	}
+
+	.welcome-text {
+		font-size: 1.8rem;
+	}
+}
+
+/* ── Pantalla de carga ────────────────────────────────────────────────────── */
+.client-loading-screen {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 100vh;
+	font-size: 1.2rem;
+	color: #666;
+}
+
+/* ── Pantalla de cuenta desactivada ──────────────────────────────────────── */
+.client-blocked-screen {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 100vh;
+	background-color: #f2f2f2;
+	padding: 20px;
+}
+
+.client-blocked-card {
+	background-color: #ffffff;
+	border-radius: 10px;
+	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+	padding: 3rem 2.5rem;
+	text-align: center;
+	max-width: 450px;
+	width: 100%;
+}
+
+.client-blocked-card .blocked-icon {
+	font-size: 4rem;
+	margin-bottom: 1.5rem;
+}
+
+.client-blocked-card h2 {
+	font-size: 1.8rem;
+	color: #dc3545;
+	margin-bottom: 1rem;
+	font-weight: 700;
+}
+
+.client-blocked-card p {
+	font-size: 1rem;
+	color: #555;
+	line-height: 1.6;
+	margin-bottom: 1rem;
+}
+
+.client-blocked-card .blocked-contact {
+	font-size: 0.9rem;
+	color: #888;
+	font-style: italic;
+}
+
+.btn-logout-blocked {
+	width: 100%;
+	padding: 0.8rem;
+	margin-top: 1.5rem;
+	background-color: #dc3545;
+	color: #ffffff;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+	font-weight: bold;
+	font-size: 1rem;
+	transition: background-color 0.3s;
+}
+
+.btn-logout-blocked:hover {
+	background-color: #c82333;
 }

@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+
 import { Login } from "./pages/Guest/Log_In/login.jsx";
 import { Guest } from "./pages/Guest/Main_Page/guest.jsx";
 import { Register } from "./pages/Guest/Register/register.jsx";
@@ -24,7 +25,7 @@ import { AdminManager } from "./pages/Admin/AdminManager/adminManager.jsx";
 import { RegisterAdmin } from "./pages/Admin/AddAdmin/registerAdmin.jsx";
 import { AdminServices } from "./pages/Admin/Services/adminServices.jsx";
 import { AddService } from "./pages/Admin/AddService/addService.jsx";
-import { AdminLogs } from "./pages/Admin/Logs/adminLogs.jsx";
+import { AdminLogs } from "./pages/Admin/Logs_Admin/adminLogs.jsx";
 import { AdminClients } from "./pages/Admin/Clients/adminClients.jsx";
 import { AdminPets } from "./pages/Admin/Pets/adminPets.jsx";
 
@@ -32,36 +33,47 @@ export function App() {
 	return (
 		<Routes>
 			{/* Rutas de invitado: solo accesibles sin sesión activa */}
-			<Route path="/" element={<GuestRoute><Guest /></GuestRoute>} />
-			<Route path="/inicio-sesion" element={<GuestRoute><Login /></GuestRoute>} />
-			<Route path="/registro" element={<GuestRoute><Register /></GuestRoute>} />
+			<Route element={<GuestRoute />}>
+				<Route path="/" element={<Guest />} />
+				<Route path="/inicio-sesion" element={<Login />} />
+				<Route path="/registro" element={<Register />} />
+			</Route>
 
 			{/* Rutas exclusivas de cliente */}
-			<Route path="/cliente" element={<ClientRoute><ClientHome /></ClientRoute>} />
-			<Route path="/agendar-cita" element={<ClientRoute><Appointment /></ClientRoute>} />
-			<Route path="/mascotas" element={<ClientRoute><Pets /></ClientRoute>} />
-			<Route path="/nueva-mascota" element={<ClientRoute><PetAdd /></ClientRoute>} />
-			<Route path="/detalles-mascota/:id" element={<ClientRoute><PetDetails /></ClientRoute>} />
-			<Route path="/historial" element={<ClientRoute><History /></ClientRoute>} />
-
-			{/* Rutas compartidas: cualquier usuario autenticado */}
-			<Route path="/perfil" element={<AuthRoute><Profile /></AuthRoute>} />
+			<Route element={<ClientRoute />}>
+				<Route path="/cliente" element={<ClientHome />} />
+				<Route path="/agendar-cita" element={<Appointment />} />
+				<Route path="/mascotas" element={<Pets />} />
+				<Route path="/nueva-mascota" element={<PetAdd />} />
+				<Route path="/detalles-mascota/:id" element={<PetDetails />} />
+				<Route path="/historial" element={<History />} />
+			</Route>
 
 			{/* Rutas exclusivas de veterinario */}
-			<Route path="/veterinario" element={<VetRoute><VetHome /></VetRoute>} />
-			<Route path="/atender-cita/:id" element={<VetRoute><AtenderCita /></VetRoute>} />
-			<Route path="/vet-historial" element={<VetRoute><VetHistory /></VetRoute>} />
+			<Route element={<VetRoute />}>
+				<Route path="/veterinario" element={<VetHome />} />
+				<Route path="/atender-cita/:id" element={<AtenderCita />} />
+				<Route path="/vet-historial" element={<VetHistory />} />
+			</Route>
+
 			{/* Rutas exclusivas de administrador */}
-			<Route path="/admin/citas"               element={<AdminRoute><AdminCitas /></AdminRoute>} />
-			<Route path="/admin/veterinarios"        element={<AdminRoute><AdminVets /></AdminRoute>} />
-			<Route path="/admin/nuevo-veterinario"   element={<AdminRoute><RegisterVet /></AdminRoute>} />
-			<Route path="/admin/administradores"     element={<AdminRoute><AdminManager /></AdminRoute>} />
-			<Route path="/admin/nuevo-administrador" element={<AdminRoute><RegisterAdmin /></AdminRoute>} />
-			<Route path="/admin/servicios"           element={<AdminRoute><AdminServices /></AdminRoute>} />
-			<Route path="/admin/nuevo-servicio"      element={<AdminRoute><AddService /></AdminRoute>} />
-			<Route path="/admin/logs"                element={<AdminRoute><AdminLogs /></AdminRoute>} />
-			<Route path="/admin/clientes"            element={<AdminRoute><AdminClients /></AdminRoute>} />
-			<Route path="/admin/mascotas"            element={<AdminRoute><AdminPets /></AdminRoute>} />
+			<Route element={<AdminRoute />}>
+				<Route path="/admin/citas" element={<AdminCitas />} />
+				<Route path="/admin/veterinarios" element={<AdminVets />} />
+				<Route path="/admin/nuevo-veterinario" element={<RegisterVet />} />
+				<Route path="/admin/administradores" element={<AdminManager />} />
+				<Route path="/admin/nuevo-administrador" element={<RegisterAdmin />} />
+				<Route path="/admin/servicios" element={<AdminServices />} />
+				<Route path="/admin/nuevo-servicio" element={<AddService />} />
+				<Route path="/admin/logs" element={<AdminLogs />} />
+				<Route path="/admin/clientes" element={<AdminClients />} />
+				<Route path="/admin/mascotas" element={<AdminPets />} />
+			</Route>
+
+			{/* Rutas compartidas: cualquier usuario autenticado */}
+			<Route element={<AuthRoute />}>
+				<Route path="/perfil" element={<Profile />} />
+			</Route>
 		</Routes>
 	);
 }
