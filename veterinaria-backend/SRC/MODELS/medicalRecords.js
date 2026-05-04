@@ -1,26 +1,34 @@
 const mongoose = require("mongoose");
 
+const prescriptionSchema = new mongoose.Schema({
+	medication: { type: String, required: true },
+	dosage: { type: String, required: true },
+	frequency: { type: String, required: true },
+	duration: { type: String, required: true },
+	notes: { type: String },
+});
+
 const medicalRecordSchema = new mongoose.Schema(
 	{
 		pet: {
 			type: mongoose.Schema.Types.ObjectId,
-			ref: "pets",
+			ref: "Pets",
 			required: true,
 		},
 		appointment: {
 			type: mongoose.Schema.Types.ObjectId,
-			ref: "appointments",
-			required: false, // Puede haber registros sin cita (emergencias)
+			ref: "Appointments",
+			required: true,
 		},
 		vet: {
 			type: mongoose.Schema.Types.ObjectId,
-			ref: "users",
+			ref: "Users",
 			required: true,
 		},
 		service: {
 			type: mongoose.Schema.Types.ObjectId,
-			ref: "services",
-			required: false,
+			ref: "Services",
+			required: true,
 		},
 		diagnosis: {
 			type: String,
@@ -28,29 +36,23 @@ const medicalRecordSchema = new mongoose.Schema(
 		},
 		treatment: {
 			type: String,
+			required: true,
 		},
-		prescriptions: [
-			{
-				medication: String,
-				dosage: String,
-				frequency: String,
-				duration: String,
-			},
-		],
+		prescriptions: [prescriptionSchema],
 		symptoms: {
 			type: String,
 		},
 		weight: {
-			type: Number, // Peso en kg al momento de la consulta
+			type: Number,
 		},
 		temperature: {
-			type: Number, // Temperatura en °C
+			type: Number,
 		},
 		notes: {
 			type: String,
 		},
 		nextVisitDate: {
-			type: Date,
+			type: String, // YYYY-MM-DD, igual que las citas
 		},
 	},
 	{
@@ -61,5 +63,6 @@ const medicalRecordSchema = new mongoose.Schema(
 // Índices para búsquedas comunes
 medicalRecordSchema.index({ pet: 1, createdAt: -1 });
 medicalRecordSchema.index({ vet: 1 });
+medicalRecordSchema.index({ appointment: 1 });
 
 module.exports = mongoose.model("MedicalRecords", medicalRecordSchema);

@@ -4,6 +4,7 @@ import { PageTransition } from "../../../components/PageTransition/PageTransitio
 import { NavbarVet } from "../../../components/NavbarVet/navbarVet.jsx";
 import { FooterGuest } from "../../../components/Footer/footer.jsx";
 import { getVetAppointmentsToday } from "../../../services/Vet/citas.js";
+import { startAppointment } from "../../../services/Vet/records.js"; // ← NUEVO
 import { toast } from "react-toastify";
 import "./vets.css";
 
@@ -16,6 +17,7 @@ export function VetHome() {
 	const [appointments, setAppointments] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [stats, setStats] = useState({ total: 0, completed: 0, pending: 0 });
+	const [startingId, setStartingId] = useState(null); // ← NUEVO: para loading en el botón
 
 	const fetchAppointments = async () => {
 		setLoading(true);
@@ -24,7 +26,6 @@ export function VetHome() {
 			const apps = data.appointments || [];
 			setAppointments(apps);
 
-			// Calcular estadísticas
 			const completed = apps.filter((a) => a.status === "Terminada").length;
 			const pending = apps.filter(
 				(a) => a.status === "Aceptada" || a.status === "En progreso",
@@ -47,6 +48,33 @@ export function VetHome() {
 	useEffect(() => {
 		fetchAppointments();
 	}, []);
+
+	const handleAtender = async (apt) => {
+		// Si ya está en progreso, solo navegar
+		if (apt.status === "En progreso") {
+			navigate(`/atender-cita/${apt._id}`);
+			return;
+		}
+
+		// Si está aceptada, iniciar y luego navegar
+		setStartingId(apt._id);
+		try {
+			await startAppointment(apt._id);
+			navigate(`/atender-cita/${apt._id}`);
+		} catch (error) {
+			console.error("Error iniciando cita:", error);
+			// Si falla porque ya está en progreso, igual navegar
+			if (error.message?.includes("En progreso")) {
+				navigate(`/atender-cita/${apt._id}`);
+			} else {
+				toast.error(error.message || "Error al iniciar la cita", {
+					autoClose: 4000,
+				});
+			}
+		} finally {
+			setStartingId(null);
+		}
+	};
 
 	const visibleAppointments = showAll
 		? appointments
@@ -124,7 +152,6 @@ export function VetHome() {
 
 						<div className="vet-appointments-card">
 							{loading ? (
-								// Skeleton loading
 								Array.from({ length: 3 }).map((_, i) => (
 									<div
 										key={`skeleton-${i}`}
@@ -185,14 +212,16 @@ export function VetHome() {
 											className={`btn-atender ${
 												apt.status === "Terminada" ? "status-completed" : ""
 											}`}
-											onClick={() => {
-												if (apt.status !== "Terminada") {
-													navigate(`/atender-cita/${apt._id}`);
-												}
-											}}
-											disabled={apt.status === "Terminada"}
+											onClick={() => handleAtender(apt)} // ← CAMBIADO
+											disabled={
+												apt.status === "Terminada" || startingId === apt._id
+											} // ← CAMBIADO
 										>
-											{apt.status === "Terminada" ? "✓ Completada" : "Atender"}
+											{startingId === apt._id // ← NUEVO: loading
+												? "..."
+												: apt.status === "Terminada"
+													? "✓ Completada"
+													: "Atender"}
 										</button>
 									</div>
 								))

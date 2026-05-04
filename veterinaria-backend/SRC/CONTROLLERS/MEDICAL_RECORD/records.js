@@ -10,6 +10,7 @@ const safeLog = async (action, resource, description, metadata, userId) => {
 	}
 };
 
+// Crear registro médico y finalizar cita
 const createRecord = async (req, res) => {
 	try {
 		const user = req.user;
@@ -25,25 +26,47 @@ const createRecord = async (req, res) => {
 			nextVisitDate,
 		} = req.body;
 
-		const appointmentDB = await Appointments.findById(appointmentId);
-		if (!appointmentDB) {
-			return res.status(404).json({ message: "Cita no encontrada" });
-		}
-
 		if (user.role !== "vet") {
 			return res
 				.status(403)
 				.json({ message: "Acceso denegado: Solo veterinarios" });
 		}
 
+		const appointmentDB = await Appointments.findById(appointmentId);
+		if (!appointmentDB) {
+			return res.status(404).json({ message: "Cita no encontrada" });
+		}
+
+		const vetId = user._id || user.id;
+		if (appointmentDB.vet?.toString() !== vetId.toString()) {
+			return res
+				.status(403)
+				.json({ message: "Esta cita no está asignada a ti" });
+		}
+
+		if (!["Aceptada", "En progreso"].includes(appointmentDB.status)) {
+			return res.status(400).json({
+				message: `No se puede completar una cita con estado: ${appointmentDB.status}`,
+			});
+		}
+
+		// Mapear prescriptions del frontend al formato del modelo
+		const mappedPrescriptions = (prescriptions || []).map((p) => ({
+			medication: p.medication || p.name || "",
+			dosage: p.dosage || p.dose || "",
+			frequency: p.frequency || "",
+			duration: p.duration || "",
+			notes: p.notes || "",
+		}));
+
 		const record = new MedicalRecords({
 			pet: appointmentDB.pet,
 			appointment: appointmentDB._id,
-			vet: user.id,
+			vet: vetId,
 			service: appointmentDB.service,
 			diagnosis,
 			treatment,
-			prescriptions,
+			prescriptions: mappedPrescriptions,
 			symptoms,
 			weight,
 			temperature,
@@ -69,10 +92,11 @@ const createRecord = async (req, res) => {
 				diagnosis: diagnosis?.substring(0, 100),
 				oldAppointmentStatus: oldStatus,
 				newAppointmentStatus: "Terminada",
-				weight: weight,
-				temperature: temperature,
+				weight,
+				temperature,
+				prescriptionsCount: mappedPrescriptions.length,
 			},
-			user.id,
+			vetId,
 		);
 
 		res.status(201).json({
@@ -87,6 +111,160 @@ const createRecord = async (req, res) => {
 	}
 };
 
+// Cambiar estado de cita a "En progreso"
+const startAppointment = async (req, res) => {
+	try {
+		const user = req.user;
+		const { id } = req.params;
+
+		if (user.role !== "vet") {
+			return res
+				.status(403)
+				.json({ message: "Acceso denegado: Solo veterinarios" });
+		}
+
+		const appointment = await Appointments.findById(id);
+		if (!appointment) {
+			return res.status(404).json({ message: "Cita no encontrada" });
+		}
+
+		const vetId = user._id || user.id;
+		if (appointment.vet?.toString() !== vetId.toString()) {
+			return res
+				.status(403)
+				.json({ message: "Esta cita no está asignada a ti" });
+		}
+
+		if (appointment.status !== "Aceptada") {
+			return res.status(400).json({
+				message: `No se puede iniciar una cita con estado: ${appointment.status}`,
+			});
+		}
+
+		const oldStatus = appointment.status;
+		appointment.status = "En progreso";
+		await appointment.save();
+
+		await safeLog(
+			"UPDATE",
+			"APPOINTMENT",
+			`Inicio de atención de la cita #${id}`,
+			{
+				appointmentId: id,
+				oldStatus,
+				newStatus: "En progreso",
+				vetId,
+			},
+			vetId,
+		);
+
+		res.status(200).json({
+			message: "Cita iniciada",
+			appointment,
+		});
+	} catch (error) {
+		console.error("Error al iniciar cita:", error);
+		res
+			.status(500)
+			.json({ message: "Error al iniciar la cita", error: error.message });
+	}
+};
+
+// Cancelar/revertir cita a "Aceptada"
+const revertAppointment = async (req, res) => {
+	try {
+		const user = req.user;
+		const { id } = req.params;
+
+		if (user.role !== "vet") {
+			return res
+				.status(403)
+				.json({ message: "Acceso denegado: Solo veterinarios" });
+		}
+
+		const appointment = await Appointments.findById(id);
+		if (!appointment) {
+			return res.status(404).json({ message: "Cita no encontrada" });
+		}
+
+		const vetId = user._id || user.id;
+		if (appointment.vet?.toString() !== vetId.toString()) {
+			return res
+				.status(403)
+				.json({ message: "Esta cita no está asignada a ti" });
+		}
+
+		if (appointment.status !== "En progreso") {
+			return res.status(400).json({
+				message: `No se puede revertir una cita con estado: ${appointment.status}`,
+			});
+		}
+
+		const oldStatus = appointment.status;
+		appointment.status = "Aceptada";
+		await appointment.save();
+
+		await safeLog(
+			"UPDATE",
+			"APPOINTMENT",
+			`Reversión de cita #${id} a estado Aceptada`,
+			{
+				appointmentId: id,
+				oldStatus,
+				newStatus: "Aceptada",
+				vetId,
+			},
+			vetId,
+		);
+
+		res.status(200).json({
+			message: "Cita revertida a Aceptada",
+			appointment,
+		});
+	} catch (error) {
+		console.error("Error al revertir cita:", error);
+		res
+			.status(500)
+			.json({ message: "Error al revertir la cita", error: error.message });
+	}
+};
+
+// Obtener una cita específica con populate
+const getAppointmentById = async (req, res) => {
+	try {
+		const user = req.user;
+		const { id } = req.params;
+
+		const appointment = await Appointments.findById(id)
+			.populate("pet", "name petType breed")
+			.populate("owner", "name paternalLastName email phone")
+			.populate("service", "name price description")
+			.populate("vet", "name paternalLastName username");
+
+		if (!appointment) {
+			return res.status(404).json({ message: "Cita no encontrada" });
+		}
+
+		const userId = user._id || user.id;
+		const isOwner = appointment.owner?._id?.toString() === userId.toString();
+		const isVet = appointment.vet?._id?.toString() === userId.toString();
+		const isAdmin = user.role === "admin";
+
+		if (!isOwner && !isVet && !isAdmin) {
+			return res
+				.status(403)
+				.json({ message: "No tienes permiso para ver esta cita" });
+		}
+
+		res.status(200).json({ appointment });
+	} catch (error) {
+		console.error("Error al obtener cita:", error);
+		res
+			.status(500)
+			.json({ message: "Error al obtener la cita", error: error.message });
+	}
+};
+
 const getAllRecords = async (req, res) => {
 	try {
 		const user = req.user;
@@ -96,8 +274,9 @@ const getAllRecords = async (req, res) => {
 
 		const records = await MedicalRecords.find({})
 			.populate("pet", "name petType")
-			.populate("vet", "username email")
+			.populate("vet", "name paternalLastName username email")
 			.populate("service", "name price")
+			.populate("appointment", "date time status")
 			.sort({ createdAt: -1 });
 
 		if (records.length === 0) {
@@ -130,8 +309,9 @@ const getRecordsByUser = async (req, res) => {
 
 		const records = await MedicalRecords.find({ vet: targetId })
 			.populate("pet", "name petType")
-			.populate("vet", "username email")
+			.populate("vet", "name paternalLastName username email")
 			.populate("service", "name price")
+			.populate("appointment", "date time status")
 			.sort({ createdAt: -1 });
 
 		if (records.length === 0) {
@@ -150,4 +330,7 @@ module.exports = {
 	createRecord,
 	getAllRecords,
 	getRecordsByUser,
+	startAppointment,
+	revertAppointment,
+	getAppointmentById,
 };
