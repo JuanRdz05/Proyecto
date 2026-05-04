@@ -51,7 +51,7 @@ const userSchema = new mongoose.Schema(
 
 //Virtual para obtener las mascotas del usuario
 userSchema.virtual("pets", {
-	ref: "pets",
+	ref: "Pets",
 	localField: "_id",
 	foreignField: "owner",
 });

@@ -12,7 +12,8 @@ export const loginUser = async (email, password) => {
             credentials: "include" 
 		});
 		if (!response.ok) {
-			throw new Error("Error al iniciar sesión");
+			const errorData = await response.json().catch(() => ({}));
+			throw new Error(errorData.message || "Error al iniciar sesión");
 		}
 		return await response.json();
 	} catch (error) {

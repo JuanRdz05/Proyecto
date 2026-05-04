@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { PageTransition } from "../../../components/PageTransition/PageTransition.jsx";
 import { toast } from "react-toastify";
 import { NavbarAdmin } from "../../../components/NavbarAdmin/navbarAdmin.jsx";
@@ -164,13 +163,10 @@ export function AdminCitas() {
 
 	const formatDateTime = (dateStr, timeStr) => {
 		if (!dateStr) return "N/A";
-		const date = new Date(dateStr);
-		const formattedDate = date.toLocaleDateString("es-ES", {
-			year: "numeric",
-			month: "2-digit",
-			day: "2-digit",
-		});
-		return `${formattedDate} ${timeStr || ""}`;
+		// Parseo manual para evitar el desplazamiento UTC (new Date("YYYY-MM-DD") = UTC midnight)
+		const [year, month, day] = dateStr.split("-");
+		const formattedDate = `${day}/${month}/${year}`;
+		return `${formattedDate} ${timeStr || ""}`.trim();
 	};
 
 	const getFullName = (person) => {

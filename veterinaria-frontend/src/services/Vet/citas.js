@@ -29,3 +29,26 @@ export const getVetAppointmentsToday = async () => {
 		throw error;
 	}
 };
+
+/**
+ * Obtiene el historial completo de citas asignadas al veterinario (atendidas, por atender, etc.)
+ */
+export const getVetHistory = async () => {
+	try {
+		const response = await fetch(`${BASE_URL}/appointments/v1/vet/history`, {
+			method: "GET",
+			credentials: "include",
+			headers: getHeaders(),
+		});
+
+		if (!response.ok) {
+			const errorData = await response.json().catch(() => ({}));
+			throw new Error(errorData.message || "Error al obtener el historial de citas");
+		}
+
+		return await response.json();
+	} catch (error) {
+		console.error("Error en getVetHistory:", error);
+		throw error;
+	}
+};

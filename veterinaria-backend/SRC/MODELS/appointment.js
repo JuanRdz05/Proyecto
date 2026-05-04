@@ -68,7 +68,7 @@ appointmentSchema.index(
 	{
 		unique: true,
 		partialFilterExpression: {
-			status: { $in: ["Aceptada", "En proceso"] },
+			status: { $in: ["Aceptada", "En progreso"] },
 			vet: { $exists: true },
 		},
 	},

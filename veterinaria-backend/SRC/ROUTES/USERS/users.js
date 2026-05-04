@@ -71,14 +71,6 @@ usersRouter.patch(
 //Ruta para obtener todos los veterinarios
 usersRouter.get("/vets", verificarToken, authRole("admin"), getAllVets);
 
-//Ruta para activar o desactivar un veterinario
-usersRouter.get(
-	"/vets/:id",
-	verificarToken,
-	authRole("admin"),
-	toggleVetStatus,
-);
-
 //Ruta para activar/desactivar veterinario
 usersRouter.patch(
 	"/vets/:id",

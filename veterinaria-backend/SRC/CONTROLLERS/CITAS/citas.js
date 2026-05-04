@@ -389,6 +389,40 @@ const getAppointmentsByVet = async (req, res) => {
 	}
 };
 
+const getVetHistory = async (req, res) => {
+	try {
+		const user = req.user;
+
+		if (user.role !== "vet") {
+			return res.status(403).json({
+				message: "Acceso denegado: Solo veterinarios pueden ver su historial",
+			});
+		}
+
+		const vetId = user._id || user.id;
+
+		const appointments = await Appointments.find({
+			vet: vetId,
+		})
+			.populate("pet", "name petType breed")
+			.populate("owner", "name paternalLastName email phone")
+			.populate("service", "name price description")
+			.sort({ date: -1, time: -1 });
+
+		res.status(200).json({
+			message: appointments.length
+				? "Historial de citas obtenido"
+				: "No tienes citas en tu historial",
+			appointments,
+		});
+	} catch (error) {
+		console.error("Error al obtener historial del veterinario:", error);
+		res
+			.status(500)
+			.json({ message: "Error al obtener el historial", error: error.message });
+	}
+};
+
 module.exports = {
 	createAppointments,
 	getAllAppointments,
@@ -397,4 +431,5 @@ module.exports = {
 	acceptAppointment,
 	rejectAppointment,
 	getAppointmentsByVet,
+	getVetHistory,
 };

@@ -7,6 +7,7 @@ const {
 	acceptAppointment,
 	rejectAppointment,
 	getAppointmentsByVet,
+	getVetHistory,
 } = require("../../CONTROLLERS/CITAS/citas.js");
 const { verificarToken } = require("../../MIDDLEWARES/authToken.js");
 
@@ -24,5 +25,7 @@ citasRouter.patch("/accept/:id", verificarToken, acceptAppointment);
 citasRouter.patch("/reject/:id", verificarToken, rejectAppointment);
 // Obtener citas del veterinario
 citasRouter.get("/vet/today", verificarToken, getAppointmentsByVet);
+// Obtener historial completo de citas del veterinario
+citasRouter.get("/vet/history", verificarToken, getVetHistory);
 
 module.exports = citasRouter;
