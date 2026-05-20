@@ -343,16 +343,6 @@ export function AtenderCita() {
 											rows={2}
 										/>
 									</div>
-
-									<div className="atender-field">
-										<label>PRÓXIMA VISITA</label>
-										<input
-											type="date"
-											value={nextVisitDate}
-											onChange={(e) => setNextVisitDate(e.target.value)}
-											min={cita.date}
-										/>
-									</div>
 								</div>
 
 								<div className="atender-col-right">
